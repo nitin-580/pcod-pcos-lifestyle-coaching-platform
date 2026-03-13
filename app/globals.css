@@ -1,18 +1,20 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply bg-white text-slate-900 antialiased;
-  }
+@theme {
+  --animate-blob: blob 7s infinite;
 }
 
-.animate-blob {
+body {
+  background-color: white;
+  color: #0f172a; /* text-slate-900 */
+}
+
+/* Base utility for blob animation */
+@utility animate-blob {
   animation: blob 7s infinite;
 }
 
-.animation-delay-2000 {
+@utility animation-delay-2000 {
   animation-delay: 2s;
 }
 
