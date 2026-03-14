@@ -53,7 +53,7 @@ type CardProps = {
   purple?: boolean;
 };
 
-function Card({ icon, tag, title, image, purple = false }) {
+function Card({ icon, tag, title, image, purple = false }: CardProps) {
   return (
     <div className="snap-start flex-shrink-0 w-[380px] relative bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden min-h-[520px] flex flex-col pt-12 px-10 group">
 
