@@ -1,3 +1,4 @@
+import FloatingNavbar from '@/components/FloatingNavbar';
 import Hero from '@/components/Hero';
 import Counter from '@/components/Counter';
 import SymptomChecker from '@/components/SymptomChecker';
@@ -8,6 +9,7 @@ import EarlySignup from '@/components/EarlySignup';
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 font-sans selection:bg-pink-100 selection:text-pink-900">
+      <FloatingNavbar />
       <Hero />
       <Counter />
       
