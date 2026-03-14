@@ -1,10 +1,12 @@
 import FloatingNavbar from '@/components/FloatingNavbar';
 import Hero from '@/components/Hero';
+import PeriodCards from '@/components/PeriodCards';
 import Counter from '@/components/Counter';
 import SymptomChecker from '@/components/SymptomChecker';
 import HormoneQuiz from '@/components/HormoneQuiz';
 import SocialProof from '@/components/SocialProof';
 import EarlySignup from '@/components/EarlySignup';
+import PeriodHealthSection from '@/components/PeriodHealthSection';
 
 export default function Home() {
   return (
@@ -12,7 +14,7 @@ export default function Home() {
       <FloatingNavbar />
       <Hero />
       <Counter />
-      
+
       {/* Symptom Checker Section */}
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-purple-50 to-transparent opacity-60 pointer-events-none" />
@@ -30,14 +32,14 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      <PeriodCards />
       {/* Hormone Quiz Section */}
       <section className="py-24 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <HormoneQuiz />
         </div>
       </section>
-
+      <PeriodHealthSection/>
       <SocialProof />
       <EarlySignup />
       
