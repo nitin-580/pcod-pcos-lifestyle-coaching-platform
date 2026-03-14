@@ -3,7 +3,10 @@ import { Activity, HeartPulse, Moon, CalendarDays } from "lucide-react";
 export default function PeriodHealthSection() {
   return (
     <section className="w-full py-24 bg-white">
-        <h1>H</h1>
+        <h1 className="text-5xl font-extrabold font-poppins text-center leading-tight">
+  <span className="text-black">Understand Your Body</span>{" "}
+  <span className="text-pink-500">Through Smarter Cycle Insights</span>
+</h1>
       <div className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-12">
 
         {/* Left Side */}

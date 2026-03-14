@@ -13,28 +13,28 @@ export default function PeriodCards() {
           <Card
             icon={<Scan className="w-6 h-6 stroke-[1.5]" />}
             tag="Track & Analyze"
-            title="Decode your\nmonthly cycle."
+            title="Decode your monthly cycle."
             image="https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=800&auto=format&fit=crop"
           />
 
           <Card
             icon={<Scan className="w-6 h-6 stroke-[1.5]" />}
             tag="Hormone Insights"
-            title="Understand\nhormonal shifts."
+            title="Understand hormonal shifts."
             image="https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=800&auto=format&fit=crop"
           />
 
           <Card
             icon={<Scan className="w-6 h-6 stroke-[1.5]" />}
             tag="Lifestyle"
-            title="Balance sleep\nand nutrition."
+            title="Balance sleep and nutrition."
             image="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?q=80&w=800&auto=format&fit=crop"
           />
 
           <Card
             icon={<CreditCard className="w-6 h-6 stroke-[1.5]" />}
             tag="Personalized Care"
-            title="PCOD care\non your terms."
+            title="PCOD care on your terms."
             image="https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?q=80&w=800&auto=format&fit=crop"
             purple
           />
