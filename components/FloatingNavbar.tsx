@@ -22,9 +22,9 @@ export default function FloatingNavbar() {
   }, []);
 
   const navLinks = [
-    { name: 'About Us', href: '#about' },
-    { name: 'What We Do', href: '#what-we-do' },
-    { name: 'Vision', href: '#vision' },
+    { name: 'About Us', href: '/about' },
+    { name: 'What We Do', href: '/what-we-do' },
+    { name: 'Vision', href: '/#vision' },
   ];
 
   return (
@@ -42,7 +42,7 @@ export default function FloatingNavbar() {
               <Sparkles className="w-5 h-5" />
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
-              PCOD Coach
+              WombCare
             </span>
           </Link>
 
@@ -57,9 +57,9 @@ export default function FloatingNavbar() {
                 {link.name}
               </Link>
             ))}
-            <button className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 whitespace-nowrap">
+            <Link href="/#register" className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 whitespace-nowrap">
               Join Early Access
-            </button>
+            </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -92,12 +92,13 @@ export default function FloatingNavbar() {
                 {link.name}
               </Link>
             ))}
-            <button 
-              className="mt-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl shadow-purple-200"
+            <Link 
+              href="/#register"
+              className="mt-4 flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl shadow-purple-200"
               onClick={() => setMobileMenuOpen(false)}
             >
               Join Early Access
-            </button>
+            </Link>
           </nav>
         </div>
       )}

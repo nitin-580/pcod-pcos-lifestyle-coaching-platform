@@ -53,7 +53,7 @@ export default function EarlySignup() {
                     <input 
                       {...register("name", { required: "Name is required" })}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all bg-white/50"
-                      placeholder="Jane"
+                      placeholder="Nitya Singh"
                     />
                     {errors.name && <p className="text-rose-500 text-sm mt-1">{errors.name.message}</p>}
                   </div>
@@ -67,7 +67,7 @@ export default function EarlySignup() {
                         pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }
                       })}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all bg-white/50"
-                      placeholder="jane@example.com"
+                      placeholder="nitya@gmail.com"
                     />
                     {errors.email && <p className="text-rose-500 text-sm mt-1">{errors.email.message}</p>}
                   </div>

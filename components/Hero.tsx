@@ -3,48 +3,108 @@
 import { motion } from 'framer-motion';
 
 export default function Hero() {
+  // Different sets of premium wellness/lifestyle images for each column
+  const col1 = [
+    "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1498837167922-41c992d9bc02?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1594824432258-f7b77ab6ef89?q=80&w=600&auto=format&fit=crop"
+  ];
+
+  const col2 = [
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"
+  ];
+
+  const col3 = [
+    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1554721453-2ce52bf44bd2?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1595152772096-72c45b0d0c35?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop"
+  ];
+
+  const col4 = [
+    "https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522844990619-4951c40f7eda?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1556817411-31ae72fa3ea8?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1434493789847-2f02bffa93ea?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1512438248247-f0f2a5a8b7f0?q=80&w=600&auto=format&fit=crop"
+  ];
+
+  const ImageColumn = ({ images, direction, duration, hiddenClass = "" }: { images: string[], direction: 'up' | 'down', duration: number, hiddenClass?: string }) => (
+    <div className={`relative h-[150vh] w-[140px] sm:w-[200px] md:w-[240px] lg:w-[260px] overflow-hidden ${hiddenClass}`}>
+      <motion.div
+        className="flex flex-col gap-4 sm:gap-6"
+        animate={{
+          y: direction === 'up' ? ['-50%', '0%'] : ['0%', '-50%']
+        }}
+        transition={{
+          y: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: duration,
+            ease: "linear",
+          },
+        }}
+      >
+        {/* Double array for seamless loop */}
+        {[...images, ...images].map((src, i) => (
+          <div 
+            key={i} 
+            className="w-full h-[180px] sm:h-[260px] md:h-[300px] lg:h-[320px] rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-sm opacity-40 hover:opacity-60 transition-opacity duration-500"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt="Wellness Lifestyle" loading="lazy" className="w-full h-full object-cover object-center" />
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+
   return (
-    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-pink-50 via-white to-purple-50 px-6 sm:px-12 text-center">
-      {/* Subtle floating shapes */}
-      <motion.div
-        className="absolute top-10 left-10 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"
-        animate={{
-          x: [0, 30, 0],
-          y: [0, 40, 0],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute bottom-20 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"
-        animate={{
-          x: [0, -30, 0],
-          y: [0, -50, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40"
-        animate={{
-          scale: [1, 1.1, 1],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-white text-center">
+      
+      {/* Background Wrapper */}
+      <div className="absolute inset-0 w-full h-full z-0 flex justify-center gap-4 sm:gap-6 lg:gap-8 pt-10 px-2 sm:px-4 transform -translate-y-10 overflow-hidden mask-hero-grid">
+        {/* Mobile: 2 columns, Tablet: 3 columns, Desktop: 4 columns */}
+        <ImageColumn images={col1} direction="up" duration={35} />
+        <ImageColumn images={col2} direction="down" duration={30} />
+        <ImageColumn images={col3} direction="up" duration={38} hiddenClass="hidden md:block" />
+        <ImageColumn images={col4} direction="down" duration={32} hiddenClass="hidden lg:block" />
+      </div>
+
+      {/* Gradient Overlay for Text Readability */}
+      <div className="absolute inset-0 z-10 pointer-events-none" 
+           style={{
+             background: 'linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.95) 100%)'
+           }} 
       />
 
-      <div className="relative z-10 max-w-3xl space-y-8">
+      {/* Center Hero Content (Unchanged) */}
+      <div className="relative z-20 max-w-2xl xl:max-w-3xl space-y-8 px-6 md:px-12">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl font-extrabold text-slate-800 tracking-tight"
+          className="text-5xl md:text-6xl xl:text-7xl font-extrabold text-slate-800 tracking-tight"
         >
-          Take Control of PCOD & <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Period Health</span>
+          Take Control of PCOD & <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Period Health</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-slate-600 mx-auto leading-relaxed max-w-2xl"
         >
           Meet your personal AI lifestyle coach designed to help you balance hormones, master your cycle, and thrive every day.
         </motion.p>
@@ -53,16 +113,23 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6"
         >
-          <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+          <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl shadow-pink-200 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2">
             Start Hormone Check
           </button>
-          <button className="w-full sm:w-auto px-8 py-4 bg-white text-purple-600 border border-purple-100 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:bg-purple-50 transition-all duration-300">
+          <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300">
             Join Early Access
           </button>
         </motion.div>
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .mask-hero-grid {
+          -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+        }
+      `}} />
     </section>
   );
 }

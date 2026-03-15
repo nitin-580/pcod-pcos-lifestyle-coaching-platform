@@ -8,6 +8,8 @@ import SocialProof from '@/components/SocialProof';
 import EarlySignup from '@/components/EarlySignup';
 import PeriodHealthSection from '@/components/PeriodHealthSection';
 
+import RegistrationForm from '@/components/RegistrationForm';
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 font-sans selection:bg-pink-100 selection:text-pink-900">
@@ -41,7 +43,7 @@ export default function Home() {
       </section>
       <PeriodHealthSection/>
       <SocialProof />
-      <EarlySignup />
+      <RegistrationForm />
       
       <footer className="bg-slate-900 text-slate-400 py-12 text-center text-sm border-t border-slate-800">
         <p>&copy; {new Date().getFullYear()} PCOD & Period Wellness Coach. All rights reserved.</p>
