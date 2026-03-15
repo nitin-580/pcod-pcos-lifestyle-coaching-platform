@@ -10,6 +10,7 @@ export default function RegistrationModal() {
   const [hasSeen, setHasSeen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,14 +24,49 @@ export default function RegistrationModal() {
     setHasSeen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg('');
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      age: Number(formData.get('age')),
+      weight: Number(formData.get('weight')),
+      cycleRegularity: 'Unknown',
+      symptoms: 'None',
+      country: 'IN', // Default
+      source: 'Website Direct (Popup)'
+    };
+
+    try {
+      const response = await fetch('https://womb-care-backend-76858014616.us-central1.run.app/api/early-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        let errorMessage = result.message || 'Failed to register. Please try again.';
+        // If there are detailed validation errors, show the first one
+        if (result.errors && result.errors.length > 0) {
+          errorMessage = result.errors[0].message;
+        }
+        throw new Error(errorMessage);
+      }
+
       setIsSuccess(true);
-    }, 1500);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setErrorMsg(error.message || 'Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -142,6 +178,7 @@ export default function RegistrationModal() {
 
                       <input
                         type="text"
+                        name="name"
                         placeholder="Full Name"
                         required
                         className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
@@ -149,6 +186,7 @@ export default function RegistrationModal() {
 
                       <input
                         type="tel"
+                        name="phone"
                         placeholder="Phone Number"
                         required
                         className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
@@ -158,6 +196,7 @@ export default function RegistrationModal() {
 
                     <input
                       type="email"
+                      name="email"
                       placeholder="Email Address"
                       required
                       className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
@@ -167,6 +206,7 @@ export default function RegistrationModal() {
 
                       <input
                         type="number"
+                        name="age"
                         placeholder="Age"
                         required
                         className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
@@ -174,12 +214,19 @@ export default function RegistrationModal() {
 
                       <input
                         type="number"
+                        name="weight"
                         placeholder="Weight"
                         required
                         className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
                       />
 
                     </div>
+
+                    {errorMsg && (
+                      <div className="p-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs text-center">
+                        {errorMsg}
+                      </div>
+                    )}
 
                     {/* BUTTON */}
                     <button

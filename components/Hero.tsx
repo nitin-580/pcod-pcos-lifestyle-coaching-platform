@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
+import Link from 'next/link';
 
 type FloatingCardProps = {
   position?: string;
@@ -175,13 +176,13 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6"
         >
-          <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl shadow-pink-200 hover:-translate-y-0.5 transition-all duration-300">
+          <Link href="/#hormone-quiz" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl shadow-pink-200 hover:-translate-y-0.5 transition-all duration-300 inline-block text-center">
             Start Hormone Check
-          </button>
+          </Link>
 
-          <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300">
+          <Link href="/#register" className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300 inline-block text-center">
             Join Early Access
-          </button>
+          </Link>
         </motion.div>
       </div>
 

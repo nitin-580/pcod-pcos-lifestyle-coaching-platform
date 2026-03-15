@@ -6,18 +6,51 @@ import { Mail, User, Phone, Calendar, Scale, ArrowRight, CheckCircle2 } from 'lu
 export default function RegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // We are not handling proper controlled form state since this is a UI demo,
-  // but we will simulate a loading submission state.
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg('');
     
-    // Simulate network request
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      age: Number(formData.get('age')),
+      weight: Number(formData.get('weight')),
+      cycleRegularity: 'Unknown',
+      symptoms: 'None',
+      country: 'IN', // Default
+      source: 'Website Direct'
+    };
+
+    try {
+      const response = await fetch('https://womb-care-backend-76858014616.us-central1.run.app/api/early-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        let errorMessage = result.message || 'Failed to register. Please try again.';
+        // If there are detailed validation errors, show the first one
+        if (result.errors && result.errors.length > 0) {
+          errorMessage = result.errors[0].message;
+        }
+        throw new Error(errorMessage);
+      }
+
       setIsSuccess(true);
-    }, 1500);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setErrorMsg(error.message || 'Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -99,6 +132,7 @@ export default function RegistrationForm() {
                     <input
                       type="text"
                       id="name"
+                      name="name"
                       required
                       className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 focus:bg-white transition-all outline-none"
                       placeholder="Nitya Singh"
@@ -115,6 +149,7 @@ export default function RegistrationForm() {
                     <input
                       type="tel"
                       id="phone"
+                      name="phone"
                       required
                       className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 focus:bg-white transition-all outline-none"
                       placeholder="+91 9984654378"
@@ -133,6 +168,7 @@ export default function RegistrationForm() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     required
                     className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 focus:bg-white transition-all outline-none"
                     placeholder="nitya@gmail.com"
@@ -151,6 +187,7 @@ export default function RegistrationForm() {
                     <input
                       type="number"
                       id="age"
+                      name="age"
                       required
                       min="13"
                       max="100"
@@ -169,6 +206,7 @@ export default function RegistrationForm() {
                     <input
                       type="number"
                       id="weight"
+                      name="weight"
                       required
                       min="30"
                       max="300"
@@ -186,6 +224,12 @@ export default function RegistrationForm() {
                   By registering, you agree to our Terms of Service and Privacy Policy. Your health data is encrypted and secure.
                 </p>
               </div>
+
+              {errorMsg && (
+                <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm text-center">
+                  {errorMsg}
+                </div>
+              )}
 
               {/* Submit Button */}
               <button
