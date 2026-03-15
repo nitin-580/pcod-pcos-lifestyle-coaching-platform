@@ -7,8 +7,8 @@ import HormoneQuiz from '@/components/HormoneQuiz';
 import SocialProof from '@/components/SocialProof';
 import EarlySignup from '@/components/EarlySignup';
 import PeriodHealthSection from '@/components/PeriodHealthSection';
-
 import RegistrationForm from '@/components/RegistrationForm';
+import RegistrationModal from '@/components/RegistrationModal';
 
 export default function Home() {
   return (
@@ -49,6 +49,9 @@ export default function Home() {
         <p>&copy; {new Date().getFullYear()} PCOD & Period Wellness Coach. All rights reserved.</p>
         <p className="mt-2 text-xs opacity-60">This tool is for educational purposes only and does not replace professional medical advice.</p>
       </footer>
+
+      {/* Automatically opens after 3 seconds */}
+      <RegistrationModal />
     </main>
   );
 }
