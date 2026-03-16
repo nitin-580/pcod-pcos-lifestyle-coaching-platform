@@ -6,19 +6,19 @@ const testimonials = [
   {
     tagline: "I finally understand my body",
     quote: "After years of dealing with unexplained symptoms, this AI coach helped me map my cycle and adjust my lifestyle. The daily guidance is game-changing.",
-    author: "Sarah J.",
+    author: "Nikita Singh",
     label: "Cycle Syncing for 6 months"
   },
   {
     tagline: "No more afternoon crashes",
     quote: "The personalized hormone plan fixed my energy levels. I didn't realize how much my stress and cortisol were impacting my overall health.",
-    author: "Michelle K.",
+    author: "Sarvesha Chaudhary",
     label: "Cortisol Balance protocol"
   },
   {
     tagline: "A supportive companion",
     quote: "It's like having a wellness expert in your pocket. The advice is gentle, practical, and actually backed by science.",
-    author: "Elena T.",
+    author: "Anvesha Gupta",
     label: "PCOD management"
   }
 ];
