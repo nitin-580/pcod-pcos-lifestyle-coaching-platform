@@ -21,7 +21,7 @@ function FloatingCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay }}
-      className={`absolute ${position} z-20`}
+      className={`absolute ${position} z-20 hidden md:block`}
     >
       <motion.div
         animate={{ y: [-10, 10, -10] }}
@@ -75,7 +75,19 @@ export default function Hero() {
     "https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1512438248247-f0f2a5a8b7f0?q=80&w=600&auto=format&fit=crop"
   ];
-
+const scrollToRegister = () => {
+    const section = document.getElementById("register");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+const scrollToHormone =() => {
+  const section = document.getElementById("hormone");
+  if(section) {
+    section.scrollIntoView({ behavior: "smooth"
+    });
+  }
+};
   const ImageColumn = ({ images, direction, duration, hiddenClass = "" }: { images: string[], direction: 'up' | 'down', duration: number, hiddenClass?: string }) => (
     <div className={`relative h-[150vh] w-[140px] sm:w-[200px] md:w-[240px] lg:w-[260px] overflow-hidden ${hiddenClass}`}>
       <motion.div
@@ -176,13 +188,20 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6"
         >
-          <Link href="/#hormone-quiz" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl shadow-pink-200 hover:-translate-y-0.5 transition-all duration-300 inline-block text-center">
+          <button
+            onClick={scrollToHormone}
+            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl shadow-pink-200 hover:-translate-y-0.5 transition-all duration-300"
+          >
             Start Hormone Check
-          </Link>
+          </button>
 
-          <Link href="/#register" className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300 inline-block text-center">
+          <button
+            onClick={scrollToRegister}
+            className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300"
+          >
             Join Early Access
-          </Link>
+          </button>
+
         </motion.div>
       </div>
 

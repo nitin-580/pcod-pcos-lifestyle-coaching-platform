@@ -10,6 +10,7 @@ import PeriodHealthSection from '@/components/PeriodHealthSection';
 import RegistrationForm from '@/components/RegistrationForm';
 import RegistrationModal from '@/components/RegistrationModal';
 
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 font-sans selection:bg-pink-100 selection:text-pink-900">
@@ -38,10 +39,14 @@ export default function Home() {
       {/* Hormone Quiz Section */}
       <section className="py-24 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6">
-          <HormoneQuiz />
+         <section id="hormone" className="scroll-mt-24 py-24">
+        <HormoneQuiz />
+  </section>
         </div>
       </section>
-      <PeriodHealthSection/>
+      <div className="hidden md:block">
+        <PeriodHealthSection/>
+      </div>
       <SocialProof />
       <RegistrationForm />
       

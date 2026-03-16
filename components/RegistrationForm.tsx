@@ -71,15 +71,15 @@ export default function RegistrationForm() {
   }
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden font-sans" id="register">
+    <section className="py-16 md:py-24 bg-white relative overflow-hidden font-sans" id="register">
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-pink-50 to-transparent opacity-80 pointer-events-none" />
       <div className="absolute -left-40 top-40 w-96 h-96 bg-purple-50 rounded-full blur-[100px] opacity-60 pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         
         {/* Left Copy */}
-        <div className="max-w-xl">
+        <div className="max-w-xl mx-auto lg:mx-0 text-center lg:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-50 border border-pink-100 text-pink-600 text-sm font-medium mb-6">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
@@ -96,7 +96,7 @@ export default function RegistrationForm() {
             Join our comprehensive PCOD coaching program. Get personalized care, expert guidance, and a community that understands exactly what you're going through.
           </p>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 text-left inline-block mt-2">
             {['Personalized nutrition & fitness plans', '1-on-1 expert hormonal coaching', 'Private community access'].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -113,7 +113,7 @@ export default function RegistrationForm() {
           {/* Form backdrop blur shadow */}
           <div className="absolute inset-0 bg-gradient-to-tr from-pink-200 to-purple-200 rounded-[2.5rem] blur-2xl opacity-20 transform translate-y-4" />
           
-          <div className="relative bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-white">
+          <div className="relative bg-white/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl md:rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-white">
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-slate-800 mb-2">Claim Your Spot</h3>
               <p className="text-slate-500 text-sm">Fill in your details to secure early access.</p>
@@ -177,7 +177,7 @@ export default function RegistrationForm() {
               </div>
 
               {/* Age & Weight Grid */}
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
                   <label htmlFor="age" className="text-sm font-medium text-slate-700 ml-1">Age</label>
                   <div className="relative">

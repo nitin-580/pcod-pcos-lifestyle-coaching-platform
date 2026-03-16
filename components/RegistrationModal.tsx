@@ -127,24 +127,24 @@ export default function RegistrationModal() {
 
               <>
                 {/* LEFT PANEL */}
-                <div className="w-full md:w-5/12 bg-gradient-to-br from-purple-600 to-pink-500 text-white p-10 flex flex-col relative overflow-hidden">
+                <div className="hidden md:flex w-full md:w-5/12 bg-gradient-to-br from-purple-600 to-pink-500 text-white p-6 md:p-10 flex-col relative overflow-hidden">
 
                   {/* Glow Blob */}
                   <div className="absolute -left-20 bottom-0 w-56 h-56 bg-white/20 blur-[70px] rounded-full" />
 
                   {/* TEXT */}
                   <div className="relative z-10 mb-6">
-                    <h2 className="text-3xl font-bold mb-4">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">
                       Loving WombCare?
                     </h2>
 
-                    <p className="text-white/80 text-base leading-relaxed">
+                    <p className="text-white/80 text-sm md:text-base leading-relaxed">
                       Sign up now and continue building your personalized path to hormonal balance and wellness.
                     </p>
                   </div>
 
                   {/* IMAGE */}
-                  <div className="relative z-10 w-full aspect-[4/3] rounded-2xl border border-gray-100 overflow-hidden mt-auto hidden md:block">
+                  <div className="relative z-10 w-full aspect-[4/3] rounded-2xl border border-white/20 overflow-hidden mt-auto hidden md:block">
                     <img
                       src="/woman-img.png"
                       className="block w-full h-full object-cover object-top opacity-80"
@@ -154,17 +154,17 @@ export default function RegistrationModal() {
                 </div>
 
                 {/* RIGHT PANEL */}
-                <div className="w-full md:w-7/12 p-10 flex flex-col justify-center bg-white">
+                <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-10 flex flex-col justify-center bg-white relative">
 
                   <button
                     onClick={handleClose}
-                    className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-700 rounded-full hidden md:block"
+                    className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors rounded-full hidden md:block"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-slate-800 mb-1">
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1">
                       Join Early Access
                     </h3>
                     <p className="text-sm text-slate-500">

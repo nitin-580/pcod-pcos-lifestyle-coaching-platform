@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { determineHormoneProfile, type HormoneProfile } from '@/lib/quizLogic';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
 
 const QUESTIONS = [
   {
@@ -130,9 +131,9 @@ export default function HormoneQuiz() {
             {result.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-6 py-3 bg-slate-800 text-white rounded-full font-medium hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+            <Link href="/#register" className="px-6 py-3 bg-slate-800 text-white rounded-full font-medium hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
               Get Custom Plan <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
             <button
               onClick={reset}
               className="px-6 py-3 text-slate-500 font-medium hover:bg-slate-50 rounded-full transition-colors"

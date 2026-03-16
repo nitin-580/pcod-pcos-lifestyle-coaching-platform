@@ -25,19 +25,19 @@ const testimonials = [
 
 export default function SocialProof() {
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-800 mb-6 tracking-tight">
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-800 mb-4 md:mb-6 tracking-tight">
             Trusted by Women Everywhere
           </h2>
-          <p className="text-lg text-slate-600">
+          <p className="text-base md:text-lg text-slate-600">
             Join a growing community taking a proactive, personalized approach to their hormonal health.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
@@ -46,7 +46,7 @@ export default function SocialProof() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, delay: i * 0.2 }}
               whileHover={{ y: -5 }}
-              className="bg-purple-50 rounded-3xl p-8 border border-purple-100 shadow-sm transition-all"
+              className="bg-purple-50 rounded-2xl md:rounded-3xl p-6 md:p-8 border border-purple-100 shadow-sm transition-all"
             >
               <h4 className="text-xl font-semibold text-purple-700 mb-4">{t.tagline}</h4>
               <p className="text-slate-700 leading-relaxed mb-8 italic">&quot;{t.quote}&quot;</p>
@@ -62,7 +62,7 @@ export default function SocialProof() {
           ))}
         </div>
 
-        <div className="mt-20 pt-10 border-t border-slate-100 flex flex-col items-center justify-center">
+        <div className="mt-12 md:mt-20 pt-8 md:pt-10 border-t border-slate-100 flex flex-col items-center justify-center">
           <div className="flex -space-x-4 mb-4">
              {[1,2,3,4,5].map(i => (
                <div key={i} className={`w-12 h-12 rounded-full border-2 border-white bg-slate-200 z-${10-i} overflow-hidden`}>
