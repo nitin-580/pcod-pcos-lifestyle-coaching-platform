@@ -12,6 +12,21 @@ import RegistrationModal from '@/components/RegistrationModal';
 
 
 export default function Home() {
+  <script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "WombCare",
+      url: "https://wombcare.in",
+      description:
+        "AI lifestyle coach helping women balance hormones and manage PCOD.",
+      applicationCategory: "HealthApplication",
+      operatingSystem: "Web",
+    }),
+  }}
+/>
   return (
     <main className="min-h-screen bg-slate-50 font-sans selection:bg-pink-100 selection:text-pink-900">
       <FloatingNavbar />
