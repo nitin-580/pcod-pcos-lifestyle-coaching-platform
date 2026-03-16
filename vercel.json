@@ -1,9 +1,3 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "https://wombcare.in",
-      "permanent": true
-    }
-  ]
+  "redirects": []
 }
