@@ -127,12 +127,13 @@ export default function AdminPage() {
   const handleCareerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       const url = editingCareer ? `${API_BASE}/careers/${editingCareer.id}` : `${API_BASE}/careers`;
-      const method = editingCareer ? 'PATCH' : 'POST';
+      const requestedMethod = editingCareer ? 'PATCH' : 'POST';
       
       const response = await fetch(url, {
-        method,
+        method: requestedMethod,
         headers: {
           'Content-Type': 'application/json',
           'x-admin-api-key': apiKey,
@@ -144,8 +145,8 @@ export default function AdminPage() {
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || result.error || 'Failed to save career');
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || result.error || `Failed to save career (Status: ${response.status})`);
       }
       
       await fetchCareers(apiKey);
@@ -154,7 +155,8 @@ export default function AdminPage() {
       setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: [''], active: true });
     } catch (err: any) {
       console.error('Career save error:', err);
-      setError(err.message);
+      const isNetworkError = err.message.includes('Failed to fetch') || err.name === 'TypeError';
+      setError(isNetworkError ? 'Network Error: Failed to connect to server through proxy. Check backend availability.' : err.message);
     } finally {
       setLoading(false);
     }
@@ -163,17 +165,28 @@ export default function AdminPage() {
   const deleteCareer = async (id: string) => {
     if (!confirm('Are you sure you want to delete this career?')) return;
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`${API_BASE}/careers/${id}`, {
         method: 'DELETE',
         headers: { 'x-admin-api-key': apiKey },
       });
+      
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || result.error || 'Failed to delete career');
+        let errorMessage = 'Failed to delete career';
+        try {
+          const result = await response.json();
+          errorMessage = result.message || result.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON (e.g. 404 HTML from failed proxy)
+          errorMessage = `Server Error: ${response.status} ${response.statusText}. The proxy might be misconfigured or the server restarted.`;
+        }
+        throw new Error(errorMessage);
       }
+      
       await fetchCareers(apiKey);
     } catch (err: any) {
+      console.error('Delete career error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -183,17 +196,27 @@ export default function AdminPage() {
   const deleteBlog = async (id: string) => {
     if (!confirm('Are you sure you want to delete this blog post?')) return;
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`${API_BASE}/blogs/${id}`, {
         method: 'DELETE',
         headers: { 'x-admin-api-key': apiKey },
       });
+      
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || result.error || 'Failed to delete blog post');
+        let errorMessage = 'Failed to delete blog post';
+        try {
+          const result = await response.json();
+          errorMessage = result.message || result.error || errorMessage;
+        } catch (e) {
+          errorMessage = `Server Error: ${response.status} ${response.statusText}. The proxy might be misconfigured or the server restarted.`;
+        }
+        throw new Error(errorMessage);
       }
+      
       await fetchBlogs(apiKey);
     } catch (err: any) {
+      console.error('Delete blog error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -285,13 +308,26 @@ export default function AdminPage() {
             loading={loading} 
             onEdit={(career) => {
               setEditingCareer(career); 
+              
+              // Ensure requirements is always an array
+              let requirements = career.requirements || [''];
+              if (typeof requirements === 'string') {
+                try {
+                  requirements = JSON.parse(requirements);
+                } catch (e) {
+                  // Cast to unknown then string to satisfy compiler
+                  requirements = (requirements as unknown as string).split('\n').filter((r: string) => r.trim() !== '');
+                }
+              }
+              if (!Array.isArray(requirements)) requirements = [''];
+
               setCareerForm({ 
-                title: career.title, 
-                department: career.department, 
-                location: career.location,
-                type: career.type,
-                description: career.description,
-                requirements: career.requirements || [''],
+                title: career.title || '', 
+                department: career.department || '', 
+                location: career.location || '',
+                type: career.type || 'Full-time',
+                description: career.description || '',
+                requirements: requirements,
                 active: career.active !== undefined ? career.active : true
               }); 
               setIsCareerModalOpen(true); 

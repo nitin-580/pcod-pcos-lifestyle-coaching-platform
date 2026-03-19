@@ -84,7 +84,13 @@ const CareerModal: React.FC<CareerModalProps> = ({
 
               <div className="space-y-1.5">
                 <label className="text-sm font-bold text-slate-700 ml-1 italic">Requirements (One per line)</label>
-                <textarea rows={4} value={careerForm.requirements.join('\n')} onChange={e => setCareerForm({...careerForm, requirements: e.target.value.split('\n')})} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-500 outline-none resize-none" placeholder="What are we looking for?" />
+                <textarea 
+                  rows={4} 
+                  value={Array.isArray(careerForm.requirements) ? careerForm.requirements.join('\n') : ''} 
+                  onChange={e => setCareerForm({...careerForm, requirements: e.target.value.split('\n')})} 
+                  className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-500 outline-none resize-none" 
+                  placeholder="What are we looking for?" 
+                />
               </div>
 
               <div className="flex items-center gap-2 ml-1">

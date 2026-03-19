@@ -57,8 +57,19 @@ export default function EditBlogPage() {
   };
 
   const handleSave = async (data: BlogForm) => {
-    if (!apiKey) return;
+    if (!apiKey || !id) return;
     setLoading(true);
+    
+    const requestBody = {
+      title: data.title,
+      content: data.content,
+      authorName: data.authorName,
+      published: data.published,
+      contentType: data.contentType,
+      cover_image: data.coverImage,
+      excerpt: data.excerpt
+    };
+
     try {
       const response = await fetch(`${API_BASE}/blogs/${id}`, {
         method: 'PATCH',
@@ -66,29 +77,25 @@ export default function EditBlogPage() {
           'Content-Type': 'application/json',
           'x-admin-api-key': apiKey,
         },
-        body: JSON.stringify({
-          title: data.title,
-          content: data.content,
-          authorName: data.authorName,
-          published: data.published,
-          contentType: data.contentType,
-          cover_image: data.coverImage,
-          excerpt: data.excerpt
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || result.error || 'Failed to update blog');
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || result.error || `Failed to update blog (Status: ${response.status})`);
       }
 
       router.push('/wombcare-admin-9984');
     } catch (err: any) {
       console.error('Save error:', err);
-      if (err.message.includes('Failed to fetch')) {
-        console.warn('Checking if PATCH is supported or blocked by CORS...');
+      const isNetworkError = err.message.includes('Failed to fetch') || err.name === 'TypeError';
+      
+      let errorMessage = err.message || 'Failed to connect to server';
+      if (isNetworkError) {
+        errorMessage = 'Network Error: Failed to connect to the backend through the proxy. Please ensure the backend is running and reachable.';
       }
-      alert(err.message || 'Failed to connect to server');
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
