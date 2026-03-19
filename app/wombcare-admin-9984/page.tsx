@@ -4,6 +4,8 @@ import AdminTable, { Registration } from '@/components/AdminTable';
 import { Sparkles, Key, LogOut, RefreshCw, Loader2, AlertCircle, LayoutDashboard, FileText, Plus, Trash2, Edit3, X, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
+import CareerModal from '@/components/admin/CareerModal';
+import AdminHeader from '@/components/admin/AdminHeader';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
