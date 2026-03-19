@@ -12,7 +12,7 @@ import CareerList from '@/components/admin/CareerList';
 
 import { useRouter } from 'next/navigation';
 
-const BASE_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api/admin';
+import { API_BASE } from '@/lib/api-config';
 
 interface Blog {
   id: string;
@@ -77,12 +77,13 @@ export default function AdminPage() {
   const fetchRegistrations = async (key: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/users`, {
+      const response = await fetch(`${API_BASE}/users`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
       setRegistrations(result.data || []);
     } catch (err: any) {
+      console.error('Fetch registrations error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -92,12 +93,13 @@ export default function AdminPage() {
   const fetchBlogs = async (key: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/blogs`, {
+      const response = await fetch(`${API_BASE}/blogs`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
       setBlogs(result.data || []);
     } catch (err: any) {
+      console.error('Fetch blogs error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -107,12 +109,13 @@ export default function AdminPage() {
   const fetchCareers = async (key: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/careers`, {
+      const response = await fetch(`${API_BASE}/careers`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
       setCareers(result.data || []);
     } catch (err: any) {
+      console.error('Fetch careers error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -125,7 +128,7 @@ export default function AdminPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = editingCareer ? `${BASE_URL}/careers/${editingCareer.id}` : `${BASE_URL}/careers`;
+      const url = editingCareer ? `${API_BASE}/careers/${editingCareer.id}` : `${API_BASE}/careers`;
       const method = editingCareer ? 'PATCH' : 'POST';
       
       const response = await fetch(url, {
@@ -150,6 +153,7 @@ export default function AdminPage() {
       setEditingCareer(null);
       setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: [''], active: true });
     } catch (err: any) {
+      console.error('Career save error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -160,7 +164,7 @@ export default function AdminPage() {
     if (!confirm('Are you sure you want to delete this career?')) return;
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/careers/${id}`, {
+      const response = await fetch(`${API_BASE}/careers/${id}`, {
         method: 'DELETE',
         headers: { 'x-admin-api-key': apiKey },
       });
@@ -180,7 +184,7 @@ export default function AdminPage() {
     if (!confirm('Are you sure you want to delete this blog post?')) return;
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/blogs/${id}`, {
+      const response = await fetch(`${API_BASE}/blogs/${id}`, {
         method: 'DELETE',
         headers: { 'x-admin-api-key': apiKey },
       });

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sparkles, ArrowLeft, Save, Plus, X, Type, Bold, Italic, Image as ImageIcon, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { API_BASE } from '@/lib/api-config';
 
 export interface BlogForm {
   title: string;
@@ -54,7 +55,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       // For now, we'll use a placeholder or handle it in the parent.
       // Better: let the parent handle the actual upload function.
       const apiKey = sessionStorage.getItem('pcod_admin_key');
-      const response = await fetch('https://womb-care-backend-76858014616.us-central1.run.app/api/admin/upload', {
+      const response = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
         headers: { 'x-admin-api-key': apiKey || '' },
         body: formData,
@@ -65,8 +66,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       } else {
         alert('Upload failed: ' + result.message);
       }
-    } catch (err) {
-      alert('Upload error');
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      alert('Upload error: ' + err.message);
     } finally {
       setUploading(false);
     }

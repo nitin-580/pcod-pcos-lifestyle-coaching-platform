@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import BlogEditor, { BlogForm } from '@/components/admin/BlogEditor';
 
-const BASE_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api/admin';
+import { API_BASE } from '@/lib/api-config';
 
 export default function EditBlogPage() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function EditBlogPage() {
     try {
       // Find the blog in the full list or fetch specific (if endpoint exists)
       // Documentation says /admin/blogs lists all. We'll find by ID.
-      const response = await fetch(`${BASE_URL}/blogs`, {
+      const response = await fetch(`${API_BASE}/blogs`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
@@ -60,7 +60,7 @@ export default function EditBlogPage() {
     if (!apiKey) return;
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/blogs/${id}`, {
+      const response = await fetch(`${API_BASE}/blogs/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,11 @@ export default function EditBlogPage() {
 
       router.push('/wombcare-admin-9984');
     } catch (err: any) {
-      alert(err.message);
+      console.error('Save error:', err);
+      if (err.message.includes('Failed to fetch')) {
+        console.warn('Checking if PATCH is supported or blocked by CORS...');
+      }
+      alert(err.message || 'Failed to connect to server');
     } finally {
       setLoading(false);
     }
