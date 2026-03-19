@@ -3,4 +3,9 @@ export const getApiBase = () => {
   return '/api/admin-proxy';
 };
 
+export const getPublicApiBase = () => {
+  // Use relative proxy path for public APIs
+  return '/api/public-proxy';
+};
+
 export const API_BASE = getApiBase();

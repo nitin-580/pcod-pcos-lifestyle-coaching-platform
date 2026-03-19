@@ -6,8 +6,9 @@ import { motion } from 'framer-motion';
 import { Calendar, User, ArrowLeft, Loader2, Share2 } from 'lucide-react';
 import FloatingNavbar from '@/components/FloatingNavbar';
 import { format } from 'date-fns';
+import { getPublicApiBase } from '@/lib/api-config';
 
-const BACKEND_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api/blogs';
+const BACKEND_URL = `${getPublicApiBase()}/blogs`;
 
 interface Blog {
   id: string;

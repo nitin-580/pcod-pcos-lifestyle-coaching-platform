@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         source: '/api/admin-proxy/:path*',
         destination: 'https://womb-care-backend-76858014616.us-central1.run.app/api/admin/:path*',
       },
+      {
+        source: '/api/public-proxy/:path*',
+        destination: 'https://womb-care-backend-76858014616.us-central1.run.app/api/:path*',
+      },
     ];
   },
 };

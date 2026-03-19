@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ArrowRight, Star, Heart, Zap, Globe, Users, X, CheckCircle2, User, Mail, Phone, MapPin, Briefcase } from 'lucide-react';
 import FloatingNavbar from '@/components/FloatingNavbar';
+import { getPublicApiBase } from '@/lib/api-config';
 
-const BASE_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api';
+const BASE_URL = getPublicApiBase();
 
 interface Career {
   id: string;
