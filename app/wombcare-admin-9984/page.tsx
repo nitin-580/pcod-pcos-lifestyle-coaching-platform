@@ -20,6 +20,7 @@ interface Blog {
   authorName: string;
   createdAt: string;
   coverImage?: string;
+  cover_image?: string;
   published?: boolean;
   contentType?: string;
 }
@@ -180,7 +181,14 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
           'x-admin-api-key': apiKey,
         },
-        body: JSON.stringify(blogForm),
+        body: JSON.stringify({
+          title: blogForm.title,
+          content: blogForm.content,
+          authorName: blogForm.authorName,
+          published: blogForm.published,
+          contentType: blogForm.contentType,
+          cover_image: blogForm.coverImage
+        }),
       });
 
       if (!response.ok) {
@@ -360,7 +368,7 @@ export default function AdminPage() {
                 title: blog.title, 
                 content: blog.content, 
                 authorName: blog.authorName,
-                coverImage: blog.coverImage || '',
+                coverImage: blog.coverImage || blog.cover_image || '',
                 published: blog.published !== undefined ? blog.published : true,
                 contentType: blog.contentType || 'html'
               }); 

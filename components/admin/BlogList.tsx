@@ -10,6 +10,7 @@ interface Blog {
   authorName: string;
   createdAt: string;
   coverImage?: string;
+  cover_image?: string;
   published?: boolean;
   contentType?: string;
   content: string;
@@ -31,8 +32,8 @@ const BlogList: React.FC<BlogListProps> = ({ blogs, loading, onEdit, onDelete })
           className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:border-pink-200 transition-all translate-y-0 hover:-translate-y-1"
         >
           <div className="flex-1 min-w-0 pr-6 flex items-center gap-4">
-            {blog.coverImage && (
-              <img src={blog.coverImage} alt="" className="w-16 h-16 rounded-xl object-cover bg-slate-100" />
+            {(blog.coverImage || blog.cover_image) && (
+              <img src={blog.coverImage || blog.cover_image} alt="" className="w-16 h-16 rounded-xl object-cover bg-slate-100" />
             )}
             <div>
               <h3 className="font-bold text-lg text-slate-800 truncate mb-1">{blog.title}</h3>
