@@ -4,12 +4,11 @@ import AdminTable, { Registration } from '@/components/AdminTable';
 import { Sparkles, Key, LogOut, RefreshCw, Loader2, AlertCircle, LayoutDashboard, FileText, Plus, Trash2, Edit3, X, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import BlogModal from '@/components/admin/BlogModal';
-import CareerModal from '@/components/admin/CareerModal';
-import AdminHeader from '@/components/admin/AdminHeader';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
+
+import { useRouter } from 'next/navigation';
 
 const BASE_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api/admin';
 
@@ -23,9 +22,11 @@ interface Blog {
   cover_image?: string;
   published?: boolean;
   contentType?: string;
+  excerpt?: string;
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -38,17 +39,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Blog Form States
-  const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<any | null>(null);
-  const [blogForm, setBlogForm] = useState({ 
-    title: '', 
-    content: '', 
-    authorName: '', 
-    coverImage: '',
-    published: true,
-    contentType: 'html'
-  });
+  // Blog states can be removed as they are handled in the new pages, 
+  // but we keep 'blogs' list here.
 
   // Career Form States
   const [isCareerModalOpen, setIsCareerModalOpen] = useState(false);
@@ -125,87 +117,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
-
-    setLoading(true);
-    try {
-      const response = await fetch(`${BASE_URL}/upload`, {
-        method: 'POST',
-        headers: { 'x-admin-api-key': apiKey },
-        body: formData,
-      });
-      const result = await response.json();
-      if (result.success) {
-        setBlogForm({ ...blogForm, coverImage: result.data.url });
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const insertFormatting = (tag: string) => {
-    const textarea = document.getElementById('blog-content') as HTMLTextAreaElement;
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = blogForm.content;
-    const before = text.substring(0, start);
-    const after = text.substring(end);
-    const selection = text.substring(start, end);
-    
-    let newContent = '';
-    if (tag === 'bold') newContent = `${before}<b>${selection}</b>${after}`;
-    if (tag === 'italic') newContent = `${before}<i>${selection}</i>${after}`;
-    
-    setBlogForm({ ...blogForm, content: newContent });
-  };
-
-  const handleBlogSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const url = editingBlog ? `${BASE_URL}/blogs/${editingBlog.id}` : `${BASE_URL}/blogs`;
-      const method = editingBlog ? 'PATCH' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          title: blogForm.title,
-          content: blogForm.content,
-          authorName: blogForm.authorName,
-          published: blogForm.published,
-          contentType: blogForm.contentType,
-          cover_image: blogForm.coverImage
-        }),
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || result.error || 'Failed to save blog post');
-      }
-      
-      await fetchBlogs(apiKey);
-      setIsBlogModalOpen(false);
-      setEditingBlog(null);
-      setBlogForm({ title: '', content: '', authorName: '', coverImage: '', published: true, contentType: 'html' });
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCareerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -344,11 +256,7 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto px-6 pt-10">
         <AdminHeader 
           activeTab={activeTab} 
-          onNewBlog={() => { 
-            setEditingBlog(null); 
-            setBlogForm({ title: '', content: '', authorName: '', coverImage: '', published: true, contentType: 'html' }); 
-            setIsBlogModalOpen(true); 
-          }}
+          onNewBlog={() => router.push('/wombcare-admin-9984/blogs/new')}
           onNewCareer={() => { 
             setEditingCareer(null); 
             setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: [''], active: true }); 
@@ -362,18 +270,7 @@ export default function AdminPage() {
           <BlogList 
             blogs={blogs} 
             loading={loading} 
-            onEdit={(blog) => {
-              setEditingBlog(blog); 
-              setBlogForm({ 
-                title: blog.title, 
-                content: blog.content, 
-                authorName: blog.authorName,
-                coverImage: blog.coverImage || blog.cover_image || '',
-                published: blog.published !== undefined ? blog.published : true,
-                contentType: blog.contentType || 'html'
-              }); 
-              setIsBlogModalOpen(true); 
-            }}
+            onEdit={(blog) => router.push(`/wombcare-admin-9984/blogs/edit/${blog.id}`)}
             onDelete={deleteBlog}
           />
         ) : (
@@ -397,18 +294,6 @@ export default function AdminPage() {
           />
         )}
       </main>
-
-      <BlogModal 
-        isOpen={isBlogModalOpen}
-        onClose={() => setIsBlogModalOpen(false)}
-        onSubmit={handleBlogSubmit}
-        editingBlog={editingBlog}
-        blogForm={blogForm}
-        setBlogForm={setBlogForm}
-        loading={loading}
-        handleImageUpload={handleImageUpload}
-        insertFormatting={insertFormatting}
-      />
 
       <CareerModal 
         isOpen={isCareerModalOpen}
