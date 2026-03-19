@@ -58,6 +58,7 @@ export default function AdminPage() {
   });
 
   useEffect(() => {
+    console.log('AdminPage init. API_BASE:', API_BASE);
     const savedKey = sessionStorage.getItem('pcod_admin_key');
     if (savedKey) {
       setApiKey(savedKey);
@@ -77,9 +78,25 @@ export default function AdminPage() {
   const fetchRegistrations = async (key: string) => {
     setLoading(true);
     try {
+      if (key && typeof key === 'string') {
+        console.log(`fetchRegistrations with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
+      } else {
+        console.warn('fetchRegistrations: key is missing or not a string!', key);
+      }
       const response = await fetch(`${API_BASE}/users`, {
         headers: { 'x-admin-api-key': key },
       });
+      console.log('fetchRegistrations status:', response.status);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('fetchRegistrations failed body:', text);
+        try {
+          const result = JSON.parse(text);
+          throw new Error(result.message || result.error || 'Failed to fetch registrations');
+        } catch (e) {
+          throw new Error(`Failed to fetch registrations: ${response.status} ${response.statusText}`);
+        }
+      }
       const result = await response.json();
       setRegistrations(result.data || []);
     } catch (err: any) {
@@ -93,9 +110,25 @@ export default function AdminPage() {
   const fetchBlogs = async (key: string) => {
     setLoading(true);
     try {
+      if (key && typeof key === 'string') {
+        console.log(`fetchBlogs with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
+      } else {
+        console.warn('fetchBlogs: key is missing or not a string!', key);
+      }
       const response = await fetch(`${API_BASE}/blogs`, {
         headers: { 'x-admin-api-key': key },
       });
+      console.log('fetchBlogs status:', response.status);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('fetchBlogs failed body:', text);
+        try {
+          const result = JSON.parse(text);
+          throw new Error(result.message || result.error || 'Failed to fetch blogs');
+        } catch (e) {
+          throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText}`);
+        }
+      }
       const result = await response.json();
       setBlogs(result.data || []);
     } catch (err: any) {
@@ -109,9 +142,25 @@ export default function AdminPage() {
   const fetchCareers = async (key: string) => {
     setLoading(true);
     try {
+      if (key && typeof key === 'string') {
+        console.log(`fetchCareers with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
+      } else {
+        console.warn('fetchCareers: key is missing or not a string!', key);
+      }
       const response = await fetch(`${API_BASE}/careers`, {
         headers: { 'x-admin-api-key': key },
       });
+      console.log('fetchCareers status:', response.status);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('fetchCareers failed body:', text);
+        try {
+          const result = JSON.parse(text);
+          throw new Error(result.message || result.error || 'Failed to fetch careers');
+        } catch (e) {
+          throw new Error(`Failed to fetch careers: ${response.status} ${response.statusText}`);
+        }
+      }
       const result = await response.json();
       setCareers(result.data || []);
     } catch (err: any) {

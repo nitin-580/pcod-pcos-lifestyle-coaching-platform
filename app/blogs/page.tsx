@@ -10,13 +10,7 @@ import { getPublicApiBase } from '@/lib/api-config';
 
 const BACKEND_URL = `${getPublicApiBase()}/blogs`;
 
-interface Blog {
-  id: string;
-  title: string;
-  content: string;
-  authorName: string;
-  createdAt: string;
-}
+import { Blog } from '@/types/blog';
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -83,45 +77,48 @@ export default function BlogsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.map((blog, i) => (
-                <motion.article
-                  key={blog.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="group bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-pink-100 transition-all duration-300 flex flex-col"
-                >
-                  <div className="p-8 flex flex-col flex-1">
-                    <div className="flex items-center gap-4 mb-6 text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {format(new Date(blog.createdAt), 'MMM d, yyyy')}
-                      </span>
-                      <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                      <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5" />
-                        {blog.authorName}
-                      </span>
+              {blogs.map((blog, i) => {
+                const slug = blog.slug || blog.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, '');
+                return (
+                  <motion.article
+                    key={blog.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="group bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-pink-100 transition-all duration-300 flex flex-col"
+                  >
+                    <div className="p-8 flex flex-col flex-1">
+                      <div className="flex items-center gap-4 mb-6 text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {format(new Date(blog.createdAt), 'MMM d, yyyy')}
+                        </span>
+                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                        <span className="flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5" />
+                          {blog.authorName}
+                        </span>
+                      </div>
+                      
+                      <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-pink-600 transition-colors line-clamp-2">
+                        {blog.title}
+                      </h2>
+                      
+                      <p className="text-slate-600 line-clamp-3 mb-8 flex-1 leading-relaxed">
+                        {blog.excerpt || blog.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+                      </p>
+                      
+                      <Link 
+                        href={`/blogs/${slug}`}
+                        className="inline-flex items-center gap-2 text-pink-600 font-bold group/link"
+                      >
+                        Read More 
+                        <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                      </Link>
                     </div>
-                    
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-pink-600 transition-colors line-clamp-2">
-                      {blog.title}
-                    </h2>
-                    
-                    <p className="text-slate-600 line-clamp-3 mb-8 flex-1 leading-relaxed">
-                      {blog.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
-                    </p>
-                    
-                    <Link 
-                      href={`/blogs/${blog.id}`}
-                      className="inline-flex items-center gap-2 text-pink-600 font-bold group/link"
-                    >
-                      Read More 
-                      <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </motion.article>
-              ))}
+                  </motion.article>
+                );
+              })}
             </div>
           )}
         </section>
