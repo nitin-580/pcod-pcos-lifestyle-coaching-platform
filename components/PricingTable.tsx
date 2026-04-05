@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function PricingSection() {
     const plans = [
       {
@@ -102,15 +103,16 @@ export default function PricingSection() {
                   ))}
                 </ul>
   
-                <button
-                  className={`w-full py-4 rounded-2xl font-semibold transition ${
-                    plan.highlighted
-                      ? "bg-purple-600 text-white hover:bg-purple-700"
-                      : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-                  }`}
-                >
-                  Get Started
-                </button>
+               <Link
+  href="/join-wombcare"
+  className={`w-full block text-center py-4 rounded-2xl font-semibold transition ${
+    plan.highlighted
+      ? "bg-purple-600 text-white hover:bg-purple-700"
+      : "bg-slate-100 text-slate-800 hover:bg-slate-200"
+  }`}
+>
+  Get Started
+</Link>
               </div>
             ))}
           </div>
