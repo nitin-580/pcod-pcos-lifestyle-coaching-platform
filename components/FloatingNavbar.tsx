@@ -10,11 +10,7 @@ export default function FloatingNavbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -39,6 +35,7 @@ export default function FloatingNavbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2 rounded-xl text-white shadow-md group-hover:scale-105 transition-transform duration-300">
               <Sparkles className="w-5 h-5" />
@@ -49,7 +46,7 @@ export default function FloatingNavbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -59,7 +56,20 @@ export default function FloatingNavbar() {
                 {link.name}
               </Link>
             ))}
-            <Link href="/#register" className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 whitespace-nowrap">
+
+            {/* Login Button */}
+            <Link
+              href="/login"
+              className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-colors px-4 py-2 rounded-full border border-slate-200 hover:border-purple-200 bg-white/80"
+            >
+              Login
+            </Link>
+
+            {/* CTA */}
+            <Link
+              href="/#register"
+              className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+            >
               Join Early Access
             </Link>
           </nav>
@@ -74,7 +84,7 @@ export default function FloatingNavbar() {
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-[60] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
           <button
@@ -83,6 +93,7 @@ export default function FloatingNavbar() {
           >
             <X className="w-8 h-8" />
           </button>
+
           <nav className="flex flex-col gap-8 w-full max-w-sm">
             {navLinks.map((link) => (
               <Link
@@ -94,9 +105,20 @@ export default function FloatingNavbar() {
                 {link.name}
               </Link>
             ))}
-            <Link 
+
+            {/* Mobile Login */}
+            <Link
+              href="/login"
+              className="flex items-center justify-center bg-white border border-slate-200 text-slate-800 px-8 py-4 rounded-full text-lg font-semibold shadow-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+
+            {/* Mobile CTA */}
+            <Link
               href="/#register"
-              className="mt-4 flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl shadow-purple-200"
+              className="flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl shadow-purple-200"
               onClick={() => setMobileMenuOpen(false)}
             >
               Join Early Access

@@ -9,6 +9,8 @@ import EarlySignup from '@/components/EarlySignup';
 import PeriodHealthSection from '@/components/PeriodHealthSection';
 import RegistrationForm from '@/components/RegistrationForm';
 import RegistrationModal from '@/components/RegistrationModal';
+import Footer from "@/components/Footer";
+import PricingSection from "@/components/PricingTable";
 
 
 export default function Home() {
@@ -56,9 +58,7 @@ export default function Home() {
         {/* Hormone Quiz Section */}
         <section className="py-24 bg-slate-50 relative">
           <div className="max-w-6xl mx-auto px-6">
-           <section id="hormone" className="scroll-mt-24 py-24">
-          <HormoneQuiz />
-        </section>
+            <PricingSection />
           </div>
         </section>
         <div className="hidden md:block">
@@ -67,14 +67,10 @@ export default function Home() {
         <SocialProof />
         <RegistrationForm />
       </div>
-      
-      <footer className="bg-slate-900 text-slate-400 py-12 text-center text-sm border-t border-slate-800">
-        <p>&copy; {new Date().getFullYear()} PCOD & Period Wellness Coach. All rights reserved.</p>
-        <p className="mt-2 text-xs opacity-60">This tool is for educational purposes only and does not replace professional medical advice.</p>
-      </footer>
 
       {/* Automatically opens after 3 seconds */}
       <RegistrationModal />
+      <Footer />
     </main>
 
   );
