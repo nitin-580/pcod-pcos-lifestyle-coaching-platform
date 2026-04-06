@@ -221,7 +221,7 @@ export default function Hero() {
             transition={{ duration: 0.9, delay: 0.3 }}
             className="max-w-lg mx-auto w-full"
           >
-            <div className="border rounded-[2rem] p-6 md:p-8">
+            <div className="border rounded-[2rem] md:p-8">
               <HormoneQuiz />
             </div>
           </motion.div>
