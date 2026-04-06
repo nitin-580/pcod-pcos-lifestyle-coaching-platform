@@ -92,7 +92,7 @@ export default function Footer() {
                   href="tel:+91 90319 09188"
                   className="hover:text-pink-400 transition-colors"
                 >
-                  +91 99999 99999
+                  +91 90319 09188
                 </a>
               </p>
               <p>Available Mon – Sat, 9 AM – 7 PM</p>

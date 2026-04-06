@@ -35,15 +35,22 @@ export default function FloatingNavbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2 rounded-xl text-white shadow-md group-hover:scale-105 transition-transform duration-300">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
-              WombCare
-            </span>
-          </Link>
+  {/* Logo */}
+  <Link href="/" className="flex items-center gap-3 group">
+    <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-300">
+      <Image
+        src="/logo.png"
+        alt="WombCare Logo"
+        fill
+        className="object-cover"
+        priority
+      />
+    </div>
+
+    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
+      WombCare
+    </span>
+  </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">

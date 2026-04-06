@@ -16,12 +16,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://wombcare.in"),
 
   title: {
-    default: "WombCare — AI PCOD & Period Health Coach",
+    default: "WombCare — AI-Free PCOD & Period Health Coach",
     template: "%s | WombCare",
   },
 
   description:
-    "WombCare is an AI-powered lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
+    "WombCare is an AI-Less lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
 
   keywords: [
     "PCOD",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     "women health AI",
     "cycle tracking",
     "hormone health",
-    "AI health coach",
+    "health coach",
     "PCOD lifestyle management"
   ],
 
