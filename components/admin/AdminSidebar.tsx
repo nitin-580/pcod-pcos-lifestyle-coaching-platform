@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -44,6 +44,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'careers' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Briefcase className="w-4 h-4" /> Careers
+          </button>
+          <button 
+            onClick={() => setActiveTab('enrollments')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'enrollments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Activity className="w-4 h-4" /> Enrollments
           </button>
         </div>
       </div>

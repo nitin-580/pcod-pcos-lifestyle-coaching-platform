@@ -9,6 +9,7 @@ import AdminHeader from '@/components/admin/AdminHeader';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
+import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
 
 import { useRouter } from 'next/navigation';
 
@@ -32,10 +33,11 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [careers, setCareers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,8 @@ export default function AdminPage() {
     await Promise.all([
       fetchRegistrations(key),
       fetchBlogs(key),
-      fetchCareers(key)
+      fetchCareers(key),
+      fetchEnrollments(key)
     ]);
   };
 
@@ -106,7 +109,39 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+const fetchEnrollments = async (key: string) => {
+  setLoading(true);
+  setError(null);
 
+  try {
+    const response = await fetch(
+      'https://womb-care-backend-76858014616.us-central1.run.app/api/admin/enrollments',
+      {
+        method: 'GET',
+        headers: {
+          'x-admin-api-key': key,
+        },
+      }
+    );
+
+    console.log('fetchEnrollments status:', response.status);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || 'Failed to fetch enrollments'
+      );
+    }
+
+    setEnrollments(result.data || []);
+  } catch (err: any) {
+    console.error('Fetch enrollments error:', err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const fetchBlogs = async (key: string) => {
     setLoading(true);
     try {
@@ -327,6 +362,7 @@ export default function AdminPage() {
           if (activeTab === 'registrations') fetchRegistrations(apiKey);
           else if (activeTab === 'blogs') fetchBlogs(apiKey);
           else if (activeTab === 'careers') fetchCareers(apiKey);
+          else if (activeTab === 'enrollments') fetchEnrollments(apiKey);
         }}
         onLogout={handleLogout}
       />
@@ -344,6 +380,8 @@ export default function AdminPage() {
 
         {activeTab === 'registrations' ? (
           <AdminTable data={registrations} />
+        ) : activeTab === 'enrollments' ? (
+          <EnrollmentTable data={enrollments} />
         ) : activeTab === 'blogs' ? (
           <BlogList 
             blogs={blogs} 

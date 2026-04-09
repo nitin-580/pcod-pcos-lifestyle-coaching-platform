@@ -4,7 +4,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
-  activeTab: 'registrations' | 'blogs' | 'careers';
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments';
   onNewBlog: () => void;
   onNewCareer: () => void;
 }
@@ -14,10 +14,16 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">
-          {activeTab === 'registrations' ? 'User Registrations' : activeTab === 'blogs' ? 'Blog Management' : 'Career Opportunities'}
+          {activeTab === 'registrations' ? 'User Registrations' : 
+           activeTab === 'blogs' ? 'Blog Management' : 
+           activeTab === 'enrollments' ? 'Program Enrollments' : 
+           'Career Opportunities'}
         </h2>
         <p className="text-slate-500">
-          {activeTab === 'registrations' ? 'Track your growth and user data.' : activeTab === 'blogs' ? 'Create and manage educational content.' : 'Manage job openings and hiring.'}
+          {activeTab === 'registrations' ? 'Track early access registrations.' : 
+           activeTab === 'blogs' ? 'Create and manage educational content.' : 
+           activeTab === 'enrollments' ? 'Manage wellness program participants.' : 
+           'Manage job openings and hiring.'}
         </p>
       </div>
       

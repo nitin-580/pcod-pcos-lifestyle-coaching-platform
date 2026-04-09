@@ -8,20 +8,28 @@ import { getPublicApiBase } from '@/lib/api-config';
 
 export default function SignupPage() {
   const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
     specialization: '',
-    credentials: 'MBBS, MD', // Default value
+    credentials: 'MBBS, MD',
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,27 +37,42 @@ export default function SignupPage() {
     setIsLoading(true);
     setError('');
 
+    // Validate passwords
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    const { confirmPassword, ...payload } = formData;
+
     try {
-      const res = await fetch(`${getPublicApiBase()}/doctors/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${getPublicApiBase()}/doctors/signup`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
 
       if (data.success) {
         setSuccess(true);
+
         setTimeout(() => {
-          router.push('/login');
+          router.push('/join-wombcare');
         }, 2000);
       } else {
         setError(data.message || 'Signup failed');
       }
     } catch (err) {
-      setError('Connection failed. Please check if backend is running.');
+      setError(
+        'Connection failed. Please check if backend is running.'
+      );
       console.error('Signup error:', err);
     } finally {
       setIsLoading(false);
@@ -59,7 +82,6 @@ export default function SignupPage() {
   return (
     <main className="min-h-screen bg-white">
       <div className="grid lg:grid-cols-2 min-h-screen">
-        
         {/* Left Signup Panel */}
         <div className="flex items-center justify-center px-8 md:px-16 lg:px-24 bg-white border-r border-slate-100 py-12">
           <motion.div
@@ -69,11 +91,11 @@ export default function SignupPage() {
             className="w-full max-w-md"
           >
             <h1 className="text-5xl font-bold text-slate-800 mb-3">
-              Join as Doctor
+              Join Us
             </h1>
 
             <p className="text-slate-500 mb-10 text-lg">
-              Partner with WombCare and empower women's health
+              Join WombCare and empower women&apos;s health
             </p>
 
             {success ? (
@@ -81,17 +103,27 @@ export default function SignupPage() {
                 <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
                   ✓
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">Account Created!</h3>
-                <p className="text-slate-600 mt-2">Redirecting you to login...</p>
+
+                <h3 className="text-xl font-bold text-slate-800">
+                  Account Created!
+                </h3>
+
+                <p className="text-slate-600 mt-2">
+                  Redirecting you to Plans...
+                </p>
               </div>
             ) : (
-              <form className="space-y-4" onSubmit={handleSubmit}>
+              <form
+                className="space-y-4"
+                onSubmit={handleSubmit}
+              >
                 {error && (
                   <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
                     {error}
                   </div>
                 )}
 
+                {/* Full Name */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Full Name
@@ -107,6 +139,7 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* Phone + Specialization */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -122,6 +155,7 @@ export default function SignupPage() {
                       className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Specialization
@@ -138,6 +172,7 @@ export default function SignupPage() {
                   </div>
                 </div>
 
+                {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Email Address
@@ -153,6 +188,7 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* Password */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Password
@@ -168,12 +204,31 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* Confirm Password */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                {/* Submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold text-lg shadow-xl shadow-pink-200 hover:opacity-95 transition-all disabled:opacity-50 mt-4"
                 >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading
+                    ? 'Creating Account...'
+                    : 'Create Account'}
                 </button>
               </form>
             )}
@@ -198,14 +253,18 @@ export default function SignupPage() {
             transition={{ duration: 0.6 }}
             className="max-w-xl"
           >
-            <div className="text-7xl text-pink-200 mb-6 font-serif">“</div>
+            <div className="text-7xl text-pink-200 mb-6 font-serif">
+              “
+            </div>
 
             <h2 className="text-5xl font-bold leading-tight text-slate-800 mb-8">
               Empower your hormonal wellness journey.
             </h2>
 
             <p className="text-2xl leading-relaxed text-slate-600">
-              Join thousands of experts using WombCare to bridge the gap in women's health through personalized care, cycle tracking, and nutrition.
+              Join thousands of experts using WombCare to bridge
+              the gap in women&apos;s health through personalized
+              care, cycle tracking, and nutrition.
             </p>
 
             <div className="mt-10 flex items-center gap-4">

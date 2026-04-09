@@ -198,13 +198,12 @@ export default function Hero() {
             </motion.p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={scrollToHormone}
-                className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl hover:-translate-y-0.5 transition-all"
+              <Link
+                href="/hormonal-check"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl hover:-translate-y-0.5 transition-all"
               >
                 Start Hormone Check
-              </button>
-
+              </Link>
               <button
                 onClick={scrollToRegister}
                 className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm"
