@@ -39,7 +39,7 @@ export default function PricingPage() {
             </Link>
 
             <a
-              href="https://chat.whatsapp.com/YOUR_INVITE_CODE"
+              href="https://chat.whatsapp.com/CAFOBPDpyPBA8vG1H9oDTP"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-2xl bg-green-500 text-white font-semibold shadow-lg hover:opacity-95 transition-all"
