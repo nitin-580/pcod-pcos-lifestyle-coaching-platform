@@ -39,7 +39,7 @@ export default function JoinWombCareFormPage() {
     setError(null);
 
     try {
-      const endpoint = 'http://localhost:3001/api/enrollments';
+      const endpoint = 'https://womb-care-backend-76858014616.us-central1.run.app/api/enrollments';
 
       const payload = {
         fullName: formData.fullName,
@@ -82,6 +82,8 @@ export default function JoinWombCareFormPage() {
       setIsSubmitting(false);
     }
   };
+
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-white via-pink-50/30 to-purple-50/40">

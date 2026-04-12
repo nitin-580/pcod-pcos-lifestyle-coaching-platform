@@ -134,7 +134,7 @@ export default function SignupPage() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Dr. Jane Doe"
+                    placeholder="Shraddha Shukla"
                     className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
@@ -151,7 +151,7 @@ export default function SignupPage() {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+91..."
+                      placeholder="+91-XXXXX-XXXXX"
                       className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
                   </div>
@@ -183,7 +183,7 @@ export default function SignupPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="doctor@wombcare.com"
+                    placeholder="example@gmail.com"
                     className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
