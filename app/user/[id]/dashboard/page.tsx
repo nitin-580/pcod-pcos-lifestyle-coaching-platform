@@ -199,6 +199,20 @@ export default function UserDashboardPage() {
               <p className="text-slate-500 mt-6 text-lg md:text-xl font-medium max-w-lg leading-relaxed">
                 Take a deep breath. Here is how your body is doing today.
               </p>
+
+              <div className="mt-8 flex items-center gap-4">
+                {user.isPremium ? (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-2xl border border-green-100 shadow-sm animate-fade-in">
+                    <span className="text-xl">✨</span>
+                    <span className="font-bold text-sm">Premium Member: Enjoy full platform access!</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-2xl border border-amber-100 shadow-sm">
+                    <span className="text-xl">🔒</span>
+                    <span className="font-bold text-sm">This is a premium feature. Unlock now for deeper insights.</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Wellness Circular Score Overlay */}
@@ -222,7 +236,11 @@ export default function UserDashboardPage() {
             {/* Horizontal Cards */}
             <div className="grid md:grid-cols-2 gap-8">
               <ActivePlanCard plan={user.activePlan} />
-              <Appointment time={user.nextAppointment} />
+              <Appointment 
+                time={user.nextAppointment} 
+                userId={userId} 
+                onRefresh={fetchProfile}
+              />
             </div>
 
             {/* Primary Trackers */}
