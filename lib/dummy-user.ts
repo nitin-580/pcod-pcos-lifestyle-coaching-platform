@@ -1,0 +1,17 @@
+export const dummyUser = {
+  name: 'Ishika Sharma',
+  email: 'ishika@wombcare.com',
+  activePlan: 'Premium 90-Day Hormonal Wellness',
+  nextAppointment: '18 April, 6:00 PM',
+  cycleDay: 14,
+  nextPeriodDate: '22 April',
+  waterIntake: 5,
+  targetWater: 8,
+  caloriesTarget: 1800,
+  caloriesConsumed: 1240,
+  proteinTarget: 80,
+  proteinConsumed: 52,
+  symptoms: ['Acne', 'Mood swings', 'Fatigue'],
+  bmi: 24.2,
+  wellnessScore: 82,
+};
