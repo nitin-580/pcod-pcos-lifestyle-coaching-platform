@@ -29,13 +29,13 @@ export default function Appointment({ time, userId, onRefresh, patientName, emai
 
     try {
       const token = localStorage.getItem('userToken');
-      const appointmentDate = new Date(\`\${formData.date}T\${formData.time}\`).toISOString();
+      const appointmentDate = new Date(`${formData.date}T${formData.time}`).toISOString();
       
-      const res = await fetch(\`\${getPublicApiBase()}/appointments\`, {
+      const res = await fetch(`${getPublicApiBase()}/appointments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           userId,
