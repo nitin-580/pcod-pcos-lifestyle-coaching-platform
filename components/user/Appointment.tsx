@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getPublicApiBase } from '@/lib/api-config';
 
 interface Props {
   time: string;
@@ -27,20 +28,20 @@ export default function Appointment({ time, userId, onRefresh, patientName, emai
     setIsSubmitting(true);
 
     try {
-      const appointmentDate = new Date(`${formData.date}T${formData.time}`).toISOString();
+      const token = localStorage.getItem('userToken');
+      const appointmentDate = new Date(\`\${formData.date}T\${formData.time}\`).toISOString();
       
-      const res = await fetch(`/api/appointments/book`, {
+      const res = await fetch(\`\${getPublicApiBase()}/appointments\`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': \`Bearer \${token}\`
         },
         body: JSON.stringify({
           userId,
           doctorName: formData.doctorName,
           appointmentDate,
-          notes: formData.notes,
-          email,
-          patientName
+          notes: formData.notes
         })
       });
 
