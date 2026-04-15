@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity, UserPlus } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -50,6 +50,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'enrollments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Activity className="w-4 h-4" /> Enrollments
+          </button>
+          <button 
+            onClick={() => setActiveTab('doctor-requests')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'doctor-requests' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <UserPlus className="w-4 h-4" /> Doctors
           </button>
         </div>
       </div>
