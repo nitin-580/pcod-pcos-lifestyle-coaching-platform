@@ -23,6 +23,8 @@ export default function UserDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showMoodModal, setShowMoodModal] = useState(false);
+  const [showPeriodConfirm, setShowPeriodConfirm] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -100,23 +102,32 @@ export default function UserDashboardPage() {
       nextPeriodDate: 'Calculating...',
       waterIntake: 0,
       targetWater: 8,
-      caloriesTarget: 1800,
-      proteinTarget: 80,
+      caloriesTarget: 0,
+      proteinTarget: 0,
       bmi: 22.5,
       wellnessScore: 85,
       wellnessGrade: 'BB',
-      symptoms: []
+      symptoms: [],
+      isPeriodTrackerEnabled: true,
     };
 
     // Calculate dynamic cycle day
     let currentCycleDay = profile.cycleDay || 1;
-    if (profile.cycleStartDate) {
+    if (profile.cycleStartDate && profile.isPeriodTrackerEnabled !== false) {
       const start = new Date(profile.cycleStartDate);
       const today = new Date();
-      // Calculate diff in days
       const diffTime = Math.abs(today.getTime() - start.getTime());
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      currentCycleDay = Math.min(diffDays + 1, 35); // Cap at 35 days or similar
+      currentCycleDay = Math.min(diffDays + 1, 35);
+    }
+
+    // Reset water if it's a new day
+    let waterIntake = profile.waterIntake || profile.water_intake || 0;
+    const todayStr = new Date().toDateString();
+    const lastWaterUpdate = profile.waterIntakeDate ? new Date(profile.waterIntakeDate).toDateString() : '';
+    
+    if (lastWaterUpdate && lastWaterUpdate !== todayStr) {
+      waterIntake = 0;
     }
 
     const score = profile.wellnessScore || profile.wellness_score || 85;
@@ -124,12 +135,13 @@ export default function UserDashboardPage() {
     return {
       ...profile,
       cycleDay: currentCycleDay,
-      caloriesTarget: profile.caloriesTarget || profile.calories_target || 1800,
-      proteinTarget: profile.proteinTarget || profile.protein_target || 80,
+      caloriesTarget: profile.caloriesTarget || profile.calories_target || 0,
+      proteinTarget: profile.proteinTarget || profile.protein_target || 0,
       wellnessScore: score,
       wellnessGrade: getGrade(score),
       targetWater: profile.targetWater || profile.target_water || 8,
-      waterIntake: profile.waterIntake || profile.water_intake || 0,
+      waterIntake: waterIntake,
+      isPeriodTrackerEnabled: profile.isPeriodTrackerEnabled !== false,
     };
   }, [profile, userData]);
 
@@ -147,6 +159,17 @@ export default function UserDashboardPage() {
       </div>
     );
   }
+
+  const moods = [
+    { label: 'Energetic', icon: '⚡' },
+    { label: 'Happy', icon: '😊' },
+    { label: 'Calm', icon: '🧘' },
+    { label: 'Anxious', icon: '😰' },
+    { label: 'Tired', icon: '😴' },
+    { label: 'Crampy', icon: '😖' },
+    { label: 'Bloated', icon: '🎈' },
+    { label: 'Irritable', icon: '😤' },
+  ];
 
   return (
     <main className="min-h-screen bg-[#FCFDFB] selection:bg-pink-100">
@@ -204,42 +227,72 @@ export default function UserDashboardPage() {
 
             {/* Primary Trackers */}
             <div className="grid lg:grid-cols-2 gap-8">
-              <PeriodTracker
-                cycleDay={user.cycleDay}
-                nextDate={user.nextPeriodDate}
-                onLogPeriod={() => {
-                  const today = new Date().toISOString().split('T')[0];
-                  handleUpdateProfile({ cycleDay: 1, cycleStartDate: today });
-                }}
-                onUndoPeriod={() => {
-                  const currentDay = user.cycleDay;
-                  if (currentDay > 1) {
-                    // Adjust cycleStartDate back by one day
-                    const start = new Date(user.cycleStartDate || new Date());
-                    start.setDate(start.getDate() + 1);
-                    handleUpdateProfile({ cycleDay: currentDay - 1, cycleStartDate: start.toISOString().split('T')[0] });
-                  }
-                }}
-              />
+              <div className="relative group">
+                {!user.isPeriodTrackerEnabled && (
+                  <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] rounded-3xl flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-slate-200">
+                    <p className="text-slate-600 font-semibold mb-3">Period tracker is disabled</p>
+                    <button 
+                      onClick={() => setShowPeriodConfirm(true)}
+                      className="px-6 py-2 bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-pink-200 hover:bg-pink-600 transition"
+                    >
+                      Enable Tracker
+                    </button>
+                  </div>
+                )}
+                <PeriodTracker
+                  cycleDay={user.cycleDay}
+                  nextDate={user.nextPeriodDate}
+                  onLogPeriod={() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    handleUpdateProfile({ cycleDay: 1, cycleStartDate: today });
+                  }}
+                  onUndoPeriod={() => setShowPeriodConfirm(true)}
+                />
+                
+                {user.isPeriodTrackerEnabled && (
+                  <button 
+                    onClick={() => setShowPeriodConfirm(true)}
+                    className="absolute top-4 right-4 text-xs font-bold text-slate-400 hover:text-red-400 transition"
+                  >
+                    Disable
+                  </button>
+                )}
+              </div>
 
               <WaterTracker
                 intake={user.waterIntake}
                 target={user.targetWater}
-                onAddWater={() => handleUpdateProfile({ waterIntake: (user.waterIntake || 0) + 1 })}
-                onUndoWater={() => handleUpdateProfile({ waterIntake: Math.max((user.waterIntake || 0) - 1, 0) })}
+                onAddWater={() => {
+                  const today = new Date().toISOString();
+                  handleUpdateProfile({ waterIntake: (user.waterIntake || 0) + 1, waterIntakeDate: today });
+                }}
+                onUndoWater={() => {
+                  const today = new Date().toISOString();
+                  handleUpdateProfile({ waterIntake: Math.max((user.waterIntake || 0) - 1, 0), waterIntakeDate: today });
+                }}
               />
             </div>
 
-            {/* Mood / Journaling Placeholder Section */}
+            {/* Holistic Insights - Locked for Premium */}
             <div className="rounded-[32px] bg-slate-900 p-10 text-white relative overflow-hidden group shadow-xl">
-               <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-pink-500/10 to-transparent group-hover:scale-110 transition-transform duration-500" />
-               <h3 className="text-2xl font-bold relative z-10">Holistic Insights</h3>
-               <p className="text-slate-400 mt-3 text-sm leading-relaxed relative z-10 max-w-sm">
+               <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-pink-500/10 to-transparent group-hover:scale-110 transition-transform duration-500 opacity-20" />
+               
+               {/* Premium Overlay */}
+               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                  <div className="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center text-2xl shadow-lg shadow-yellow-400/20 mb-4 animate-bounce">
+                    🔒
+                  </div>
+                  <h4 className="text-xl font-bold text-white">Premium Feature</h4>
+                  <p className="text-slate-300 text-sm mt-1">Upgrade to unlock full holistic analysis</p>
+                  <button className="mt-6 px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold shadow-xl hover:scale-105 transition">
+                    Get Premium Access
+                  </button>
+               </div>
+
+               <h3 className="text-2xl font-bold relative z-0">Holistic Insights</h3>
+               <p className="text-slate-400 mt-3 text-sm leading-relaxed relative z-0 max-w-sm">
                  Our AI is analyzing your sleep and symptoms to generate tomorrow's personalized nutrition tips.
                </p>
-               <button className="mt-6 px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition relative z-10 backdrop-blur-md">
-                 View Full Report
-               </button>
             </div>
           </div>
 
@@ -256,7 +309,7 @@ export default function UserDashboardPage() {
             {/* Quick Check-in Card */}
             <div className="rounded-[32px] bg-gradient-to-b from-[#F6FAF1] to-white border border-[#E5EEDC] p-8 shadow-sm">
               <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl mb-6">
-                ✨
+                {user.mood ? moods.find(m => m.label === user.mood)?.icon || '✨' : '✨'}
               </div>
               <p className="text-sm font-bold text-[#6D8A4E] uppercase tracking-wider">
                 Daily Check-in
@@ -267,11 +320,14 @@ export default function UserDashboardPage() {
               </h3>
 
               <p className="text-slate-500 mt-4 text-sm leading-relaxed">
-                Keeping track of your emotional wellness is key to balancing your hormones.
+                {user.mood ? `You're feeling ${user.mood} today.` : "Keeping track of your emotional wellness is key to balancing your hormones."}
               </p>
 
-              <button className="mt-8 w-full rounded-2xl bg-white py-4 shadow-md text-slate-700 font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm uppercase tracking-widest border border-slate-50">
-                Update Status
+              <button 
+                onClick={() => setShowMoodModal(true)}
+                className="mt-8 w-full rounded-2xl bg-white py-4 shadow-md text-slate-700 font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm uppercase tracking-widest border border-slate-50"
+              >
+                {user.mood ? 'Change Status' : 'Update Status'}
               </button>
             </div>
 
@@ -284,6 +340,101 @@ export default function UserDashboardPage() {
           </div>
         </div>
       </section>
+
+      {/* Mood Selection Modal */}
+      <AnimatePresence>
+        {showMoodModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMoodModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[40px] p-8 md:p-12 shadow-2xl"
+            >
+              <h2 className="text-3xl font-bold text-slate-900 text-center">How are you feeling?</h2>
+              <p className="text-slate-500 text-center mt-3">Select your current emotional state</p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10">
+                {moods.map((m) => (
+                  <button
+                    key={m.label}
+                    onClick={() => {
+                      handleUpdateProfile({ mood: m.label, moodDate: new Date().toISOString() });
+                      setShowMoodModal(false);
+                    }}
+                    className={`flex flex-col items-center p-6 rounded-3xl border-2 transition-all ${
+                      user.mood === m.label 
+                        ? 'border-pink-300 bg-pink-50' 
+                        : 'border-slate-50 bg-slate-50 hover:border-slate-200 hover:bg-white'
+                    }`}
+                  >
+                    <span className="text-3xl mb-3">{m.icon}</span>
+                    <span className="text-xs font-bold text-slate-700">{m.label}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Period Tracker Confirmation Modal */}
+      <AnimatePresence>
+        {showPeriodConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPeriodConfirm(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[40px] p-10 text-center shadow-2xl"
+            >
+              <div className="w-20 h-20 rounded-full bg-pink-50 flex items-center justify-center text-4xl mx-auto mb-8">
+                {user.isPeriodTrackerEnabled ? '❓' : '🌸'}
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                {user.isPeriodTrackerEnabled ? 'Disable Period Tracker?' : 'Enable Period Tracker?'}
+              </h2>
+              <p className="text-slate-500 mt-4 leading-relaxed">
+                {user.isPeriodTrackerEnabled 
+                  ? "Are you sure you want to disable the tracker? This will hide your current cycle progress until you re-enable it."
+                  : "Welcome back! Enable the tracker to start logging and tracking your monthly cycle again."}
+              </p>
+              
+              <div className="flex flex-col gap-3 mt-10">
+                <button
+                  onClick={() => {
+                    handleUpdateProfile({ isPeriodTrackerEnabled: !user.isPeriodTrackerEnabled });
+                    setShowPeriodConfirm(false);
+                  }}
+                  className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg shadow-slate-200 hover:bg-black transition"
+                >
+                  Confirm Choice
+                </button>
+                <button
+                  onClick={() => setShowPeriodConfirm(false)}
+                  className="w-full py-4 rounded-2xl bg-white text-slate-500 font-bold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </main>

@@ -61,9 +61,9 @@ export default function LoginPage() {
         }
       );
 
-      // If profile row missing → dashboard (as per "dont open onboarding page")
+      // If profile row missing → onboarding
       if (profileRes.status === 404) {
-        router.push(`/user/${userId}/dashboard`);
+        router.push(`/user/${userId}/onboarding`);
         return;
       }
 
@@ -71,13 +71,12 @@ export default function LoginPage() {
       const profile = profileData.data;
 
       // Step 3: Redirect based on profile completion
-      // User requested: "check if profile_completed is TRUE then opne onboarind page or=therwise open directly dashbaord"
       const isCompleted = profile?.profile_completed === true || profile?.profileCompleted === true;
 
       if (isCompleted) {
-        router.push(`/user/${userId}/onboarding`);
-      } else {
         router.push(`/user/${userId}/dashboard`);
+      } else {
+        router.push(`/user/${userId}/onboarding`);
       }
     } catch (err) {
       setError(

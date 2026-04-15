@@ -36,10 +36,8 @@ export default function NutritionPlan({
           </p>
 
           <h3 className="text-2xl font-bold text-slate-900 mt-1">
-            {target}
-            <span className="text-sm font-medium text-slate-500 ml-1">
-              kcal
-            </span>
+            {target > 0 ? target : 'NA'}
+            {target > 0 && <span className="text-sm font-medium text-slate-500 ml-1">kcal</span>}
           </h3>
         </div>
 
@@ -49,10 +47,8 @@ export default function NutritionPlan({
           </p>
 
           <h3 className="text-2xl font-bold text-slate-900 mt-1">
-            {proteinTarget}
-            <span className="text-sm font-medium text-slate-500 ml-1">
-              g
-            </span>
+            {proteinTarget > 0 ? proteinTarget : 'NA'}
+            {proteinTarget > 0 && <span className="text-sm font-medium text-slate-500 ml-1">g</span>}
           </h3>
         </div>
       </div>
