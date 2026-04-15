@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getPublicApiBase } from '@/lib/api-config';
 
 interface Props {
   time: string;
   userId: string;
   onRefresh?: () => void;
+  patientName?: string;
+  email?: string;
 }
 
-export default function Appointment({ time, userId, onRefresh }: Props) {
+export default function Appointment({ time, userId, onRefresh, patientName, email }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -26,20 +27,20 @@ export default function Appointment({ time, userId, onRefresh }: Props) {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('userToken');
       const appointmentDate = new Date(`${formData.date}T${formData.time}`).toISOString();
       
-      const res = await fetch(`${getPublicApiBase()}/appointments`, {
+      const res = await fetch(`/api/appointments/book`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           userId,
           doctorName: formData.doctorName,
           appointmentDate,
-          notes: formData.notes
+          notes: formData.notes,
+          email,
+          patientName
         })
       });
 
@@ -71,7 +72,7 @@ export default function Appointment({ time, userId, onRefresh }: Props) {
         </h2>
 
         <p className="text-slate-500 mt-2 text-sm">
-          {time ? 'Coach consultation scheduled' : 'Book a session with your health coach'}
+          {time !== 'No scheduled sessions' ? 'Coach consultation scheduled' : 'Book a session with your health coach'}
         </p>
       </div>
 

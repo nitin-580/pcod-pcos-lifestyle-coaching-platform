@@ -20,6 +20,7 @@ export default function UserDashboardPage() {
 
   const [profile, setProfile] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -47,16 +48,35 @@ export default function UserDashboardPage() {
     } catch (err) {
       console.error('Fetch profile error:', err);
       setError('Connection failed');
-    } finally {
-      setIsLoading(false);
     }
   }, [userId]);
+
+  const fetchAppointments = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('userToken');
+      const res = await fetch(`${getPublicApiBase()}/appointments/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppointments(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch appointments error:', err);
+    }
+  }, [userId]);
+
+  const refreshData = useCallback(async () => {
+    setIsLoading(true);
+    await Promise.all([fetchProfile(), fetchAppointments()]);
+    setIsLoading(false);
+  }, [fetchProfile, fetchAppointments]);
 
   useEffect(() => {
     const savedData = localStorage.getItem('userData');
     if (savedData) setUserData(JSON.parse(savedData));
-    fetchProfile();
-  }, [fetchProfile]);
+    refreshData();
+  }, [refreshData]);
 
   const handleUpdateProfile = async (updates: any) => {
     if (isUpdating) return;
@@ -93,11 +113,24 @@ export default function UserDashboardPage() {
     return 'F';
   };
 
+  const nextAppointmentDisplay = useMemo(() => {
+    if (appointments.length === 0) return 'No scheduled sessions';
+    const future = appointments
+      .filter(a => a.status === 'scheduled')
+      .sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime())[0];
+    
+    if (!future) return 'No scheduled sessions';
+    
+    return new Date(future.appointmentDate).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }, [appointments]);
+
   const user = useMemo(() => {
     if (!profile) return {
       name: userData?.name || 'User',
       activePlan: 'Loading...',
-      nextAppointment: 'No scheduled sessions',
+      nextAppointment: nextAppointmentDisplay,
       cycleDay: 1,
       nextPeriodDate: 'Calculating...',
       waterIntake: 0,
@@ -109,6 +142,7 @@ export default function UserDashboardPage() {
       wellnessGrade: 'BB',
       symptoms: [],
       isPeriodTrackerEnabled: true,
+      email: userData?.email || ''
     };
 
     // Calculate dynamic cycle day
@@ -122,7 +156,7 @@ export default function UserDashboardPage() {
     }
 
     // Reset water if it's a new day
-    let waterIntake = profile.waterIntake || profile.water_intake || 0;
+    let waterIntake = profile.waterIntake || 0;
     const todayStr = new Date().toDateString();
     const lastWaterUpdate = profile.waterIntakeDate ? new Date(profile.waterIntakeDate).toDateString() : '';
     
@@ -130,20 +164,22 @@ export default function UserDashboardPage() {
       waterIntake = 0;
     }
 
-    const score = profile.wellnessScore || profile.wellness_score || 85;
+    const score = profile.wellnessScore || 85;
 
     return {
       ...profile,
       cycleDay: currentCycleDay,
-      caloriesTarget: profile.caloriesTarget || profile.calories_target || 0,
-      proteinTarget: profile.proteinTarget || profile.protein_target || 0,
+      caloriesTarget: profile.caloriesTarget || 0,
+      proteinTarget: profile.proteinTarget || 0,
       wellnessScore: score,
       wellnessGrade: getGrade(score),
-      targetWater: profile.targetWater || profile.target_water || 8,
+      targetWater: profile.targetWater || 8,
       waterIntake: waterIntake,
       isPeriodTrackerEnabled: profile.isPeriodTrackerEnabled !== false,
+      nextAppointment: nextAppointmentDisplay,
+      email: userData?.email || profile.email
     };
-  }, [profile, userData]);
+  }, [profile, userData, nextAppointmentDisplay]);
 
   if (isLoading) {
     return (
@@ -239,7 +275,9 @@ export default function UserDashboardPage() {
               <Appointment 
                 time={user.nextAppointment} 
                 userId={userId} 
-                onRefresh={fetchProfile}
+                onRefresh={refreshData}
+                patientName={user.name}
+                email={user.email}
               />
             </div>
 
@@ -296,16 +334,18 @@ export default function UserDashboardPage() {
                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-pink-500/10 to-transparent group-hover:scale-110 transition-transform duration-500 opacity-20" />
                
                {/* Premium Overlay */}
-               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                  <div className="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center text-2xl shadow-lg shadow-yellow-400/20 mb-4 animate-bounce">
-                    🔒
-                  </div>
-                  <h4 className="text-xl font-bold text-white">Premium Feature</h4>
-                  <p className="text-slate-300 text-sm mt-1">Upgrade to unlock full holistic analysis</p>
-                  <button className="mt-6 px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold shadow-xl hover:scale-105 transition">
-                    Get Premium Access
-                  </button>
-               </div>
+               {!user.isPremium && (
+                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                    <div className="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center text-2xl shadow-lg shadow-yellow-400/20 mb-4 animate-bounce">
+                      🔒
+                    </div>
+                    <h4 className="text-xl font-bold text-white">Premium Feature</h4>
+                    <p className="text-slate-300 text-sm mt-1">Upgrade to unlock full holistic analysis</p>
+                    <button className="mt-6 px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold shadow-xl hover:scale-105 transition">
+                      Get Premium Access
+                    </button>
+                 </div>
+               )}
 
                <h3 className="text-2xl font-bold relative z-0">Holistic Insights</h3>
                <p className="text-slate-400 mt-3 text-sm leading-relaxed relative z-0 max-w-sm">
@@ -397,57 +437,6 @@ export default function UserDashboardPage() {
                     <span className="text-xs font-bold text-slate-700">{m.label}</span>
                   </button>
                 ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Period Tracker Confirmation Modal */}
-      <AnimatePresence>
-        {showPeriodConfirm && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowPeriodConfirm(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[40px] p-10 text-center shadow-2xl"
-            >
-              <div className="w-20 h-20 rounded-full bg-pink-50 flex items-center justify-center text-4xl mx-auto mb-8">
-                {user.isPeriodTrackerEnabled ? '❓' : '🌸'}
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                {user.isPeriodTrackerEnabled ? 'Disable Period Tracker?' : 'Enable Period Tracker?'}
-              </h2>
-              <p className="text-slate-500 mt-4 leading-relaxed">
-                {user.isPeriodTrackerEnabled 
-                  ? "Are you sure you want to disable the tracker? This will hide your current cycle progress until you re-enable it."
-                  : "Welcome back! Enable the tracker to start logging and tracking your monthly cycle again."}
-              </p>
-              
-              <div className="flex flex-col gap-3 mt-10">
-                <button
-                  onClick={() => {
-                    handleUpdateProfile({ isPeriodTrackerEnabled: !user.isPeriodTrackerEnabled });
-                    setShowPeriodConfirm(false);
-                  }}
-                  className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg shadow-slate-200 hover:bg-black transition"
-                >
-                  Confirm Choice
-                </button>
-                <button
-                  onClick={() => setShowPeriodConfirm(false)}
-                  className="w-full py-4 rounded-2xl bg-white text-slate-500 font-bold hover:bg-slate-50 transition"
-                >
-                  Cancel
-                </button>
               </div>
             </motion.div>
           </div>

@@ -49,7 +49,24 @@ export default function LoginPage() {
         JSON.stringify(data.doctor)
       );
 
-      // Step 2: Check profile completion
+      // New Step 2: Role Based Check
+      const roleRes = await fetch(`${getPublicApiBase()}/role-check?email=${email}`, {
+        headers: { Authorization: `Bearer ${data.token}` }
+      });
+      const roleData = await roleRes.json();
+      const userRole = roleData.role || 'user'; // Default to user
+
+      if (userRole === 'doctor') {
+        router.push(`/doctor/dashboard`);
+        return;
+      }
+
+      if (userRole === 'admin') {
+        router.push(`/admin/dashboard`);
+        return;
+      }
+
+      // Step 3: Regular User Flow - Check profile completion
       const profileRes = await fetch(
         `${getPublicApiBase()}/profiles/${userId}`,
         {
