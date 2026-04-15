@@ -2,12 +2,14 @@ interface Props {
   intake: number;
   target: number;
   onAddWater?: () => void;
+  onUndoWater?: () => void;
 }
 
 export default function WaterTracker({
   intake,
   target,
   onAddWater,
+  onUndoWater,
 }: Props) {
   const percent = Math.min((intake / target) * 100, 100);
   const progress = (percent / 100) * 360;
@@ -81,12 +83,22 @@ export default function WaterTracker({
         {intake}/{target} glasses completed today
       </p>
 
-      {/* CTA */}
-      <button 
-        onClick={onAddWater}
-        className="mt-6 w-full rounded-2xl bg-white py-4 shadow-md text-slate-700 font-medium hover:shadow-lg transition">
-        Add Water ＋
-      </button>
+      {/* CTA Buttons */}
+      <div className="mt-6 flex gap-4">
+        <button 
+          onClick={onAddWater}
+          className="flex-1 rounded-2xl bg-white py-4 shadow-md text-slate-700 font-medium hover:shadow-lg transition">
+          Add Water ＋
+        </button>
+
+        {intake > 0 && (
+          <button 
+            onClick={() => onUndoWater && onUndoWater()}
+            className="px-6 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-600 transition">
+            Undo
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function LoginPage() {
 
       // Step 2: Check profile completion
       const profileRes = await fetch(
-        `${getPublicApiBase()}/wombcare/profile/${userId}`,
+        `${getPublicApiBase()}/profiles/${userId}`,
         {
           method: 'GET',
           headers: {
@@ -61,9 +61,9 @@ export default function LoginPage() {
         }
       );
 
-      // If profile row missing → onboarding
+      // If profile row missing → dashboard (as per "dont open onboarding page")
       if (profileRes.status === 404) {
-        router.push(`/user/${userId}/onboarding`);
+        router.push(`/user/${userId}/dashboard`);
         return;
       }
 
@@ -71,7 +71,10 @@ export default function LoginPage() {
       const profile = profileData.data;
 
       // Step 3: Redirect based on profile completion
-      if (!profile || !profile.profileCompleted) {
+      // User requested: "check if profile_completed is TRUE then opne onboarind page or=therwise open directly dashbaord"
+      const isCompleted = profile?.profile_completed === true || profile?.profileCompleted === true;
+
+      if (isCompleted) {
         router.push(`/user/${userId}/onboarding`);
       } else {
         router.push(`/user/${userId}/dashboard`);

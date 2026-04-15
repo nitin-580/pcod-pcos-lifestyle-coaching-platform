@@ -9,6 +9,15 @@ export default function WellnessStats({
   score,
   symptoms = [],
 }: Props) {
+  const getGrade = (s: number) => {
+    if (s >= 90) return 'AA';
+    if (s >= 82) return 'AB';
+    if (s >= 75) return 'BB';
+    if (s >= 65) return 'BC';
+    if (s >= 55) return 'CC';
+    return 'F';
+  };
+
   return (
     <div className="bg-white rounded-3xl p-8 border border-purple-100">
       <h2 className="text-2xl font-semibold text-slate-900">
@@ -25,10 +34,10 @@ export default function WellnessStats({
 
         <div>
           <p className="text-sm text-slate-500 uppercase tracking-tight font-medium">
-            Score
+            Grade
           </p>
           <p className="text-3xl font-bold text-pink-600 mt-2">
-            {score || '--'}
+            {getGrade(score)}
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPublicApiBase } from '@/lib/api-config';
 
@@ -82,6 +82,57 @@ export default function UserDashboardPage() {
     }
   };
 
+  const getGrade = (score: number) => {
+    if (score >= 90) return 'AA';
+    if (score >= 82) return 'AB';
+    if (score >= 75) return 'BB';
+    if (score >= 65) return 'BC';
+    if (score >= 55) return 'CC';
+    return 'F';
+  };
+
+  const user = useMemo(() => {
+    if (!profile) return {
+      name: userData?.name || 'User',
+      activePlan: 'Loading...',
+      nextAppointment: 'No scheduled sessions',
+      cycleDay: 1,
+      nextPeriodDate: 'Calculating...',
+      waterIntake: 0,
+      targetWater: 8,
+      caloriesTarget: 1800,
+      proteinTarget: 80,
+      bmi: 22.5,
+      wellnessScore: 85,
+      wellnessGrade: 'BB',
+      symptoms: []
+    };
+
+    // Calculate dynamic cycle day
+    let currentCycleDay = profile.cycleDay || 1;
+    if (profile.cycleStartDate) {
+      const start = new Date(profile.cycleStartDate);
+      const today = new Date();
+      // Calculate diff in days
+      const diffTime = Math.abs(today.getTime() - start.getTime());
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      currentCycleDay = Math.min(diffDays + 1, 35); // Cap at 35 days or similar
+    }
+
+    const score = profile.wellnessScore || profile.wellness_score || 85;
+
+    return {
+      ...profile,
+      cycleDay: currentCycleDay,
+      caloriesTarget: profile.caloriesTarget || profile.calories_target || 1800,
+      proteinTarget: profile.proteinTarget || profile.protein_target || 80,
+      wellnessScore: score,
+      wellnessGrade: getGrade(score),
+      targetWater: profile.targetWater || profile.target_water || 8,
+      waterIntake: profile.waterIntake || profile.water_intake || 0,
+    };
+  }, [profile, userData]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FCFDFB]">
@@ -96,21 +147,6 @@ export default function UserDashboardPage() {
       </div>
     );
   }
-
-  const user = profile || {
-    name: userData?.name || 'User',
-    activePlan: 'Loading...',
-    nextAppointment: 'No scheduled sessions',
-    cycleDay: 1,
-    nextPeriodDate: 'Calculating...',
-    waterIntake: 0,
-    targetWater: 8,
-    caloriesTarget: 1800,
-    proteinTarget: 80,
-    bmi: 22.5,
-    wellnessScore: 85,
-    symptoms: []
-  };
 
   return (
     <main className="min-h-screen bg-[#FCFDFB] selection:bg-pink-100">
@@ -145,9 +181,9 @@ export default function UserDashboardPage() {
             {/* Wellness Circular Score Overlay */}
             <div className="relative flex items-center justify-center shrink-0">
                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full border-[10px] border-slate-50 flex flex-col items-center justify-center bg-white shadow-2xl shadow-pink-100/50">
-                  <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Score</p>
-                  <h2 className="text-5xl font-black text-slate-900 mt-1">
-                    {user.wellnessScore || 0}
+                  <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Wellness Grade</p>
+                  <h2 className="text-6xl font-black text-slate-900 mt-1">
+                    {user.wellnessGrade}
                   </h2>
                </div>
             </div>
@@ -171,13 +207,26 @@ export default function UserDashboardPage() {
               <PeriodTracker
                 cycleDay={user.cycleDay}
                 nextDate={user.nextPeriodDate}
-                onLogPeriod={() => handleUpdateProfile({ cycleDay: 1 })}
+                onLogPeriod={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  handleUpdateProfile({ cycleDay: 1, cycleStartDate: today });
+                }}
+                onUndoPeriod={() => {
+                  const currentDay = user.cycleDay;
+                  if (currentDay > 1) {
+                    // Adjust cycleStartDate back by one day
+                    const start = new Date(user.cycleStartDate || new Date());
+                    start.setDate(start.getDate() + 1);
+                    handleUpdateProfile({ cycleDay: currentDay - 1, cycleStartDate: start.toISOString().split('T')[0] });
+                  }
+                }}
               />
 
               <WaterTracker
                 intake={user.waterIntake}
                 target={user.targetWater}
                 onAddWater={() => handleUpdateProfile({ waterIntake: (user.waterIntake || 0) + 1 })}
+                onUndoWater={() => handleUpdateProfile({ waterIntake: Math.max((user.waterIntake || 0) - 1, 0) })}
               />
             </div>
 

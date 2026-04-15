@@ -2,12 +2,14 @@ interface Props {
   cycleDay: number;
   nextDate: string;
   onLogPeriod?: () => void;
+  onUndoPeriod?: () => void;
 }
 
 export default function PeriodTracker({
   cycleDay,
   nextDate,
   onLogPeriod,
+  onUndoPeriod,
 }: Props) {
   const getPhase = (day: number) => {
     if (day <= 5) return 'Period Phase';
@@ -100,12 +102,22 @@ export default function PeriodTracker({
         </div>
       </div>
 
-      {/* Button */}
-      <button 
-        onClick={onLogPeriod}
-        className="mt-8 w-full bg-white rounded-2xl py-4 shadow-md text-slate-700 font-medium hover:shadow-lg transition">
-        Log Period <span className="text-pink-400 text-lg">＋</span>
-      </button>
+      {/* Buttons */}
+      <div className="mt-8 flex gap-4">
+        <button 
+          onClick={onLogPeriod}
+          className="flex-1 bg-white rounded-2xl py-4 shadow-md text-slate-700 font-medium hover:shadow-lg transition">
+          Log Period <span className="text-pink-400 text-lg">＋</span>
+        </button>
+
+        {cycleDay > 1 && (
+          <button 
+            onClick={() => onUndoPeriod && onUndoPeriod()}
+            className="px-6 rounded-2xl bg-[#F0F7EA] border border-[#E3EDD9] text-slate-400 hover:text-slate-600 transition">
+            Undo
+          </button>
+        )}
+      </div>
     </div>
   );
 }
