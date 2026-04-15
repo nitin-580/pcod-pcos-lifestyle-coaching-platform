@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(req: Request) {
+  if (!supabase) return NextResponse.json({ success: false, message: 'Supabase not configured' }, { status: 500 });
+  
   try {
     const { userId, doctorName, appointmentDate, notes, email, patientName } = await req.json();
 
-    // 1. Save appointment
     const { data, error } = await supabase
       .from('wombcare_appointments')
       .insert([
@@ -30,8 +26,7 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
-    // 2. Send Confirmation Email
-    if (process.env.RESEND_API_KEY && email) {
+    if (resend && email) {
       const dateObj = new Date(appointmentDate);
       const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });

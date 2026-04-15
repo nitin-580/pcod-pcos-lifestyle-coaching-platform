@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(req: Request) {
+  if (!supabase) return NextResponse.json({ success: false, message: 'Supabase not configured' }, { status: 500 });
+  
   try {
     const { email, name } = await req.json();
 
@@ -18,14 +15,13 @@ export async function POST(req: Request) {
       .insert([{ email, name }]);
 
     if (error) {
-      if (error.code === '23505') { // Duplicate email
+      if (error.code === '23505') {
         return NextResponse.json({ success: true, message: 'Already on the list!' });
       }
       throw error;
     }
 
-    // Send Welcome Email
-    if (process.env.RESEND_API_KEY) {
+    if (resend) {
       await resend.emails.send({
         from: 'WombCare <hello@remedy.wombcare.live>',
         to: email,

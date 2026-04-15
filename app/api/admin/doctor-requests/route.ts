@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// GET: Fetch all doctor join requests
 export async function GET() {
+  if (!supabase) return NextResponse.json({ success: false, message: 'Supabase not configured' }, { status: 500 });
+
   try {
     const { data, error } = await supabase
       .from('doctor_join_requests')
@@ -25,12 +21,12 @@ export async function GET() {
   }
 }
 
-// PATCH: Update request status (Approve/Reject)
 export async function PATCH(req: Request) {
+  if (!supabase) return NextResponse.json({ success: false, message: 'Supabase not configured' }, { status: 500 });
+
   try {
     const { id, status } = await req.json();
 
-    // 1. Update status in table
     const { data: requestData, error: updateError } = await supabase
       .from('doctor_join_requests')
       .update({ status })
@@ -40,14 +36,12 @@ export async function PATCH(req: Request) {
 
     if (updateError) throw updateError;
 
-    // 2. If approved, add to user_roles
     if (status === 'approved') {
       await supabase
         .from('user_roles')
         .upsert([{ email: requestData.email, role: 'doctor' }], { onConflict: 'email' });
 
-      // Send Approval Email
-      if (process.env.RESEND_API_KEY) {
+      if (resend) {
         await resend.emails.send({
           from: 'WombCare <onboarding@remedy.wombcare.live>',
           to: requestData.email,
@@ -62,16 +56,13 @@ export async function PATCH(req: Request) {
           `,
         });
       }
-    } else if (status === 'rejected') {
-        // Send Rejection Email
-        if (process.env.RESEND_API_KEY) {
-            await resend.emails.send({
-              from: 'WombCare <onboarding@remedy.wombcare.live>',
-              to: requestData.email,
-              subject: 'Update regarding your WombCare application',
-              html: `<p>Dear Dr. ${requestData.full_name}, thank you for your interest. At this time, we are unable to proceed with your application. Feel free to re-apply in 6 months.</p>`,
-            });
-        }
+    } else if (status === 'rejected' && resend) {
+        await resend.emails.send({
+          from: 'WombCare <onboarding@remedy.wombcare.live>',
+          to: requestData.email,
+          subject: 'Update regarding your WombCare application',
+          html: `<p>Dear Dr. ${requestData.full_name}, thank you for your interest. At this time, we are unable to proceed with your application. Feel free to re-apply in 6 months.</p>`,
+        });
     }
 
     return NextResponse.json({ success: true, data: requestData });
