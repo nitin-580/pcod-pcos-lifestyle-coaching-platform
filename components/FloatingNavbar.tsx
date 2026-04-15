@@ -25,7 +25,7 @@ export default function FloatingNavbar() {
     { name: 'What We Do', href: '/what-we-do' },
     { name: 'Blogs', href: '/blogs' },
     { name: 'Careers', href: '/careers' },
-    { name: 'Join as Doctor', href: '/login-doctor' },
+    { name: 'Join as Doctor', href: '/join-as-doctor' },
   ];
 
   return (

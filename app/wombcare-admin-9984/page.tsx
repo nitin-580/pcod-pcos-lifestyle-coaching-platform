@@ -1,9 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import AdminTable, { Registration } from '@/components/AdminTable';
-import { Sparkles, Key, LogOut, RefreshCw, Loader2, AlertCircle, LayoutDashboard, FileText, Plus, Trash2, Edit3, X, Briefcase } from 'lucide-react';
+import { Key, RefreshCw, Loader2, UserPlus, Check, X, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
 import CareerModal from '@/components/admin/CareerModal';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminSidebar from '@/components/admin/AdminSidebar';
@@ -12,7 +11,6 @@ import CareerList from '@/components/admin/CareerList';
 import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
 
 import { useRouter } from 'next/navigation';
-
 import { API_BASE } from '@/lib/api-config';
 
 interface Blog {
@@ -33,18 +31,16 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [careers, setCareers] = useState<any[]>([]);
+  const [doctorRequests, setDoctorRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Blog states can be removed as they are handled in the new pages, 
-  // but we keep 'blogs' list here.
 
   // Career Form States
   const [isCareerModalOpen, setIsCareerModalOpen] = useState(false);
@@ -60,7 +56,6 @@ export default function AdminPage() {
   });
 
   useEffect(() => {
-    console.log('AdminPage init. API_BASE:', API_BASE);
     const savedKey = sessionStorage.getItem('pcod_admin_key');
     if (savedKey) {
       setApiKey(savedKey);
@@ -70,238 +65,93 @@ export default function AdminPage() {
   }, []);
 
   const fetchInitialData = async (key: string) => {
+    setLoading(true);
     await Promise.all([
       fetchRegistrations(key),
       fetchBlogs(key),
       fetchCareers(key),
-      fetchEnrollments(key)
+      fetchEnrollments(key),
+      fetchDoctorRequests(key)
     ]);
+    setLoading(false);
   };
 
   const fetchRegistrations = async (key: string) => {
-    setLoading(true);
     try {
-      if (key && typeof key === 'string') {
-        console.log(`fetchRegistrations with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
-      } else {
-        console.warn('fetchRegistrations: key is missing or not a string!', key);
-      }
       const response = await fetch(`${API_BASE}/users`, {
         headers: { 'x-admin-api-key': key },
       });
-      console.log('fetchRegistrations status:', response.status);
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('fetchRegistrations failed body:', text);
-        try {
-          const result = JSON.parse(text);
-          throw new Error(result.message || result.error || 'Failed to fetch registrations');
-        } catch (e) {
-          throw new Error(`Failed to fetch registrations: ${response.status} ${response.statusText}`);
-        }
-      }
       const result = await response.json();
       setRegistrations(result.data || []);
     } catch (err: any) {
       console.error('Fetch registrations error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
-const fetchEnrollments = async (key: string) => {
-  setLoading(true);
-  setError(null);
 
-  try {
-    const response = await fetch(
-      'https://womb-care-backend-76858014616.us-central1.run.app/api/admin/enrollments',
-      {
-        method: 'GET',
-        headers: {
-          'x-admin-api-key': key,
-        },
-      }
-    );
-
-    console.log('fetchEnrollments status:', response.status);
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || 'Failed to fetch enrollments'
-      );
-    }
-
-    setEnrollments(result.data || []);
-  } catch (err: any) {
-    console.error('Fetch enrollments error:', err);
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-  const fetchBlogs = async (key: string) => {
-    setLoading(true);
+  const fetchEnrollments = async (key: string) => {
     try {
-      if (key && typeof key === 'string') {
-        console.log(`fetchBlogs with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
-      } else {
-        console.warn('fetchBlogs: key is missing or not a string!', key);
-      }
+      const response = await fetch(`${API_BASE}/admin/enrollments`, {
+        headers: { 'x-admin-api-key': key },
+      });
+      const result = await response.json();
+      setEnrollments(result.data || []);
+    } catch (err: any) {
+      console.error('Fetch enrollments error:', err);
+    }
+  };
+
+  const fetchBlogs = async (key: string) => {
+    try {
       const response = await fetch(`${API_BASE}/blogs`, {
         headers: { 'x-admin-api-key': key },
       });
-      console.log('fetchBlogs status:', response.status);
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('fetchBlogs failed body:', text);
-        try {
-          const result = JSON.parse(text);
-          throw new Error(result.message || result.error || 'Failed to fetch blogs');
-        } catch (e) {
-          throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText}`);
-        }
-      }
       const result = await response.json();
       setBlogs(result.data || []);
     } catch (err: any) {
       console.error('Fetch blogs error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchCareers = async (key: string) => {
-    setLoading(true);
     try {
-      if (key && typeof key === 'string') {
-        console.log(`fetchCareers with key: ${key.substring(0, 2)}...${key.substring(key.length - 2)}`);
-      } else {
-        console.warn('fetchCareers: key is missing or not a string!', key);
-      }
       const response = await fetch(`${API_BASE}/careers`, {
         headers: { 'x-admin-api-key': key },
       });
-      console.log('fetchCareers status:', response.status);
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('fetchCareers failed body:', text);
-        try {
-          const result = JSON.parse(text);
-          throw new Error(result.message || result.error || 'Failed to fetch careers');
-        } catch (e) {
-          throw new Error(`Failed to fetch careers: ${response.status} ${response.statusText}`);
-        }
-      }
       const result = await response.json();
       setCareers(result.data || []);
     } catch (err: any) {
       console.error('Fetch careers error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-
-
-  const handleCareerSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const fetchDoctorRequests = async (key: string) => {
     try {
-      const url = editingCareer ? `${API_BASE}/careers/${editingCareer.id}` : `${API_BASE}/careers`;
-      const requestedMethod = editingCareer ? 'PATCH' : 'POST';
-      
-      const response = await fetch(url, {
-        method: requestedMethod,
-        headers: {
+      const response = await fetch(`${API_BASE}/doctors/admin/join-requests`, {
+        headers: { 'x-admin-api-key': key },
+      });
+      const result = await response.json();
+      setDoctorRequests(result.data || []);
+    } catch (err: any) {
+      console.error('Fetch doctor requests error:', err);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/doctors/admin/join-requests`, {
+        method: 'PATCH',
+        headers: { 
           'Content-Type': 'application/json',
-          'x-admin-api-key': apiKey,
+          'x-admin-api-key': apiKey 
         },
-        body: JSON.stringify({
-          ...careerForm,
-          requirements: careerForm.requirements.filter(r => r.trim() !== '')
-        }),
+        body: JSON.stringify({ id, status })
       });
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}));
-        throw new Error(result.message || result.error || `Failed to save career (Status: ${response.status})`);
+      if (res.ok) {
+        await fetchDoctorRequests(apiKey);
       }
-      
-      await fetchCareers(apiKey);
-      setIsCareerModalOpen(false);
-      setEditingCareer(null);
-      setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: [''], active: true });
-    } catch (err: any) {
-      console.error('Career save error:', err);
-      const isNetworkError = err.message.includes('Failed to fetch') || err.name === 'TypeError';
-      setError(isNetworkError ? 'Network Error: Failed to connect to server through proxy. Check backend availability.' : err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteCareer = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this career?')) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE}/careers/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-api-key': apiKey },
-      });
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to delete career';
-        try {
-          const result = await response.json();
-          errorMessage = result.message || result.error || errorMessage;
-        } catch (e) {
-          // If response is not JSON (e.g. 404 HTML from failed proxy)
-          errorMessage = `Server Error: ${response.status} ${response.statusText}. The proxy might be misconfigured or the server restarted.`;
-        }
-        throw new Error(errorMessage);
-      }
-      
-      await fetchCareers(apiKey);
-    } catch (err: any) {
-      console.error('Delete career error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteBlog = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this blog post?')) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE}/blogs/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-api-key': apiKey },
-      });
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to delete blog post';
-        try {
-          const result = await response.json();
-          errorMessage = result.message || result.error || errorMessage;
-        } catch (e) {
-          errorMessage = `Server Error: ${response.status} ${response.statusText}. The proxy might be misconfigured or the server restarted.`;
-        }
-        throw new Error(errorMessage);
-      }
-      
-      await fetchBlogs(apiKey);
-    } catch (err: any) {
-      console.error('Delete blog error:', err);
-      setError(err.message);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -358,12 +208,7 @@ const fetchEnrollments = async (key: string) => {
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         loading={loading} 
-        onRefresh={() => {
-          if (activeTab === 'registrations') fetchRegistrations(apiKey);
-          else if (activeTab === 'blogs') fetchBlogs(apiKey);
-          else if (activeTab === 'careers') fetchCareers(apiKey);
-          else if (activeTab === 'enrollments') fetchEnrollments(apiKey);
-        }}
+        onRefresh={() => fetchInitialData(apiKey)}
         onLogout={handleLogout}
       />
 
@@ -373,7 +218,6 @@ const fetchEnrollments = async (key: string) => {
           onNewBlog={() => router.push('/wombcare-admin-9984/blogs/new')}
           onNewCareer={() => { 
             setEditingCareer(null); 
-            setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: [''], active: true }); 
             setIsCareerModalOpen(true); 
           }}
         />
@@ -383,56 +227,62 @@ const fetchEnrollments = async (key: string) => {
         ) : activeTab === 'enrollments' ? (
           <EnrollmentTable data={enrollments} />
         ) : activeTab === 'blogs' ? (
-          <BlogList 
-            blogs={blogs} 
-            loading={loading} 
-            onEdit={(blog) => router.push(`/wombcare-admin-9984/blogs/edit/${blog.id}`)}
-            onDelete={deleteBlog}
-          />
-        ) : (
-          <CareerList 
-            careers={careers} 
-            loading={loading} 
-            onEdit={(career) => {
-              setEditingCareer(career); 
-              
-              // Ensure requirements is always an array
-              let requirements = career.requirements || [''];
-              if (typeof requirements === 'string') {
-                try {
-                  requirements = JSON.parse(requirements);
-                } catch (e) {
-                  // Cast to unknown then string to satisfy compiler
-                  requirements = (requirements as unknown as string).split('\n').filter((r: string) => r.trim() !== '');
-                }
-              }
-              if (!Array.isArray(requirements)) requirements = [''];
+          <BlogList blogs={blogs} loading={loading} onEdit={(blog) => router.push(`/wombcare-admin-9984/blogs/edit/${blog.id}`)} onDelete={() => {}} />
+        ) : activeTab === 'doctor-requests' ? (
+          <div className="space-y-6">
+            {doctorRequests.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
+                <UserPlus className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                <p className="text-slate-400 font-medium">No pending doctor requests</p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {doctorRequests.map((req) => (
+                  <motion.div 
+                    layout
+                    key={req.id} 
+                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-slate-900">{req.full_name}</h3>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'pending' ? 'bg-amber-50 text-amber-600' : req.status === 'approved' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
+                          {req.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-500">
+                        <p><span className="font-bold text-slate-700">Email:</span> {req.email}</p>
+                        <p><span className="font-bold text-slate-700">Specialization:</span> {req.specialization}</p>
+                        <p><span className="font-bold text-slate-700">Reg No:</span> {req.medical_registration_number}</p>
+                        <p><span className="font-bold text-slate-700">Exp:</span> {req.experience_years} years</p>
+                      </div>
+                    </div>
 
-              setCareerForm({ 
-                title: career.title || '', 
-                department: career.department || '', 
-                location: career.location || '',
-                type: career.type || 'Full-time',
-                description: career.description || '',
-                requirements: requirements,
-                active: career.active !== undefined ? career.active : true
-              }); 
-              setIsCareerModalOpen(true); 
-            }}
-            onDelete={deleteCareer}
-          />
+                    {req.status === 'pending' && (
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => handleUpdateStatus(req.id, 'approved')}
+                          className="p-3 bg-green-50 text-green-600 rounded-2xl hover:bg-green-100 transition shadow-sm"
+                        >
+                          <Check className="w-6 h-6" />
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateStatus(req.id, 'rejected')}
+                          className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 transition shadow-sm"
+                        >
+                          <X className="w-6 h-6" />
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}
       </main>
-
-      <CareerModal 
-        isOpen={isCareerModalOpen}
-        onClose={() => setIsCareerModalOpen(false)}
-        onSubmit={handleCareerSubmit}
-        editingCareer={editingCareer}
-        careerForm={careerForm}
-        setCareerForm={setCareerForm}
-        loading={loading}
-      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { API_BASE } from '@/lib/api-config';
 
 export default function JoinDoctorPage() {
   const [formData, setFormData] = useState({
@@ -46,7 +47,7 @@ export default function JoinDoctorPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/join-doctor', {
+      const res = await fetch(`${API_BASE}/doctors/join-request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
