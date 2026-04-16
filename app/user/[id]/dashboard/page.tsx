@@ -274,6 +274,7 @@ export default function UserDashboardPage() {
               <ActivePlanCard plan={user.activePlan} />
               <Appointment 
                 time={user.nextAppointment} 
+                appointments={appointments}
                 userId={userId} 
                 onRefresh={refreshData}
                 patientName={user.name}
