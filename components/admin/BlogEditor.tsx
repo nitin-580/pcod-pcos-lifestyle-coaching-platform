@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, ArrowLeft, Save, Plus, X, Type, Bold, Italic, Image as ImageIcon, Eye } from 'lucide-react';
+import { Sparkles, ArrowLeft, Save, Plus, X, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { API_BASE } from '@/lib/api-config';
+import TiptapEditor from './TiptapEditor';
 
 export interface BlogForm {
   title: string;
@@ -74,25 +75,6 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     }
   };
 
-  const insertFormatting = (tag: 'b' | 'i' | 'h2' | 'h3') => {
-    const textarea = document.getElementById('blog-content') as HTMLTextAreaElement;
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = form.content;
-    const before = text.substring(0, start);
-    const after = text.substring(end);
-    const selection = text.substring(start, end);
-    
-    let newContent = '';
-    if (tag === 'b') newContent = `${before}<b>${selection}</b>${after}`;
-    if (tag === 'i') newContent = `${before}<i>${selection}</i>${after}`;
-    if (tag === 'h2') newContent = `${before}<h2>${selection}</h2>${after}`;
-    if (tag === 'h3') newContent = `${before}<h3>${selection}</h3>${after}`;
-    
-    setForm({ ...form, content: newContent });
-  };
 
   return (
     <div className="min-h-screen bg-[#FDFCFD] pb-20">
@@ -192,56 +174,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
 
           {/* Content Editor */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-                <button 
-                  type="button" 
-                  onClick={() => insertFormatting('b')} 
-                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-600"
-                  title="Bold"
-                >
-                  <Bold className="w-4 h-4" />
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => insertFormatting('i')} 
-                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-600"
-                  title="Italic"
-                >
-                  <Italic className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-                <button 
-                  type="button" 
-                  onClick={() => insertFormatting('h2')} 
-                  className="p-2 px-3 hover:bg-white rounded-lg transition-all text-slate-600 text-xs font-black"
-                  title="Heading 2"
-                >
-                  H2
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => insertFormatting('h3')} 
-                  className="p-2 px-3 hover:bg-white rounded-lg transition-all text-slate-600 text-xs font-black"
-                  title="Heading 3"
-                >
-                  H3
-                </button>
-              </div>
-
-              <div className="ml-auto flex items-center gap-2 text-xs font-bold text-slate-400">
-                <Eye className="w-4 h-4" /> Rich Text Enabled
-              </div>
-            </div>
-
-            <textarea 
-              id="blog-content"
-              value={form.content}
-              onChange={e => setForm({...form, content: e.target.value})}
-              placeholder="Tell your story..."
-              className="w-full min-h-[500px] text-lg leading-relaxed text-slate-700 placeholder:text-slate-200 bg-transparent border-none outline-none resize-none overflow-visible"
+            <TiptapEditor 
+              content={form.content} 
+              onChange={(html, json) => {
+                setForm({...form, content: html});
+                // Note: If we needed the JSON for something specific, we'd store it here.
+                // But the requirement is primarily clean HTML for prose rendering.
+                console.log('Tiptap change:', { html, json });
+              }} 
             />
           </div>
         </div>
