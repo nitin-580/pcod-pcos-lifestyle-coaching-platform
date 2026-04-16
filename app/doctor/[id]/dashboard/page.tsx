@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('doctorToken');
+      const token = localStorage.getItem('doctorToken') || localStorage.getItem('userToken');
       
       if (!token) {
         router.push('/login');

@@ -41,7 +41,7 @@ export default function LoginPage() {
       }
 
       const userId = data.doctor.id;
-      const userRole = data.role || 'user';
+      const userRole = (data.role || 'user').toLowerCase();
       const onboardingCompleted = data.onboardingCompleted || false;
 
       // Save session
@@ -53,6 +53,7 @@ export default function LoginPage() {
 
       // Redirect based on Role
       if (userRole === 'doctor') {
+        localStorage.setItem('doctorToken', data.token);
         router.push(`/doctor/${userId}/dashboard`);
         return;
       }
