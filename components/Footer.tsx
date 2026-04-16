@@ -16,10 +16,10 @@ export default function Footer() {
               Building India’s most trusted digital PCOD care platform. Helping women balance hormones and master their wellness journey.
             </p>
             <div className="flex gap-4 pt-2">
-              <a href="https://instagram.com/wombcare.in" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
+              <a href="https://www.instagram.com/wombcare.official/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="https://linkedin.com/company/wombcare" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
+              <a href="https://www.linkedin.com/company/wombcare/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
                 <Linkedin className="w-4 h-4" />
               </a>
               <a href="https://twitter.com/wombcare" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
