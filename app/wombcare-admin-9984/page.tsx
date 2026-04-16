@@ -31,7 +31,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [careers, setCareers] = useState<any[]>([]);
   const [doctorRequests, setDoctorRequests] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,7 +72,8 @@ export default function AdminPage() {
       fetchBlogs(key),
       fetchCareers(key),
       fetchEnrollments(key),
-      fetchDoctorRequests(key)
+      fetchDoctorRequests(key),
+      fetchAdminAppointments(key)
     ]);
     setLoading(false);
   };
@@ -136,6 +138,18 @@ export default function AdminPage() {
     }
   };
 
+  const fetchAdminAppointments = async (key: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/appointments/admin/all`, {
+        headers: { 'x-admin-api-key': key },
+      });
+      const result = await response.json();
+      setAppointments(result.data || []);
+    } catch (err: any) {
+      console.error('Fetch admin appointments error:', err);
+    }
+  };
+
   const handleUpdateStatus = async (id: string, status: string) => {
     setLoading(true);
     try {
@@ -149,6 +163,27 @@ export default function AdminPage() {
       });
       if (res.ok) {
         await fetchDoctorRequests(apiKey);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateAppointmentStatus = async (id: string, status: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/appointments/admin/${id}/status`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-api-key': apiKey 
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        await fetchAdminAppointments(apiKey);
       }
     } catch (err) {
       console.error(err);
@@ -274,6 +309,68 @@ export default function AdminPage() {
                         </button>
                       </div>
                     )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : activeTab === 'appointments' ? (
+          <div className="space-y-6">
+            {appointments.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
+                <Activity className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                <p className="text-slate-400 font-medium">No appointments scheduled</p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {appointments.map((appt) => (
+                  <motion.div 
+                    layout
+                    key={appt.id} 
+                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-slate-900">{appt.doctorName}</h3>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${appt.status === 'approved' ? 'bg-green-50 text-green-600' : appt.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {appt.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2 text-sm text-slate-500">
+                        <p><span className="font-bold text-slate-700">Patient:</span> {appt.patientName || 'WombCare User'}</p>
+                        <p><span className="font-bold text-slate-700">Date:</span> {new Date(appt.appointmentDate).toLocaleString()}</p>
+                        <p><span className="font-bold text-slate-700">Notes:</span> {appt.notes || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <select 
+                        value={appt.status}
+                        onChange={(e) => handleUpdateAppointmentStatus(appt.id, e.target.value)}
+                        className="bg-slate-50 border-none rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-pink-500"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                      {appt.status !== 'rejected' && appt.status !== 'completed' && (
+                        <div className="flex items-center gap-2">
+                           <button 
+                            onClick={() => handleUpdateAppointmentStatus(appt.id, 'approved')}
+                            className="p-2 bg-green-50 text-green-600 rounded-lg"
+                           >
+                             <Check className="w-4 h-4" />
+                           </button>
+                           <button 
+                            onClick={() => handleUpdateAppointmentStatus(appt.id, 'rejected')}
+                            className="p-2 bg-rose-50 text-rose-600 rounded-lg"
+                           >
+                             <X className="w-4 h-4" />
+                           </button>
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
