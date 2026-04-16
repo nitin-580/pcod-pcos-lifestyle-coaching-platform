@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import FloatingNavbar from '@/components/FloatingNavbar';
 import Footer from '@/components/Footer';
-import { API_BASE } from '@/lib/api-config';
+import { getPublicApiBase } from '@/lib/api-config';
 
 export default function JoinDoctorPage() {
   const [formData, setFormData] = useState({
@@ -65,7 +65,7 @@ export default function JoinDoctorPage() {
       };
 
       const res = await fetch(
-        `${API_BASE}/doctors/join-request`,
+        `${getPublicApiBase()}/doctors/join-request`,
         {
           method: 'POST',
           headers: {
