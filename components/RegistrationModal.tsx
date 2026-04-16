@@ -215,8 +215,10 @@ export default function RegistrationModal() {
                       <input
                         type="number"
                         name="weight"
-                        placeholder="Weight"
+                        placeholder="Weight (kg)"
                         required
+                        step="0.1"
+                        min="30"
                         className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none"
                       />
 

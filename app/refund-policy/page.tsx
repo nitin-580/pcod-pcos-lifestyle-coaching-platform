@@ -23,7 +23,7 @@ export default function RefundPolicyPage() {
             digital services.
           </p>
           <p className="text-sm text-slate-500 mt-4">
-            Effective Date: 01/05/2026
+            Effective Date: April 15, 2026
           </p>
         </div>
       </section>
@@ -142,7 +142,7 @@ export default function RefundPolicyPage() {
               <br />
               Email: support@wombcare.in
               <br />
-              Phone: [Insert Number]
+              Phone: +91 90319 09188
             </p>
           </div>
         </div>

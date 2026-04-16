@@ -6,23 +6,23 @@ const testimonials = [
   {
     tagline: 'Real progress with PCOD healing',
     quote:
-      'Struggling with PCOD was overwhelming, but Dipshikha, our lifestyle coach, made the journey so much easier. The sessions are tailored, gentle yet effective, and focus on long-term healing. I’ve seen real changes in my energy levels, mood, and cycle regularity. Truly thankful for the guidance and support.',
+      'Struggling with PCOD was overwhelming, but Dipshikha, our lifestyle coach, made the journey so much easier. The sessions are tailored, gentle yet effective, and focus on long-term healing. I’ve seen real changes in my energy levels, mood, and cycle regularity.',
     author: 'Ishika',
-    label: 'PCOD Lifestyle Program',
+    label: 'Lifestyle Coaching Client',
   },
   {
     tagline: 'Positive impact on menstrual health',
     quote:
-      'I’m incredibly grateful to have found such a wonderful yoga instructor, Dipshikha. Not only is she kind, patient, and supportive, but her guidance has truly made a positive impact on my health. I had been struggling with menstrual issues for a long time and through her yoga sessions, I’ve experienced significant improvement.',
+      'I’m incredibly grateful to have found such a wonderful yoga instructor, Ankita. Not only is she kind, patient, and supportive, but her guidance has truly made a positive impact on my health through her yoga sessions.',
     author: 'Riji',
     label: 'Yoga & Hormonal Wellness',
   },
   {
     tagline: 'Compassionate and holistic support',
     quote:
-      'She creates a calm and encouraging environment, explains everything clearly, and genuinely cares about her students’ well-being. Her approach is both holistic and effective, and you can feel her passion for helping others in every session.',
-    author: 'Riji',
-    label: 'Holistic Wellness Support',
+      'The holistic approach here is life-changing. I’ve learned how nutrition and stress management play a huge role in my hormonal balance. The community support is the cherry on top!',
+    author: 'Priya Sharma',
+    label: 'Holistic Wellness Member',
   },
 ];
 

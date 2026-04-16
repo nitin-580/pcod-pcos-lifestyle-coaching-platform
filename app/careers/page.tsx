@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ArrowRight, Star, Heart, Zap, Globe, Users, X, CheckCircle2, User, Mail, Phone, MapPin, Briefcase } from 'lucide-react';
 import FloatingNavbar from '@/components/FloatingNavbar';
+import Footer from '@/components/Footer';
 import { getPublicApiBase } from '@/lib/api-config';
 
 const BASE_URL = getPublicApiBase();
@@ -146,7 +147,7 @@ export default function CareersPage() {
           <div className="max-w-4xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold text-slate-900 mb-4">Open Positions</h2>
-              <p className="text-slate-500">Don't see a role that fits? Email us at careers@wombcare.in</p>
+              <p className="text-slate-500">Don't see a role that fits? Email us at <a href="mailto:careers@wombcare.in" className="text-pink-600 font-semibold hover:underline">careers@wombcare.in</a></p>
             </div>
             
             <div className="space-y-4">
@@ -307,17 +308,7 @@ export default function CareersPage() {
         )}
       </AnimatePresence>
 
-      {/* Footer */}
-      <footer className="bg-white py-20 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-slate-400 text-sm font-medium">Join us in making hormone health accessible to everyone.</p>
-          <div className="mt-8 flex justify-center gap-8">
-            <a href="#" className="text-slate-400 hover:text-slate-800">Twitter</a>
-            <a href="#" className="text-slate-400 hover:text-slate-800">LinkedIn</a>
-            <a href="#" className="text-slate-400 hover:text-slate-800">Instagram</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

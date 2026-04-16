@@ -99,20 +99,37 @@ export default function BlogContent({
           max-w-none
           prose-p:leading-[1.8]
           prose-p:text-slate-600
+          prose-p:text-justify
           prose-headings:text-slate-900
           prose-headings:font-extrabold
+          prose-headings:tracking-tight
           prose-strong:text-slate-900
-          prose-img:rounded-3xl
-          prose-img:shadow-md
+          prose-img:rounded-[2.5rem]
+          prose-img:shadow-2xl
           prose-h1:text-5xl
-          prose-h1:mt-16
-          prose-h1:mb-8
+          prose-h1:md:text-6xl
+          prose-h1:mt-20
+          prose-h1:mb-10
           prose-h2:text-4xl
-          prose-h2:mt-12
-          prose-h2:mb-6
+          prose-h2:mt-16
+          prose-h2:mb-8
+          prose-h2:text-slate-800
+          prose-h3:text-2xl
+          prose-h3:mt-10
+          prose-h3:mb-6
           prose-a:text-pink-600
-          prose-a:no-underline
+          prose-a:font-semibold
+          prose-a:underline-offset-4
+          prose-a:decoration-pink-200
           hover:prose-a:text-purple-600
+          hover:prose-a:decoration-purple-200
+          prose-blockquote:border-l-pink-500
+          prose-blockquote:bg-pink-50/50
+          prose-blockquote:py-4
+          prose-blockquote:px-8
+          prose-blockquote:rounded-r-3xl
+          prose-blockquote:italic
+          prose-li:marker:text-pink-500
         "
         style={{ fontSize: `${fontSize}rem` }}
         dangerouslySetInnerHTML={{ __html: content }}

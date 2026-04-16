@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Instagram, Linkedin, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -12,39 +13,30 @@ export default function Footer() {
               Womb<span className="text-pink-500">Care</span>
             </h2>
             <p className="text-slate-400 leading-relaxed text-sm">
-              Your trusted wellness platform for PCOD, PCOS, hormonal balance,
-              cycle tracking, fertility support, and complete women’s health.
+              Building India’s most trusted digital PCOD care platform. Helping women balance hormones and master their wellness journey.
             </p>
+            <div className="flex gap-4 pt-2">
+              <a href="https://instagram.com/wombcare.in" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="https://linkedin.com/company/wombcare" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a href="https://twitter.com/wombcare" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center hover:bg-pink-500 transition-colors">
+                <Twitter className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-white font-semibold mb-4">Explore</h3>
             <div className="space-y-3 text-sm">
-              <Link
-                href="/"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Home
-              </Link>
-              <Link
-                href="/what-we-do"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                What We Do
-              </Link>
-              <Link
-                href="/pricing"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/contact"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Contact Us
-              </Link>
+              <Link href="/" className="block hover:text-pink-400 transition-colors">Home</Link>
+              <Link href="/blogs" className="block hover:text-pink-400 transition-colors">Blogs</Link>
+              <Link href="/what-we-do" className="block hover:text-pink-400 transition-colors">What We Do</Link>
+              <Link href="/pricing" className="block hover:text-pink-400 transition-colors">Pricing</Link>
+              <Link href="/faq" className="block hover:text-pink-400 transition-colors">FAQs</Link>
             </div>
           </div>
 
@@ -52,24 +44,9 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Legal</h3>
             <div className="space-y-3 text-sm">
-              <Link
-                href="/privacy-policy"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/refund-policy"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Refund Policy
-              </Link>
-              <Link
-                href="/terms-and-conditions"
-                className="block hover:text-pink-400 transition-colors"
-              >
-                Terms & Conditions
-              </Link>
+              <Link href="/privacy-policy" className="block hover:text-pink-400 transition-colors">Privacy Policy</Link>
+              <Link href="/refund-policy" className="block hover:text-pink-400 transition-colors">Refund Policy</Link>
+              <Link href="/terms-and-conditions" className="block hover:text-pink-400 transition-colors">Terms & Conditions</Link>
             </div>
           </div>
 
@@ -77,25 +54,9 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Contact</h3>
             <div className="space-y-3 text-sm text-slate-400">
-              <p>
-                Email:{" "}
-                <a
-                  href="mailto:support@wombcare.in"
-                  className="hover:text-pink-400 transition-colors"
-                >
-                  support@wombcare.in
-                </a>
-              </p>
-              <p>
-                Phone:{" "}
-                <a
-                  href="tel:+91 90319 09188"
-                  className="hover:text-pink-400 transition-colors"
-                >
-                  +91 90319 09188
-                </a>
-              </p>
-              <p>Available Mon – Sat, 9 AM – 7 PM</p>
+              <p>Email: <a href="mailto:support@wombcare.in" className="hover:text-pink-400 transition-colors">support@wombcare.in</a></p>
+              <p>Phone: <a href="tel:+919031909188" className="hover:text-pink-400 transition-colors">+91 90319 09188</a></p>
+              <p className="mt-4 pt-4 border-t border-slate-900">Available Mon – Sat<br/> 9 AM – 7 PM IST</p>
             </div>
           </div>
         </div>

@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
             WombCare.
           </p>
           <p className="text-sm text-slate-500 mt-4">
-            Effective Date: [Insert Date]
+            Effective Date: April 15, 2026
           </p>
         </div>
       </section>
@@ -202,7 +202,7 @@ export default function PrivacyPolicyPage() {
               <br />
               Email: support@wombcare.in
               <br />
-              Phone: [Insert number]
+              Phone: +91 90319 09188
             </p>
           </div>
         </div>

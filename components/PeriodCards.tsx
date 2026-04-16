@@ -71,7 +71,13 @@ function Card({ icon, tag, title, image, purple = false }: CardProps) {
       </h3>
 
       {/* Button */}
-      <button className="flex items-center gap-4 px-6 py-4 border border-white text-white text-xs tracking-[0.2em] font-bold hover:bg-white hover:text-black transition-all duration-300 rounded-sm w-fit group-hover:pl-8">
+      <button 
+        onClick={() => {
+          const el = document.getElementById('register');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        className="flex items-center gap-4 px-6 py-4 border border-white text-white text-xs tracking-[0.2em] font-bold hover:bg-white hover:text-black transition-all duration-300 rounded-sm w-fit group-hover:pl-8"
+      >
         KNOW MORE
         <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
       </button>

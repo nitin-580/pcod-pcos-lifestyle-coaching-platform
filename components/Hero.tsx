@@ -175,10 +175,19 @@ export default function Hero() {
 
           {/* Left Content */}
           <div className="space-y-8 text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold mb-4 uppercase tracking-widest"
+            >
+              India’s Most Trusted Digital PCOD Care Platform
+            </motion.div>
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
               className="text-5xl md:text-6xl xl:text-7xl font-extrabold text-slate-800 tracking-tight"
             >
               Take Control of PCOD &{" "}

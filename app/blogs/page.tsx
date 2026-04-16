@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
 import FloatingNavbar from '@/components/FloatingNavbar';
+import Footer from '@/components/Footer';
 import { format } from 'date-fns';
 import { getPublicApiBase } from '@/lib/api-config';
 
@@ -124,10 +125,7 @@ export default function BlogsPage() {
         </section>
       </div>
 
-      {/* Footer Placeholder */}
-      <footer className="bg-slate-900 text-slate-400 py-12 text-center text-sm border-t border-slate-800">
-        <p>&copy; {new Date().getFullYear()} WombCare. All rights reserved.</p>
-      </footer>
+      <Footer />
     </main>
 
   );
