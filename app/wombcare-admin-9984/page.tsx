@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import AdminTable, { Registration } from '@/components/AdminTable';
-import { Key, RefreshCw, Loader2, UserPlus, Check, X, Mail } from 'lucide-react';
+import { Key, RefreshCw, Loader2, UserPlus, Check, X, Mail, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CareerModal from '@/components/admin/CareerModal';
 import AdminHeader from '@/components/admin/AdminHeader';
