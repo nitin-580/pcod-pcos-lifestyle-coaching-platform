@@ -2,28 +2,33 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import FloatingNavbar from '@/components/FloatingNavbar';
+import Footer from '@/components/Footer';
 import { API_BASE } from '@/lib/api-config';
 
 export default function JoinDoctorPage() {
   const [formData, setFormData] = useState({
-    full_name: '',
+    fullName: '',
     email: '',
     phone: '',
     specialization: '',
     qualification: '',
-    experience_years: '',
-    hospital_clinic: '',
+    experienceYears: '',
+    hospitalClinic: '',
     city: '',
-    consultation_mode: 'Online + Offline',
-    medical_registration_number: '',
-    agreed_to_terms: false,
+    consultationMode: 'Online + Offline',
+    medicalRegistrationNumber: '',
+    agreedToTerms: false,
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type } = e.target;
 
@@ -36,145 +41,327 @@ export default function JoinDoctorPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
 
-    if (!formData.agreed_to_terms) {
-      alert('Please agree to the terms before continuing.');
+    if (!formData.agreedToTerms) {
+      setError(
+        'Please agree to the terms before continuing.'
+      );
       return;
     }
 
     setLoading(true);
+    setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/doctors/join-request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          experience_years: Number(formData.experience_years),
-        }),
-      });
+      const payload = {
+        ...formData,
+        experienceYears: Number(
+          formData.experienceYears
+        ),
+      };
+
+      const res = await fetch(
+        `${API_BASE}/doctors/join-request`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json',
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
 
-      if (data.success) {
-        setSubmitted(true);
-      } else {
-        alert(data.message || 'Something went wrong');
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+            'Failed to submit application'
+        );
       }
-    } catch (err) {
+
+      setSubmitted(true);
+    } catch (err: any) {
       console.error(err);
-      alert('Submission failed. Check your internet.');
+      setError(
+        err.message ||
+          'Submission failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-lg text-center bg-white shadow-2xl rounded-[40px] p-12 border border-slate-100"
-        >
-          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-8">
-            ✅
-          </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Application Sent</h1>
-          <p className="text-slate-500 text-lg leading-relaxed">
-            Thank you, Dr. {formData.full_name}. Your credentials have been received. 
-            A confirmation email has been sent to <strong>{formData.email}</strong>.
-          </p>
-          <button 
-             onClick={() => window.location.href = '/'}
-             className="mt-10 px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black transition"
-          >
-            Back to Home
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#FCFDFB] py-20 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-[40px] shadow-2xl shadow-pink-100/50 p-8 md:p-16 border border-slate-50">
-        <div className="text-center mb-12">
-           <span className="px-4 py-1.5 rounded-full bg-pink-50 text-pink-600 text-xs font-bold tracking-widest uppercase">
-             For Providers
-           </span>
-           <h1 className="text-4xl md:text-5xl font-black text-slate-900 mt-6">Join WombCare</h1>
-           <p className="text-slate-500 mt-4 text-lg">Partner with us to provide specialized care for women's hormonal wellness.</p>
+    <main className="min-h-screen bg-gradient-to-br from-white via-pink-50/30 to-purple-50/40">
+      <FloatingNavbar />
+
+      {/* Header */}
+      <section className="border-b border-pink-100 bg-gradient-to-r from-pink-50/70 to-purple-50/70 pt-28">
+        <div className="max-w-7xl mx-auto px-8 py-16">
+          <p className="text-sm font-semibold tracking-wide text-pink-600 uppercase">
+            For Providers
+          </p>
+
+          <h1 className="mt-4 text-5xl font-bold text-slate-900">
+            Join WombCare as a Doctor
+          </h1>
+
+          <p className="mt-6 text-xl text-slate-600 max-w-3xl leading-8">
+            Partner with WombCare to provide expert
+            hormonal wellness and women’s healthcare
+            support.
+          </p>
+        </div>
+      </section>
+
+      {/* Main Layout */}
+      <section className="max-w-7xl mx-auto px-8 py-16 grid lg:grid-cols-12 gap-16">
+        {/* Left Side */}
+        <div className="lg:col-span-5">
+          <div className="space-y-8">
+            <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 p-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+                Why join WombCare?
+              </h2>
+
+              <p className="text-slate-600 leading-8">
+                Expand your practice and help women
+                access better hormonal and reproductive
+                care through our trusted digital health
+                platform.
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {[
+                'Verified doctor onboarding',
+                'Online + offline consultations',
+                'Premium patient flow',
+                'Dedicated provider dashboard',
+                'Secure payouts & support',
+              ].map((item, index) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-4 pb-4 border-b border-pink-100"
+                >
+                  <div
+                    className={`w-2.5 h-2.5 mt-3 rounded-full ${
+                      index % 2 === 0
+                        ? 'bg-pink-500'
+                        : 'bg-purple-500'
+                    }`}
+                  />
+                  <p className="text-slate-600 text-lg">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
-              <input name="full_name" placeholder="Dr. Jane Doe" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <input name="email" type="email" placeholder="jane.doe@hospital.com" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
-              <input name="phone" placeholder="+91 98765 43210" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Specialization</label>
-              <input name="specialization" placeholder="e.g. Gynaecologist" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Qualification</label>
-              <input name="qualification" placeholder="e.g. MBBS, MD" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Years of Experience</label>
-              <input name="experience_years" type="number" placeholder="5" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Medical Registration No.</label>
-              <input name="medical_registration_number" placeholder="MC-123456" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Consultation Mode</label>
-              <select name="consultation_mode" onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg bg-transparent">
-                <option>Online + Offline</option>
-                <option>Online Only</option>
-                <option>Offline Only</option>
-              </select>
-            </div>
+        {/* Right Form */}
+        <div className="lg:col-span-7">
+          <div className="rounded-3xl border border-pink-100 bg-white shadow-xl shadow-pink-100/40 p-8">
+            {submitted ? (
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.95,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                className="text-center py-10"
+              >
+                <div className="w-16 h-16 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto text-2xl mb-4">
+                  ✓
+                </div>
+
+                <h2 className="text-3xl font-bold text-slate-900">
+                  Application Submitted
+                </h2>
+
+                <p className="mt-4 text-slate-600 leading-8 max-w-xl mx-auto">
+                  Thank you, Dr.{' '}
+                  {formData.fullName}. Your
+                  application has been received
+                  successfully.
+                </p>
+
+                <p className="mt-2 text-slate-500">
+                  A confirmation email has been
+                  sent to{' '}
+                  <span className="font-medium text-slate-700">
+                    {formData.email}
+                  </span>
+                </p>
+
+                <p className="mt-4 text-sm text-slate-400">
+                  Our onboarding team will review
+                  your credentials and connect
+                  within 24 hours.
+                </p>
+              </motion.div>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-6"
+              >
+                {error && (
+                  <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <input
+                  name="fullName"
+                  placeholder="Full Name"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                />
+
+                <div className="grid grid-cols-2 gap-6">
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                  />
+
+                  <input
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                  />
+                </div>
+
+                <input
+                  name="specialization"
+                  placeholder="Specialization"
+                  value={formData.specialization}
+                  onChange={handleChange}
+                  required
+                  className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                />
+
+                <div className="grid grid-cols-2 gap-6">
+                  <input
+                    name="qualification"
+                    placeholder="Qualification"
+                    value={formData.qualification}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                  />
+
+                  <input
+                    name="experienceYears"
+                    type="number"
+                    placeholder="Years of Experience"
+                    value={formData.experienceYears}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                  />
+                </div>
+
+                <input
+                  name="medicalRegistrationNumber"
+                  placeholder="Medical Registration No."
+                  value={
+                    formData.medicalRegistrationNumber
+                  }
+                  onChange={handleChange}
+                  required
+                  className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                />
+
+                <input
+                  name="hospitalClinic"
+                  placeholder="Hospital / Clinic"
+                  value={formData.hospitalClinic}
+                  onChange={handleChange}
+                  className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                />
+
+                <div className="grid grid-cols-2 gap-6">
+                  <input
+                    name="city"
+                    placeholder="City"
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-b border-pink-200 py-3 focus:outline-none focus:border-pink-500"
+                  />
+
+                  <select
+                    name="consultationMode"
+                    value={
+                      formData.consultationMode
+                    }
+                    onChange={handleChange}
+                    className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500"
+                  >
+                    <option>
+                      Online + Offline
+                    </option>
+                    <option>
+                      Online Only
+                    </option>
+                    <option>
+                      Offline Only
+                    </option>
+                  </select>
+                </div>
+
+                <label className="flex items-center gap-3 rounded-2xl bg-pink-50 border border-pink-100 p-4">
+                  <input
+                    type="checkbox"
+                    name="agreedToTerms"
+                    checked={
+                      formData.agreedToTerms
+                    }
+                    onChange={handleChange}
+                    className="accent-pink-500"
+                  />
+                  <span className="text-sm text-slate-600">
+                    I agree to the onboarding
+                    terms and medical guidelines
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold text-lg shadow-xl shadow-pink-200 hover:opacity-95 transition-all disabled:opacity-50"
+                >
+                  {loading
+                    ? 'Submitting...'
+                    : 'Submit Application'}
+                </button>
+              </form>
+            )}
           </div>
+        </div>
+      </section>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Hospital / Clinic Name (Optional)</label>
-            <input name="hospital_clinic" placeholder="City General Hospital" onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">City</label>
-            <input name="city" placeholder="Bangalore" required onChange={handleChange} className="w-full border-b-2 border-slate-100 p-4 focus:outline-none focus:border-pink-500 transition-colors text-lg" />
-          </div>
-
-          <label className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl cursor-pointer hover:bg-slate-100 transition">
-            <input type="checkbox" name="agreed_to_terms" onChange={handleChange} className="w-5 h-5 accent-pink-500" />
-            <span className="text-sm text-slate-600 font-medium leading-relaxed">I agree to join WombCare as a provider and accept the onboarding terms, data privacy policy, and medical guidelines.</span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-6 rounded-2xl font-bold text-xl shadow-2xl shadow-pink-200 hover:scale-[1.01] transition-all disabled:opacity-50"
-          >
-            {loading ? 'Submitting Application...' : 'Submit Application'}
-          </button>
-        </form>
-      </div>
-    </div>
+      <Footer />
+    </main>
   );
 }

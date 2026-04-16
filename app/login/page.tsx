@@ -41,6 +41,8 @@ export default function LoginPage() {
       }
 
       const userId = data.doctor.id;
+      const userRole = data.role || 'user';
+      const onboardingCompleted = data.onboardingCompleted || false;
 
       // Save session
       localStorage.setItem('userToken', data.token);
@@ -49,48 +51,19 @@ export default function LoginPage() {
         JSON.stringify(data.doctor)
       );
 
-      // New Step 2: Role Based Check
-      const roleRes = await fetch(`${getPublicApiBase()}/role-check?email=${email}`, {
-        headers: { Authorization: `Bearer ${data.token}` }
-      });
-      const roleData = await roleRes.json();
-      const userRole = roleData.role || 'user'; // Default to user
-
+      // Redirect based on Role
       if (userRole === 'doctor') {
-        router.push(`/doctor/dashboard`);
+        router.push(`/doctor/${userId}/dashboard`);
         return;
       }
 
       if (userRole === 'admin') {
-        router.push(`/admin/dashboard`);
+        router.push(`/wombcare-admin-9984`);
         return;
       }
 
-      // Step 3: Regular User Flow - Check profile completion
-      const profileRes = await fetch(
-        `${getPublicApiBase()}/profiles/${userId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${data.token}`,
-          },
-        }
-      );
-
-      // If profile row missing → onboarding
-      if (profileRes.status === 404) {
-        router.push(`/user/${userId}/onboarding`);
-        return;
-      }
-
-      const profileData = await profileRes.json();
-      const profile = profileData.data;
-
-      // Step 3: Redirect based on profile completion
-      const isCompleted = profile?.profile_completed === true || profile?.profileCompleted === true;
-
-      if (isCompleted) {
+      // Regular User Flow
+      if (onboardingCompleted) {
         router.push(`/user/${userId}/dashboard`);
       } else {
         router.push(`/user/${userId}/onboarding`);

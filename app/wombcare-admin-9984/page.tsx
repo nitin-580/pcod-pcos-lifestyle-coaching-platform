@@ -245,7 +245,7 @@ export default function AdminPage() {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-slate-900">{req.full_name}</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{req.fullName}</h3>
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'pending' ? 'bg-amber-50 text-amber-600' : req.status === 'approved' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
                           {req.status}
                         </span>
@@ -253,8 +253,8 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-500">
                         <p><span className="font-bold text-slate-700">Email:</span> {req.email}</p>
                         <p><span className="font-bold text-slate-700">Specialization:</span> {req.specialization}</p>
-                        <p><span className="font-bold text-slate-700">Reg No:</span> {req.medical_registration_number}</p>
-                        <p><span className="font-bold text-slate-700">Exp:</span> {req.experience_years} years</p>
+                        <p><span className="font-bold text-slate-700">Reg No:</span> {req.medicalRegistrationNumber}</p>
+                        <p><span className="font-bold text-slate-700">Exp:</span> {req.experienceYears} years</p>
                       </div>
                     </div>
 
