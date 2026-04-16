@@ -11,7 +11,7 @@ import CareerList from '@/components/admin/CareerList';
 import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
 
 import { useRouter } from 'next/navigation';
-import { API_BASE } from '@/lib/api-config';
+import { API_BASE, getPublicApiBase } from '@/lib/api-config';
 
 interface Blog {
   id: string;
@@ -126,7 +126,7 @@ export default function AdminPage() {
 
   const fetchDoctorRequests = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/doctors/admin/join-requests`, {
+      const response = await fetch(`${getPublicApiBase()}/doctors/admin/join-requests`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
@@ -139,7 +139,7 @@ export default function AdminPage() {
   const handleUpdateStatus = async (id: string, status: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/doctors/admin/join-requests`, {
+      const res = await fetch(`${getPublicApiBase()}/doctors/admin/join-requests`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
