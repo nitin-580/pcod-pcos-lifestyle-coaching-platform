@@ -121,7 +121,7 @@ export default function DashboardPage() {
 
           <EarningsAnalytics earnings={earnings} stats={earningsStats} />
 
-          <PatientHistory patients={patients} />
+          {/* <PatientHistory patients={patients} /> */}
         </div>
       </section>
     </main>
