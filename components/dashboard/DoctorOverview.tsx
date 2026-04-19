@@ -8,61 +8,52 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 
-const stats = [
-  {
-    title: 'Today Appointments',
-    value: '12',
-    sub: '+3 from yesterday',
-    icon: CalendarDays,
-  },
-  {
-    title: 'Monthly Earnings',
-    value: '₹48,500',
-    sub: '+12%',
-    icon: Wallet,
-  },
-  {
-    title: 'Sessions Booked',
-    value: '38',
-    sub: 'This week',
-    icon: Clock3,
-  },
-  {
-    title: 'Patients',
-    value: '124',
-    sub: 'Total records',
-    icon: Users,
-  },
-];
-
-const upcomingSessions = [
-  {
-    patient: 'Priya Sharma',
-    time: '10:00 AM',
-    type: 'PCOD Consultation',
-  },
-  {
-    patient: 'Ananya Patel',
-    time: '11:30 AM',
-    type: 'Follow-up Session',
-  },
-  {
-    patient: 'Riya Verma',
-    time: '2:00 PM',
-    type: 'Diet Consultation',
-  },
-];
-
-export default function DoctorOverview({ doctorData, totalPatients }: { doctorData?: any, totalPatients?: number }) {
-  const currentStats = [...stats];
-  if (totalPatients !== undefined) {
-    currentStats[3] = { ...currentStats[3], value: totalPatients.toString() };
-  }
+export default function DoctorOverview({ 
+  doctorData, 
+  totalPatients = 0,
+  todayAppointmentsCount = 0,
+  monthlyEarnings = 0,
+  totalSessions = 0,
+  quickInsights = []
+}: { 
+  doctorData?: any, 
+  totalPatients?: number,
+  todayAppointmentsCount?: number,
+  monthlyEarnings?: number,
+  totalSessions?: number,
+  quickInsights?: any[]
+}) {
+  const stats = [
+    {
+      title: 'Today Appointments',
+      value: todayAppointmentsCount.toString(),
+      sub: 'Scheduled for today',
+      icon: CalendarDays,
+    },
+    {
+      title: 'Monthly Earnings',
+      value: `₹${monthlyEarnings.toLocaleString()}`,
+      sub: 'Earnings this month',
+      icon: Wallet,
+    },
+    {
+      title: 'Sessions Booked',
+      value: totalSessions.toString(),
+      sub: 'Total across platform',
+      icon: Clock3,
+    },
+    {
+      title: 'Patients',
+      value: totalPatients.toString(),
+      sub: 'Total records',
+      icon: Users,
+    },
+  ];
 
   return (
     <section>
       {/* Header */}
-      <div className="mb-10">
+      <div className="mb-10 text-center lg:text-left">
         <h1 className="text-4xl font-bold text-slate-800">
           Welcome back, {doctorData?.name?.split(' ')[0] || 'Doctor'}
         </h1>
@@ -73,7 +64,7 @@ export default function DoctorOverview({ doctorData, totalPatients }: { doctorDa
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {currentStats.map((item) => {
+        {stats.map((item) => {
           const Icon = item.icon;
 
           return (
@@ -91,7 +82,7 @@ export default function DoctorOverview({ doctorData, totalPatients }: { doctorDa
                     {item.value}
                   </h2>
 
-                  <p className="text-sm text-green-600 mt-2">
+                  <p className="text-sm text-slate-500 mt-2">
                     {item.sub}
                   </p>
                 </div>
@@ -107,43 +98,53 @@ export default function DoctorOverview({ doctorData, totalPatients }: { doctorDa
 
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-8">
-        {/* Upcoming Sessions - Relocated to Dashboard Page Grid for better layout but keeping original template logic here if used as standalone */}
+        {/* Quick Insights */}
         <div className="xl:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-slate-800">
               Quick Insights
             </h2>
-
-            <button className="text-purple-600 font-medium">
-              View All
-            </button>
           </div>
 
           <div className="space-y-4">
-            {upcomingSessions.map((session, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100"
-              >
-                <div>
-                  <h3 className="font-semibold text-slate-800">
-                    {session.patient}
-                  </h3>
-                  <p className="text-sm text-slate-500 mt-1">
-                    {session.type}
-                  </p>
-                </div>
+            {quickInsights.length > 0 ? (
+              quickInsights.map((session, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-slate-100"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold shrink-0">
+                      {session.patientName?.[0] || session.userName?.[0] || 'P'}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">
+                        {session.patientName || session.userName || 'Unknown Patient'}
+                      </h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {session.appointmentType || 'Consultation'}
+                      </p>
+                    </div>
+                  </div>
 
-                <div className="text-right">
-                  <p className="font-semibold text-slate-700">
-                    {session.time}
-                  </p>
-                  <button className="text-sm text-purple-600 mt-1 hover:underline">
-                    Join Session
-                  </button>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-700">
+                      {new Date(session.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
+                      session.status === 'confirmed' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                    }`}>
+                      {session.status}
+                    </span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                <CalendarDays size={48} className="mb-4 opacity-20" />
+                <p>No insights available for today</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -171,11 +172,11 @@ export default function DoctorOverview({ doctorData, totalPatients }: { doctorDa
             )}
 
             <h3 className="text-2xl font-bold mt-4 text-slate-800">
-              {doctorData?.name || 'Dr. Sarah Watson'}
+              {doctorData?.name || 'Doctor'}
             </h3>
 
             <p className="text-slate-600 mt-2 font-medium">
-              {doctorData?.specialization || 'Gynecologist & PCOD Specialist'}
+              {doctorData?.specialization || 'Gynecologist & Health Specialist'}
             </p>
 
             <div className="w-full h-[1px] bg-slate-200 my-6"></div>
@@ -183,16 +184,16 @@ export default function DoctorOverview({ doctorData, totalPatients }: { doctorDa
             <div className="w-full space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500">Credentials</span>
-                <span className="text-slate-800 font-semibold">{doctorData?.credentials || 'MBBS, MD'}</span>
+                <span className="text-slate-800 font-semibold">{doctorData?.credentials || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500">Total Patients</span>
-                <span className="text-slate-800 font-semibold">{totalPatients || '124'}</span>
+                <span className="text-slate-800 font-semibold">{totalPatients}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500">Referral Code</span>
                 <span className="text-slate-purple-600 font-bold bg-white px-2 py-1 rounded-lg border border-purple-100">
-                  {doctorData?.referralCode || 'WC-5829'}
+                  {doctorData?.referralCode || 'N/A'}
                 </span>
               </div>
             </div>

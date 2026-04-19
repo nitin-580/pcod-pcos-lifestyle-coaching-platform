@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import DoctorSidebar from '@/components/dashboard/Sidebar';
 import DoctorOverview from '@/components/dashboard/DoctorOverview';
 import AppointmentsTable from '@/components/dashboard/AppointmentsTable';
 import EarningsAnalytics from '@/components/dashboard/EarningsAnalytics';
@@ -92,15 +91,28 @@ export default function DashboardPage() {
            aptDate.getFullYear() === today.getFullYear();
   });
 
-  return (
-    <main className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar */}
-      <DoctorSidebar doctorName={doctorData?.name} profilePicture={doctorData?.profilePicture} />
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthlyEarnings = earnings
+    .filter(e => {
+      const d = new Date(e.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    })
+    .reduce((sum, e) => sum + (e.amount || 0), 0);
 
+  return (
+    <main className="min-h-screen bg-slate-50">
       {/* Main Content */}
-      <section className="flex-1 p-8 lg:p-10 overflow-y-auto">
+      <section className="max-w-7xl mx-auto p-6 lg:p-10">
         <div className="space-y-8">
-          <DoctorOverview doctorData={doctorData} totalPatients={patients.length} />
+          <DoctorOverview 
+            doctorData={doctorData} 
+            totalPatients={patients.length || 0}
+            todayAppointmentsCount={todayAppointments.length || 0}
+            monthlyEarnings={monthlyEarnings || 0}
+            totalSessions={appointments.length || 0}
+            quickInsights={todayAppointments || []}
+          />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <AppointmentsTable appointments={appointments} />
