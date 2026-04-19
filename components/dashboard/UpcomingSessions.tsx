@@ -2,39 +2,10 @@
 
 import { useState } from 'react';
 
-const sessionData = [
-  {
-    time: '10:00 AM',
-    patient: 'Priya Sharma',
-    type: 'PCOD Consultation',
-    duration: '45 mins',
-    status: 'Upcoming',
-  },
-  {
-    time: '11:30 AM',
-    patient: 'Riya Verma',
-    type: 'Diet Follow-up',
-    duration: '30 mins',
-    status: 'Upcoming',
-  },
-  {
-    time: '2:00 PM',
-    patient: 'Ananya Patel',
-    type: 'Hormonal Review',
-    duration: '60 mins',
-    status: 'Upcoming',
-  },
-  {
-    time: '5:00 PM',
-    patient: 'Kavya Singh',
-    type: 'Fertility Session',
-    duration: '45 mins',
-    status: 'Upcoming',
-  },
-];
-
-export default function UpcomingSessions() {
+export default function UpcomingSessions({ sessions = [] }: { sessions?: any[] }) {
   const [selectedSession, setSelectedSession] = useState(0);
+
+  const displaySessions = sessions.length > 0 ? sessions : [];
 
   return (
     <section className="mt-8 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
@@ -56,7 +27,7 @@ export default function UpcomingSessions() {
 
       {/* Sessions */}
       <div className="space-y-4">
-        {sessionData.map((session, index) => (
+        {displaySessions.length > 0 ? displaySessions.map((session, index) => (
           <button
             key={index}
             onClick={() => setSelectedSession(index)}
@@ -69,21 +40,21 @@ export default function UpcomingSessions() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-slate-800">
-                  {session.patient}
+                  {session.patientName || 'Anonymous'}
                 </h3>
 
                 <p className="text-sm text-slate-500 mt-1">
-                  {session.type}
+                  Consultation
                 </p>
 
                 <p className="text-sm text-slate-400 mt-2">
-                  {session.duration}
+                  45 mins
                 </p>
               </div>
 
               <div className="text-right">
                 <p className="font-semibold text-purple-600">
-                  {session.time}
+                  {new Date(session.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
 
                 <span className="inline-block mt-2 px-3 py-1 rounded-full bg-green-100 text-green-600 text-xs font-medium">
@@ -92,7 +63,11 @@ export default function UpcomingSessions() {
               </div>
             </div>
           </button>
-        ))}
+        )) : (
+          <div className="py-10 text-center text-slate-400">
+            No upcoming sessions for today
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}

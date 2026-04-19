@@ -15,10 +15,13 @@ export default function DashboardPage() {
   const params = useParams();
   const [doctorData, setDoctorData] = useState<any>(null);
   const [patients, setPatients] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [earnings, setEarnings] = useState<any[]>([]);
+  const [earningsStats, setEarningsStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       const token = localStorage.getItem('doctorToken') || localStorage.getItem('userToken');
       
       if (!token) {
@@ -27,30 +30,47 @@ export default function DashboardPage() {
       }
 
       try {
-        const res = await fetch(`${getPublicApiBase()}/doctors/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const apiBase = getPublicApiBase();
 
-        const data = await res.json();
+        const [profileRes, appointmentsRes, earningsRes] = await Promise.all([
+          fetch(`${apiBase}/doctors/profile`, { headers }),
+          fetch(`${apiBase}/doctors/appointments`, { headers }),
+          fetch(`${apiBase}/doctors/earnings`, { headers })
+        ]);
 
-        if (data.success) {
-          setDoctorData(data.doctor);
-          setPatients(data.referredPatients || []);
+        const profileData = await profileRes.json();
+        const appointmentsData = await appointmentsRes.json();
+        const earningsData = await earningsRes.json();
+
+        if (profileData.success) {
+          setDoctorData(profileData.doctor);
+          setPatients(profileData.referredPatients || []);
         } else {
-          // Token might be invalid
           localStorage.removeItem('doctorToken');
-          router.push('/login');
+          router.push('/login-doctor');
+          return;
+        }
+
+        if (appointmentsData.success) {
+          setAppointments(appointmentsData.appointments || []);
+        }
+
+        if (earningsData.success) {
+          setEarnings(earningsData.earnings || []);
+          setEarningsStats({
+            totalEarnings: earningsData.totalEarnings,
+            stats: earningsData.stats
+          });
         }
       } catch (err) {
-        console.error('Failed to fetch doctor profile:', err);
+        console.error('Failed to fetch dashboard data:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, [router]);
 
   if (isLoading) {
@@ -64,10 +84,18 @@ export default function DashboardPage() {
     );
   }
 
+  const todayAppointments = appointments.filter(apt => {
+    const aptDate = new Date(apt.appointmentDate);
+    const today = new Date();
+    return aptDate.getDate() === today.getDate() &&
+           aptDate.getMonth() === today.getMonth() &&
+           aptDate.getFullYear() === today.getFullYear();
+  });
+
   return (
     <main className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar
-      <DoctorSidebar doctorName={doctorData?.name} profilePicture={doctorData?.profilePicture} /> */}
+      {/* Sidebar */}
+      <DoctorSidebar doctorName={doctorData?.name} profilePicture={doctorData?.profilePicture} />
 
       {/* Main Content */}
       <section className="flex-1 p-8 lg:p-10 overflow-y-auto">
@@ -75,11 +103,11 @@ export default function DashboardPage() {
           <DoctorOverview doctorData={doctorData} totalPatients={patients.length} />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <AppointmentsTable />
-            <UpcomingSessions />
+            <AppointmentsTable appointments={appointments} />
+            <UpcomingSessions sessions={todayAppointments} />
           </div>
 
-          <EarningsAnalytics />
+          <EarningsAnalytics earnings={earnings} stats={earningsStats} />
 
           <PatientHistory patients={patients} />
         </div>

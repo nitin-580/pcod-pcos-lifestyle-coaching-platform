@@ -1,38 +1,7 @@
-
 'use client';
 
-const monthlyData = [
-  { month: 'Jan', amount: 22000 },
-  { month: 'Feb', amount: 28000 },
-  { month: 'Mar', amount: 32000 },
-  { month: 'Apr', amount: 27000 },
-  { month: 'May', amount: 38000 },
-  { month: 'Jun', amount: 42000 },
-];
-
-const transactions = [
-  {
-    patient: 'Priya Sharma',
-    type: 'PCOD Consultation',
-    amount: '₹799',
-    date: 'Today',
-  },
-  {
-    patient: 'Riya Verma',
-    type: 'Diet Session',
-    amount: '₹699',
-    date: 'Yesterday',
-  },
-  {
-    patient: 'Ananya Patel',
-    type: 'Follow-up',
-    amount: '₹499',
-    date: '2 days ago',
-  },
-];
-
-export default function EarningsAnalytics() {
-  const maxValue = Math.max(...monthlyData.map((d) => d.amount));
+export default function EarningsAnalytics({ earnings = [], stats }: { earnings?: any[], stats?: any }) {
+  const maxValue = earnings.length > 0 ? Math.max(...earnings.map((d) => d.amount), 5000) : 5000;
 
   return (
     <section className="mt-8 grid grid-cols-3 gap-6">
@@ -58,33 +27,33 @@ export default function EarningsAnalytics() {
           <div className="bg-[#fdf2f8] rounded-2xl p-5">
             <p className="text-sm text-slate-500">Total Earnings</p>
             <h3 className="text-3xl font-bold text-slate-800 mt-2">
-              ₹48,500
+              ₹{stats?.totalEarnings || 0}
             </h3>
           </div>
 
           <div className="bg-[#f5f3ff] rounded-2xl p-5">
-            <p className="text-sm text-slate-500">Today</p>
+            <p className="text-sm text-slate-500">Overall Transactions</p>
             <h3 className="text-3xl font-bold text-slate-800 mt-2">
-              ₹1,998
+              {earnings.length}
             </h3>
           </div>
 
           <div className="bg-[#eef2ff] rounded-2xl p-5">
-            <p className="text-sm text-slate-500">Pending</p>
+            <p className="text-sm text-slate-500">Status</p>
             <h3 className="text-3xl font-bold text-slate-800 mt-2">
-              ₹3,200
+              Active
             </h3>
           </div>
         </div>
 
-        {/* Chart */}
+        {/* Chart (Simplified for dynamic) */}
         <div className="mt-10 h-72 flex items-end gap-5">
-          {monthlyData.map((item) => {
+          {earnings.slice(0, 6).map((item, index) => {
             const height = (item.amount / maxValue) * 220;
 
             return (
               <div
-                key={item.month}
+                key={index}
                 className="flex-1 flex flex-col items-center gap-3"
               >
                 <div
@@ -92,45 +61,51 @@ export default function EarningsAnalytics() {
                   style={{ height }}
                 />
                 <p className="text-sm text-slate-500">
-                  {item.month}
+                  {new Date(item.date).toLocaleDateString([], { month: 'short' })}
                 </p>
               </div>
             );
           })}
+          {earnings.length === 0 && (
+            <div className="w-full h-full flex items-center justify-center text-slate-300">
+              No data points available yet
+            </div>
+          )}
         </div>
       </div>
 
       {/* Right Recent Transactions */}
       <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
         <h2 className="text-2xl font-bold text-slate-800">
-          Transactions
+          Recent Transactions
         </h2>
 
-        <div className="space-y-4 mt-6">
-          {transactions.map((transaction, index) => (
+        <div className="space-y-4 mt-6 overflow-y-auto max-h-[500px]">
+          {earnings.map((transaction, index) => (
             <div
               key={index}
               className="p-4 rounded-2xl bg-slate-50"
             >
               <h3 className="font-semibold text-slate-800">
-                {transaction.patient}
+                {transaction.description || 'Consultation Fee'}
               </h3>
-
-              <p className="text-sm text-slate-500 mt-1">
-                {transaction.type}
-              </p>
 
               <div className="flex justify-between mt-3">
                 <span className="font-semibold text-purple-600">
-                  {transaction.amount}
+                  ₹{transaction.amount}
                 </span>
 
                 <span className="text-sm text-slate-400">
-                  {transaction.date}
+                  {new Date(transaction.date).toLocaleDateString()}
                 </span>
               </div>
             </div>
           ))}
+          {earnings.length === 0 && (
+             <div className="py-10 text-center text-slate-400">
+               No transactions yet
+             </div>
+          )}
         </div>
 
         <button className="w-full mt-6 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium">
