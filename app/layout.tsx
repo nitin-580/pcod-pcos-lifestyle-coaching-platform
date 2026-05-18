@@ -16,12 +16,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://wombcare.in"),
 
   title: {
-    default: "WombCare — AI-Free PCOD & Period Health Coach",
+    default: "WombCare — PCOD & Period Health Coach",
     template: "%s | WombCare",
   },
 
   description:
-    "WombCare is an AI-Less lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
+    "WombCare is an lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
 
   keywords: [
     "PCOD",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   publisher: "WombCare",
 
   openGraph: {
-    title: "WombCare — AI Coach for PCOD & Hormone Health",
+    title: "WombCare — Coach for PCOD & Hormone Health",
     description:
       "Understand your hormones, balance your cycle, and manage PCOD with AI-powered guidance.",
     url: "https://wombcare.in",
