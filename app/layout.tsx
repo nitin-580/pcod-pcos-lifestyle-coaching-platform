@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "WombCare is an lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
+    "WombCare is a lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
 
   keywords: [
     "PCOD",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     "cycle tracking",
     "hormone health",
     "health coach",
-    "PCOD lifestyle management"
+    "PCOD lifestyle management",
   ],
 
   authors: [{ name: "WombCare Team" }],
@@ -94,6 +95,22 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-R88VXLF710"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-R88VXLF710');
+          `}
+        </Script>
       </body>
     </html>
   );
