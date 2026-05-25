@@ -4,8 +4,8 @@ import React from 'react';
 import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity, UserPlus, Calendar } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -26,42 +26,50 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           WOMBCARE <span className="text-slate-300 font-medium">ADMIN</span>
         </h1>
         
-        <div className="hidden md:flex items-center gap-1 p-1 bg-slate-50 rounded-xl">
+        <div className="hidden md:flex items-center gap-1 p-1 bg-slate-50 rounded-xl overflow-x-auto max-w-[70vw] md:max-w-none">
           <button 
             onClick={() => setActiveTab('registrations')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'registrations' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'registrations' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <LayoutDashboard className="w-4 h-4" /> Registrations
           </button>
           
           <button 
             onClick={() => setActiveTab('appointments')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'appointments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'appointments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Calendar className="w-4 h-4" /> Appointments
           </button>
 
           <button 
             onClick={() => setActiveTab('blogs')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'blogs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'blogs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <FileText className="w-4 h-4" /> Blogs
           </button>
+          
+          <button 
+            onClick={() => setActiveTab('classes')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'classes' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Video className="w-4 h-4" /> Classes
+          </button>
+
           <button 
             onClick={() => setActiveTab('careers')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'careers' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'careers' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Briefcase className="w-4 h-4" /> Careers
           </button>
           <button 
             onClick={() => setActiveTab('enrollments')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'enrollments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'enrollments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Activity className="w-4 h-4" /> Enrollments
           </button>
           <button 
             onClick={() => setActiveTab('doctor-requests')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'doctor-requests' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'doctor-requests' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <UserPlus className="w-4 h-4" /> Doctors
           </button>

@@ -4,7 +4,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments';
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes';
   onNewBlog: () => void;
   onNewCareer: () => void;
 }
@@ -19,6 +19,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'enrollments' ? 'Program Enrollments' : 
            activeTab === 'doctor-requests' ? 'Doctor Join Requests' :
            activeTab === 'appointments' ? 'Scheduled Sessions' :
+           activeTab === 'classes' ? 'Classes & Wellness' :
            'Career Opportunities'}
         </h2>
         <p className="text-slate-500">
@@ -27,6 +28,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'enrollments' ? 'Manage wellness program participants.' : 
            activeTab === 'doctor-requests' ? 'Review medical provider applications.' :
            activeTab === 'appointments' ? 'Manage coach and doctor consultations.' :
+           activeTab === 'classes' ? 'Configure live classes, recorded content, placements, and analytics.' :
            'Manage job openings and hiring.'}
         </p>
       </div>

@@ -9,6 +9,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
 import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
+import ClassManagement from '@/components/admin/ClassManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
@@ -31,7 +32,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -261,6 +262,8 @@ export default function AdminPage() {
           <AdminTable data={registrations} />
         ) : activeTab === 'enrollments' ? (
           <EnrollmentTable data={enrollments} />
+        ) : activeTab === 'classes' ? (
+          <ClassManagement apiKey={apiKey} />
         ) : activeTab === 'blogs' ? (
           <BlogList blogs={blogs} loading={loading} onEdit={(blog) => router.push(`/wombcare-admin-9984/blogs/edit/${blog.id}`)} onDelete={() => {}} />
         ) : activeTab === 'doctor-requests' ? (
