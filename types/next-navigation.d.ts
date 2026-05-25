@@ -1,4 +1,7 @@
 declare module 'next/navigation' {
+  export function notFound(): never;
+  export function redirect(url: string, type?: any): never;
+  
   export function useRouter(): {
     push(url: string, options?: any): void;
     replace(url: string, options?: any): void;
