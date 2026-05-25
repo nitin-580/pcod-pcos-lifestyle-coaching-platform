@@ -20,7 +20,7 @@ function generateSlug(title: string): string {
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
-  const backendBase = 'https://womb-care-backend-76858014616.us-central1.run.app/api';
+  const backendBase = 'https://womb-care-backend-76858014616.europe-west1.run.app/api';
   
   try {
     // 1. Try fetching by slug directly (in case backend is updated)

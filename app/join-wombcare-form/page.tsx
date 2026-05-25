@@ -39,7 +39,7 @@ export default function JoinWombCareFormPage() {
     setError(null);
 
     try {
-      const endpoint = 'https://womb-care-backend-76858014616.us-central1.run.app/api/enrollments';
+      const endpoint = 'https://womb-care-backend-76858014616.europe-west1.run.app/api/enrollments';
 
       const payload = {
         fullName: formData.fullName,

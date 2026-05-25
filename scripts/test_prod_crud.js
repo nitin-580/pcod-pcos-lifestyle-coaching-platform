@@ -1,4 +1,4 @@
-const BASE_URL = 'https://womb-care-backend-76858014616.us-central1.run.app/api';
+const BASE_URL = 'https://womb-care-backend-76858014616.europe-west1.run.app/api';
 const ADMIN_KEY = 'nitinisacoderandstudent';
 
 async function logResponse(name, res) {

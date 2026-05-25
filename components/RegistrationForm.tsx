@@ -27,7 +27,7 @@ export default function RegistrationForm() {
     };
 
     try {
-      const response = await fetch('https://womb-care-backend-76858014616.us-central1.run.app/api/early-access', {
+      const response = await fetch('https://womb-care-backend-76858014616.europe-west1.run.app/api/early-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

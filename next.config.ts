@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   async rewrites() {
-    const backendUrl = "https://womb-care-backend-76858014616.us-central1.run.app";
+    const backendUrl = "https://womb-care-backend-76858014616.europe-west1.run.app";
     return [
       {
         source: '/api/admin-proxy/:path*',
