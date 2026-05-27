@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, 
   Video, 
@@ -22,9 +22,18 @@ import {
   Layout, 
   ExternalLink,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Send,
+  Trash
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
+
+// Setup Supabase Client for Real-time chat monitor
+const SUPABASE_URL = "https://uzxejobfqbjldutqplpx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6eGVqb2JmcWJqbGR1dHFwbHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzU4MDQ1OSwiZXhwIjoyMDg5MTU2NDU5fQ.Fc-70eYP_73PmR0NZYGaaE3GnTltco0wBnPk7OpyagQ";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 interface ClassCategory {
   id: string;
@@ -82,6 +91,16 @@ interface AnalyticsData {
   }[];
 }
 
+interface ChatMessage {
+  id: string;
+  class_id: string;
+  user_id: string;
+  sender_name: string;
+  sender_role: 'user' | 'doctor' | 'admin';
+  message: string;
+  created_at: string;
+}
+
 interface ClassManagementProps {
   apiKey: string;
 }
@@ -101,6 +120,15 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'live' | 'recorded'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Live Chat Drawer States
+  const [activeChatClass, setActiveChatClass] = useState<WellnessClass | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [clearingChat, setClearingChat] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   
   // Modal / Form States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,11 +187,17 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       }
 
       setCategories(catsData.data || []);
-      setClasses(classesData.data || []);
+      
+      // Ensure tags is array
+      const cleanedClasses = (classesData.data || []).map((c: any) => ({
+        ...c,
+        tags: Array.isArray(c.tags) ? c.tags : []
+      }));
+      setClasses(cleanedClasses);
+      
       setPlacements(placementsData.data || []);
       setAnalytics(analyticsData);
       
-      // Auto-set category in form if categories exist
       if (catsData.data && catsData.data.length > 0 && !formFields.categoryId) {
         setFormFields(prev => ({ ...prev, categoryId: catsData.data[0].id }));
       }
@@ -172,6 +206,172 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       setError('Failed to fetch class management data. Please verify your connection or API key.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Setup Real-time Chat Subscription
+  useEffect(() => {
+    if (!activeChatClass) return;
+
+    // 1. Fetch initial chat history from Supabase
+    const loadChatHistory = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('wombcare_live_chats')
+          .select('*')
+          .eq('class_id', activeChatClass.id)
+          .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        setChatMessages(data || []);
+      } catch (err) {
+        console.error('Error fetching chat history:', err);
+      }
+    };
+    loadChatHistory();
+
+    // 2. Subscribe to realtime broadcast events
+    const channel = supabase
+      .channel(`live-chat-${activeChatClass.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wombcare_live_chats',
+          filter: `class_id=eq.${activeChatClass.id}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setChatMessages(prev => {
+              if (prev.some(m => m.id === payload.new.id)) return prev;
+              return [...prev, payload.new as ChatMessage];
+            });
+          } else if (payload.eventType === 'DELETE') {
+            // If rows are deleted (cleared chat), reset local list
+            setChatMessages([]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeChatClass]);
+
+  // Scroll Chat to bottom
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  // Send message as Admin
+  const handleSendAdminMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessageText.trim() || !activeChatClass) return;
+
+    setSendingMessage(true);
+    try {
+      const { error } = await supabase
+        .from('wombcare_live_chats')
+        .insert({
+          class_id: activeChatClass.id,
+          user_id: '00000000-0000-0000-0000-000000000000', // valid UUID format for static admin
+          sender_name: 'Dr. Aaradhya (Admin)',
+          sender_role: 'admin',
+          message: newMessageText.trim()
+        });
+
+      if (error) throw error;
+      setNewMessageText('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+      alert('Could not broadcast message.');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  // Clear Chat History for moderation
+  const handleClearChatHistory = async () => {
+    if (!activeChatClass || !window.confirm("Are you sure you want to delete ALL message history for this class? This cannot be undone!")) return;
+
+    setClearingChat(true);
+    try {
+      const { error } = await supabase
+        .from('wombcare_live_chats')
+        .delete()
+        .eq('class_id', activeChatClass.id);
+
+      if (error) throw error;
+      setChatMessages([]);
+      alert("Chat logs flushed successfully!");
+    } catch (err) {
+      console.error('Error clearing messages:', err);
+      alert('Failed to delete messages.');
+    } finally {
+      setClearingChat(false);
+    }
+  };
+
+  // Toggle Class Join Active Permission
+  const toggleClassActive = async (classId: string, currentStatus: boolean) => {
+    setUpdatingId(classId);
+    try {
+      const response = await fetch(`${getProxyBase()}/classes/${classId}`, {
+        method: 'PATCH',
+        headers: {
+          'x-admin-api-key': apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          isActive: !currentStatus
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle active state.');
+      }
+
+      await fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error updating status.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // Button Mode Selector (Meet vs YouTube)
+  const setButtonMode = async (classId: string, currentTags: string[], mode: 'gmeet' | 'youtube') => {
+    setUpdatingId(classId);
+    try {
+      const cleaned = (currentTags || []).filter(t => t !== 'button:gmeet' && t !== 'button:youtube');
+      const updatedTags = [...cleaned, `button:${mode}`];
+
+      const response = await fetch(`${getProxyBase()}/classes/${classId}`, {
+        method: 'PATCH',
+        headers: {
+          'x-admin-api-key': apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tags: updatedTags
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to change button configuration.');
+      }
+
+      await fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error setting mode.');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -198,7 +398,6 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
   const handleOpenEditModal = (cls: WellnessClass) => {
     setEditingClass(cls);
     
-    // Format scheduledAt to datetime-local friendly format (YYYY-MM-DDThh:mm)
     let formattedDate = '';
     if (cls.scheduledAt) {
       const d = new Date(cls.scheduledAt);
@@ -720,6 +919,10 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
               
               {filteredClasses.map((cls) => {
                 const category = categories.find(c => c.id === cls.categoryId);
+                const isJoinActive = cls.isActive !== false;
+                const isYoutubeMode = cls.tags?.includes('button:youtube');
+                const isMeetMode = cls.tags?.includes('button:gmeet') || (!isYoutubeMode && !!cls.googleMeetLink);
+
                 return (
                   <div 
                     key={cls.id}
@@ -735,7 +938,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                       />
                       
                       {/* Top Badges */}
-                      <div className="absolute top-4 left-4 flex gap-2">
+                      <div className="absolute top-4 left-4 flex gap-2 z-10">
                         <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm ${cls.type === 'live' ? 'bg-pink-600/90' : 'bg-purple-600/90'}`}>
                           {cls.type === 'live' ? '🔴 Live' : '🎬 Recorded'}
                         </span>
@@ -753,16 +956,32 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                     </div>
 
                     {/* Class Info */}
-                    <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="p-6 flex-1 flex flex-col justify-between gap-4">
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">
                             {category?.name || 'Wellness'}
                           </span>
-                          <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${cls.isActive ? 'text-green-500' : 'text-slate-400'}`}>
-                            <span className={`w-2 h-2 rounded-full ${cls.isActive ? 'bg-green-500' : 'bg-slate-300'}`} />
-                            {cls.isActive ? 'Active' : 'Inactive'}
-                          </span>
+                          
+                          {/* Live Switch Button */}
+                          <button
+                            onClick={() => toggleClassActive(cls.id, isJoinActive)}
+                            disabled={updatingId === cls.id}
+                            className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border transition-all ${
+                              isJoinActive 
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' 
+                                : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+                            }`}
+                          >
+                            {updatingId === cls.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                            ) : (
+                              <>
+                                <span className={`w-2 h-2 rounded-full ${isJoinActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                {isJoinActive ? 'Active' : 'Inactive'}
+                              </>
+                            )}
+                          </button>
                         </div>
 
                         <h4 className="font-extrabold text-slate-800 text-base leading-snug line-clamp-1 mb-2">
@@ -775,7 +994,41 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                       </div>
 
                       <div className="space-y-4">
-                        <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-500">
+                        
+                        {/* Dynamic Button Mode Selector (Google Meet vs YouTube Video watch) */}
+                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3">
+                          <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                            ⚙️ ACTIVE BUTTON TYPE SELECTOR
+                          </span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setButtonMode(cls.id, cls.tags, 'gmeet')}
+                              disabled={updatingId === cls.id}
+                              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                                isMeetMode 
+                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
+                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              <Video className="w-3.5 h-3.5" /> Meet Link
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setButtonMode(cls.id, cls.tags, 'youtube')}
+                              disabled={updatingId === cls.id}
+                              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                                isYoutubeMode 
+                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
+                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              <Play className="w-3.5 h-3.5" /> Watch Video
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-500">
                           <span className="font-semibold text-slate-600">Instructor: <span className="font-black text-slate-800">{cls.instructorName}</span></span>
                         </div>
 
@@ -788,7 +1041,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                           </div>
                         )}
 
-                        {/* Tags */}
+                        {/* Tags list */}
                         {cls.tags && cls.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {cls.tags.map(t => (
@@ -802,10 +1055,16 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                         {/* Admin Action Buttons */}
                         <div className="flex gap-2 pt-2">
                           <button
-                            onClick={() => handleOpenEditModal(cls)}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-50 text-slate-600 hover:bg-pink-50 hover:text-pink-600 rounded-xl text-xs font-bold transition-all"
+                            onClick={() => setActiveChatClass(cls)}
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl text-xs font-bold transition-all"
                           >
-                            <Edit3 className="w-3.5 h-3.5" /> Edit
+                            <MessageSquare className="w-3.5 h-3.5" /> Monitor Chat
+                          </button>
+                          <button
+                            onClick={() => handleOpenEditModal(cls)}
+                            className="flex items-center justify-center p-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition-all"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteClass(cls.id)}
@@ -846,14 +1105,13 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-lg text-slate-800">Featured Video Placements</h3>
-                  <p className="text-xs text-slate-400">Map specific wellness classes to Link 1 and Link 2 targets displayed on patient portals.</p>
+                  <p className="text-xs text-slate-400">Map specific wellness classes to Link 1, Link 2, and Link 3 targets displayed on patient portals.</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {placements.map(placement => {
-                // Find currently selected class details
                 const currentCls = classes.find(c => c.id === placement.classId);
                 const isPlacementActive = placement.isActive && currentCls;
 
@@ -879,7 +1137,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                           <img 
                             src={currentCls.thumbnailUrl} 
                             alt={currentCls.title}
-                            className="w-16 h-16 rounded-xl object-cover"
+                            className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                           />
                           <div className="min-w-0 flex-1">
                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider inline-block mb-1 ${currentCls.type === 'live' ? 'bg-pink-100 text-pink-600' : 'bg-purple-100 text-purple-600'}`}>
@@ -1003,7 +1261,140 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
 
       </AnimatePresence>
 
-      {/* 5. CLASS CREATE / EDIT DIALOG MODAL */}
+      {/* 5. LIVE CHAT DRAWER MODAL */}
+      <AnimatePresence>
+        {activeChatClass && (
+          <div className="fixed inset-0 z-50 overflow-hidden font-sans flex justify-end">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveChatClass(null)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" 
+            />
+
+            {/* Sidebar drawer content */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md bg-white h-full flex flex-col justify-between shadow-2xl border-l border-slate-100 z-10"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="min-w-0">
+                  <span className="text-[9px] bg-pink-100 text-pink-600 px-2 py-0.5 rounded font-black uppercase tracking-wider">
+                    REALTIME BROADCAST
+                  </span>
+                  <h3 className="text-base font-extrabold text-slate-900 truncate mt-1">
+                    {activeChatClass.title}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">Instructor: {activeChatClass.instructorName}</p>
+                </div>
+                
+                <button
+                  onClick={() => setActiveChatClass(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Chat messages workspace */}
+              <div 
+                ref={chatScrollRef}
+                className="flex-1 p-6 overflow-y-auto bg-slate-50/30 space-y-4 min-h-0"
+              >
+                {chatMessages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6">
+                    <MessageSquare className="w-10 h-10 text-slate-200 mb-2" />
+                    <p className="text-slate-400 text-sm font-semibold">No messages in room</p>
+                    <p className="text-slate-300 text-xs mt-1">Messages sent by patients or doctors will show up here in real time.</p>
+                  </div>
+                ) : (
+                  chatMessages.map((msg) => {
+                    const isSelf = msg.sender_role === 'admin';
+                    const isDoc = msg.sender_role === 'doctor';
+
+                    return (
+                      <div 
+                        key={msg.id}
+                        className={`flex flex-col ${isSelf ? 'items-end' : 'items-start'}`}
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[10px] font-black text-slate-500">{msg.sender_name}</span>
+                          <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
+                            isSelf ? 'bg-pink-100 text-pink-600' : isDoc ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'
+                          }`}>
+                            {msg.sender_role}
+                          </span>
+                        </div>
+                        <div className={`px-4 py-2.5 rounded-2xl text-xs max-w-[85%] leading-relaxed ${
+                          isSelf 
+                            ? 'bg-slate-900 text-white rounded-tr-none' 
+                            : 'bg-white border border-slate-150 text-slate-800 rounded-tl-none shadow-sm'
+                        }`}>
+                          {msg.message}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Command box input area */}
+              <div className="p-4 border-t border-slate-100 bg-white">
+                <form onSubmit={handleSendAdminMessage} className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    placeholder="Type official admin alert..."
+                    value={newMessageText}
+                    onChange={(e) => setNewMessageText(e.target.value)}
+                    className="flex-1 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={sendingMessage || !newMessageText.trim()}
+                    className="p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingMessage ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </button>
+                </form>
+
+                {/* Moderation Controls */}
+                <div className="flex items-center justify-between border-t border-slate-50 pt-3">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    Moderator Commands:
+                  </span>
+                  
+                  <button
+                    type="button"
+                    onClick={handleClearChatHistory}
+                    disabled={clearingChat || chatMessages.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-50"
+                  >
+                    {clearingChat ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Trash className="w-3.5 h-3.5" />
+                    )}
+                    Clear Room
+                  </button>
+                </div>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 6. CLASS CREATE / EDIT DIALOG MODAL */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 overflow-y-auto font-sans">
