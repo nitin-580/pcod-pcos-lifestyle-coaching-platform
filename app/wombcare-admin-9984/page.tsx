@@ -10,6 +10,7 @@ import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
 import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
 import ClassManagement from '@/components/admin/ClassManagement';
+import ReferralManagement from '@/components/admin/ReferralManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
@@ -32,7 +33,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -379,6 +380,8 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+        ) : activeTab === 'referrals' ? (
+          <ReferralManagement apiKey={apiKey} />
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}
