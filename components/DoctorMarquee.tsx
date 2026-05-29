@@ -60,7 +60,7 @@ export default function DoctorMarquee() {
           const merged = [...apiDoctors];
           MOCK_DOCTORS.forEach(mockDoc => {
             const cleanMockName = mockDoc.name.toLowerCase().replace(/dr\.\s*/g, '').trim();
-            const exists = apiDoctors.some(apiDoc => {
+            const exists = apiDoctors.some((apiDoc: DoctorItem) => {
               const cleanApiName = apiDoc.name.toLowerCase().replace(/dr\.\s*/g, '').trim();
               return cleanApiName === cleanMockName;
             });
