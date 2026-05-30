@@ -40,6 +40,7 @@ export default function AdminPage() {
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [patients, setPatients] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [careers, setCareers] = useState<any[]>([]);
   const [doctorRequests, setDoctorRequests] = useState<any[]>([]);
@@ -76,6 +77,7 @@ export default function AdminPage() {
       fetchBlogs(key),
       fetchCareers(key),
       fetchEnrollments(key),
+      fetchPatients(key),
       fetchDoctorRequests(key),
       fetchAdminAppointments(key)
     ]);
@@ -103,6 +105,18 @@ export default function AdminPage() {
       setEnrollments(result.data || []);
     } catch (err: any) {
       console.error('Fetch enrollments error:', err);
+    }
+  };
+
+  const fetchPatients = async (key: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/patients`, {
+        headers: { 'x-admin-api-key': key },
+      });
+      const result = await response.json();
+      setPatients(result.data || []);
+    } catch (err: any) {
+      console.error('Fetch patients error:', err);
     }
   };
 
@@ -272,7 +286,7 @@ export default function AdminPage() {
             </div>
           </div>
         ) : activeTab === 'patients' ? (
-          <PatientTable data={enrollments} />
+          <PatientTable data={patients} />
         ) : activeTab === 'classes' ? (
           <ClassManagement apiKey={apiKey} />
         ) : activeTab === 'blogs' ? (
