@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity, UserPlus, Calendar, Video, Share2 } from 'lucide-react';
+import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity, UserPlus, Calendar, Video, Share2, UserCircle } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -61,12 +61,21 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           >
             <Briefcase className="w-4 h-4" /> Careers
           </button>
+          
           <button 
             onClick={() => setActiveTab('enrollments')}
             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'enrollments' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Activity className="w-4 h-4" /> Enrollments
           </button>
+
+          <button 
+            onClick={() => setActiveTab('patients')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'patients' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <UserCircle className="w-4 h-4" /> Patients
+          </button>
+
           <button 
             onClick={() => setActiveTab('doctor-requests')}
             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'doctor-requests' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}

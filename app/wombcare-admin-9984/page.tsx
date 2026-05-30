@@ -9,6 +9,8 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import BlogList from '@/components/admin/BlogList';
 import CareerList from '@/components/admin/CareerList';
 import EnrollmentTable, { Enrollment } from '@/components/admin/EnrollmentTable';
+import EnrollmentForm from '@/components/admin/EnrollmentForm';
+import PatientTable from '@/components/admin/PatientTable';
 import ClassManagement from '@/components/admin/ClassManagement';
 import ReferralManagement from '@/components/admin/ReferralManagement';
 
@@ -33,7 +35,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -262,7 +264,15 @@ export default function AdminPage() {
         {activeTab === 'registrations' ? (
           <AdminTable data={registrations} />
         ) : activeTab === 'enrollments' ? (
-          <EnrollmentTable data={enrollments} />
+          <div className="space-y-8">
+            <EnrollmentForm registrations={registrations} onEnrollSuccess={() => fetchEnrollments(apiKey)} />
+            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-lg mb-4">Enrollment Logs</h3>
+              <EnrollmentTable data={enrollments} />
+            </div>
+          </div>
+        ) : activeTab === 'patients' ? (
+          <PatientTable data={enrollments} />
         ) : activeTab === 'classes' ? (
           <ClassManagement apiKey={apiKey} />
         ) : activeTab === 'blogs' ? (

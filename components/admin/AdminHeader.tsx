@@ -4,7 +4,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals';
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients';
   onNewBlog: () => void;
   onNewCareer: () => void;
 }
@@ -17,6 +17,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
           {activeTab === 'registrations' ? 'User Registrations' : 
            activeTab === 'blogs' ? 'Blog Management' : 
            activeTab === 'enrollments' ? 'Program Enrollments' : 
+           activeTab === 'patients' ? 'Patient Care Directory' : 
            activeTab === 'doctor-requests' ? 'Doctor Join Requests' :
            activeTab === 'appointments' ? 'Scheduled Sessions' :
            activeTab === 'classes' ? 'Classes & Wellness' :
@@ -27,6 +28,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
           {activeTab === 'registrations' ? 'Track early access registrations.' : 
            activeTab === 'blogs' ? 'Create and manage educational content.' : 
            activeTab === 'enrollments' ? 'Manage wellness program participants.' : 
+           activeTab === 'patients' ? 'View clinical medical profiles, diagnostic symptoms, and contact detail history for program participants.' : 
            activeTab === 'doctor-requests' ? 'Review medical provider applications.' :
            activeTab === 'appointments' ? 'Manage coach and doctor consultations.' :
            activeTab === 'classes' ? 'Configure live classes, recorded content, placements, and analytics.' :
