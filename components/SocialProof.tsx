@@ -42,6 +42,26 @@ export default function SocialProof() {
           </p>
         </div>
 
+        {/* Video Testimonial */}
+        <div className="relative w-full max-w-4xl mx-auto mb-16 group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-[2.2rem] blur opacity-20 group-hover:opacity-30 transition duration-1000" />
+          <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden bg-black border-4 border-white shadow-2xl">
+            <iframe
+              src="https://www.youtube.com/embed/SLBlfumkDXc"
+              title="WombCare Success Testimonial"
+              className="w-full h-full object-cover"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <div className="text-center mt-4">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-600 bg-pink-50 border border-pink-100 px-3 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-ping" />
+              Real Transformation Story
+            </span>
+          </div>
+        </div>
+
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((t, i) => (
