@@ -81,7 +81,7 @@ export default function FloatingNavbar() {
             {/* Login */}
             <Link
               href="/login"
-              className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-full border border-slate-200 bg-white hover:shadow-sm"
+              className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-xl border border-slate-200 bg-white hover:shadow-sm"
             >
               Login
             </Link>
@@ -89,7 +89,7 @@ export default function FloatingNavbar() {
             {/* CTA */}
             <Link
               href="/#register"
-              className="bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-95 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
+              className="bg-purple-600 hover:opacity-95 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
             >
               Join Early Access
             </Link>
@@ -134,7 +134,7 @@ export default function FloatingNavbar() {
 
           <Link
             href="/login"
-            className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-full font-semibold"
+            className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold"
             onClick={() => setMobileMenuOpen(false)}
           >
             Login
@@ -142,7 +142,7 @@ export default function FloatingNavbar() {
 
           <Link
             href="/#register"
-            className="w-full max-w-xs text-center bg-gradient-to-r from-purple-600 to-pink-500 text-white py-4 rounded-full font-semibold shadow-lg"
+            className="w-full max-w-xs text-center bg-purple-600 text-white py-4 rounded-xl font-semibold shadow-lg"
             onClick={() => setMobileMenuOpen(false)}
           >
             Join Early Access
