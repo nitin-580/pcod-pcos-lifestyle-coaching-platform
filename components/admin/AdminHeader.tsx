@@ -4,7 +4,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients';
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners';
   onNewBlog: () => void;
   onNewCareer: () => void;
 }
@@ -22,6 +22,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'appointments' ? 'Scheduled Sessions' :
            activeTab === 'classes' ? 'Classes & Wellness' :
            activeTab === 'referrals' ? 'Doctor Patient Referrals' :
+           activeTab === 'banners' ? 'Dashboard Banners' :
            'Career Opportunities'}
         </h2>
         <p className="text-slate-500">
@@ -33,6 +34,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'appointments' ? 'Manage coach and doctor consultations.' :
            activeTab === 'classes' ? 'Configure live classes, recorded content, placements, and analytics.' :
            activeTab === 'referrals' ? 'Track and convert patient referrals submitted by verified network doctors.' :
+           activeTab === 'banners' ? 'Add, edit, or configure mobile application dashboard banners.' :
            'Manage job openings and hiring.'}
         </p>
       </div>

@@ -13,6 +13,7 @@ import EnrollmentForm from '@/components/admin/EnrollmentForm';
 import PatientTable from '@/components/admin/PatientTable';
 import ClassManagement from '@/components/admin/ClassManagement';
 import ReferralManagement from '@/components/admin/ReferralManagement';
+import BannerManagement from '@/components/admin/BannerManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
@@ -35,7 +36,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -406,6 +407,8 @@ export default function AdminPage() {
           </div>
         ) : activeTab === 'referrals' ? (
           <ReferralManagement apiKey={apiKey} />
+        ) : activeTab === 'banners' ? (
+          <BannerManagement apiKey={apiKey} />
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}
