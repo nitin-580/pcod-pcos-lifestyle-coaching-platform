@@ -43,6 +43,9 @@ export default function ReferralManagement({ apiKey }: ReferralManagementProps) 
     email: ''
   });
 
+  const [convertingReferral, setConvertingReferral] = useState<Referral | null>(null);
+  const [emailInput, setEmailInput] = useState('');
+
   const fetchReferrals = async () => {
     setLoading(true);
     setError(null);
@@ -96,14 +99,16 @@ export default function ReferralManagement({ apiKey }: ReferralManagementProps) 
     }
   };
 
-  const handleConvertReferral = async (id: string) => {
+  const handleConvertReferral = async (id: string, email: string) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/admin-proxy/referrals/convert/${id}`, {
         method: 'POST',
         headers: { 
+          'Content-Type': 'application/json',
           'x-admin-api-key': apiKey 
-        }
+        },
+        body: JSON.stringify({ email })
       });
       const result = await res.json();
       if (result.success) {
@@ -117,7 +122,7 @@ export default function ReferralManagement({ apiKey }: ReferralManagementProps) 
         
         // Update local referrals status
         setReferrals(prev => 
-          prev.map(ref => ref.id === id ? { ...ref, referralStatus: 'converted', convertedPatientId: result.referral.convertedPatientId } : ref)
+          prev.map(ref => ref.id === id ? { ...ref, referralStatus: 'converted', convertedPatientId: result.referral.convertedPatientId, email } : ref)
         );
       } else {
         alert(result.message || 'Conversion failed');
@@ -290,7 +295,10 @@ export default function ReferralManagement({ apiKey }: ReferralManagementProps) 
 
                   {(ref.referralStatus === 'pending' || ref.referralStatus === 'contacted') && (
                     <button
-                      onClick={() => handleConvertReferral(ref.id)}
+                      onClick={() => {
+                        setConvertingReferral(ref);
+                        setEmailInput(ref.email || '');
+                      }}
                       className="px-6 py-3 text-xs font-black uppercase tracking-wider text-white bg-slate-900 hover:bg-slate-800 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 flex-1 sm:flex-none active:scale-[0.98]"
                     >
                       <UserCheck className="w-4 h-4" /> Convert to Patient
@@ -364,6 +372,68 @@ export default function ReferralManagement({ apiKey }: ReferralManagementProps) 
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-[0.98]"
                 >
                   Got it, close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Conversion Email Input Modal */}
+      <AnimatePresence>
+        {convertingReferral && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden p-8 space-y-6"
+            >
+              <div className="text-center">
+                <h3 className="text-xl font-black text-slate-800">Convert Referral</h3>
+                <p className="text-slate-500 text-sm mt-1">Please enter the email address for {convertingReferral.patientName}</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">Phone Number</span>
+                  <span className="text-sm font-bold text-slate-700">{convertingReferral.mobile}</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block pl-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="patient@email.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none text-sm text-slate-800"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConvertingReferral(null)}
+                  className="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3.5 rounded-2xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (!emailInput.trim()) {
+                      alert('Email address is required.');
+                      return;
+                    }
+                    const refId = convertingReferral.id;
+                    const mail = emailInput.trim();
+                    setConvertingReferral(null);
+                    handleConvertReferral(refId, mail);
+                  }}
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl shadow-md transition-all active:scale-[0.98]"
+                >
+                  Confirm Convert
                 </button>
               </div>
             </motion.div>
