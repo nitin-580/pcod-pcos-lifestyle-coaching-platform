@@ -98,7 +98,7 @@ export default function AdminPage() {
 
   const fetchEnrollments = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/enrollments`, {
+      const response = await fetch(`${API_BASE}/enrollments`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
@@ -110,7 +110,7 @@ export default function AdminPage() {
 
   const fetchPatients = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/patients`, {
+      const response = await fetch(`${API_BASE}/patients`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
