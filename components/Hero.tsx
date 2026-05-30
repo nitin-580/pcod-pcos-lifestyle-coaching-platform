@@ -209,13 +209,13 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/hormonal-check"
-                className="inline-block px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl hover:-translate-y-0.5 transition-all"
+                className="inline-block px-8 py-4 bg-pink-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:-translate-y-0.5 transition-all"
               >
                 Start Hormone Check
               </Link>
               <button
                 onClick={scrollToRegister}
-                className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold text-lg shadow-sm"
+                className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-lg shadow-sm"
               >
                 Join Early Access
               </button>

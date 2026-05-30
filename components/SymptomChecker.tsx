@@ -85,7 +85,11 @@ export default function SymptomChecker() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center space-y-6"
         >
-          <div className={`inline-flex items-center justify-center p-4 rounded-full mb-2 $\n            {result.level === 'High' ? 'bg-rose-100 text-rose-600' :\n            result.level === 'Moderate' ? 'bg-amber-100 text-amber-600' :\n            'bg-emerald-100 text-emerald-600'}`}>
+          <div className={`inline-flex items-center justify-center p-4 rounded-xl mb-2 ${
+            result.level === 'High' ? 'bg-rose-100 text-rose-600' :
+            result.level === 'Moderate' ? 'bg-amber-100 text-amber-600' :
+            'bg-emerald-100 text-emerald-600'
+          }`}>
             <span className="text-2xl font-bold">{result.level} Risk</span>
           </div>
           <p className="text-slate-600 leading-relaxed bg-slate-50 p-6 rounded-2xl">
