@@ -127,7 +127,7 @@ export default function DoctorMarquee() {
 
         <div className="grid grid-cols-3 md:grid-cols-3 gap-4 mt-8">
           <div className="bg-white rounded-2xl border border-slate-100 p-4 text-center shadow-sm">
-            <div className="text-2xl font-extrabold text-pink-600">9+</div>
+            <div className="text-2xl font-extrabold text-pink-600">50+</div>
             <div className="text-xs text-slate-500 mt-1">
               Clinical Experts
             </div>
