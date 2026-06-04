@@ -1,6 +1,7 @@
 import FloatingNavbar from '@/components/FloatingNavbar';
 import Hero from '@/components/Hero';
 import DoctorMarquee from '@/components/DoctorMarquee';
+import ApkDownload from '@/components/ApkDownload';
 import PeriodCards from '@/components/PeriodCards';
 import Counter from '@/components/Counter';
 import SymptomChecker from '@/components/SymptomChecker';
@@ -37,6 +38,7 @@ export default function Home() {
       <div className="flex-1">
         <Hero />
         <DoctorMarquee />
+        <ApkDownload />
         <Counter />
 
         {/* Symptom Checker Section */}
