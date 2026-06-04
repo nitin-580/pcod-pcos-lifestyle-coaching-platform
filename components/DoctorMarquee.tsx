@@ -67,139 +67,434 @@ const DOCTORS: DoctorItem[] = [
   }
 ];
 
+
 export default function DoctorMarquee() {
-  const marqueeItems = useMemo(() => {
-    return [...DOCTORS, ...DOCTORS];
-  }, []);
+
+  const marqueeItems = useMemo(
+    () => [...DOCTORS, ...DOCTORS],
+    []
+  );
+
 
   return (
-    <section className="py-12 bg-gradient-to-b from-slate-50 to-[#FCFDFB] overflow-hidden relative">
+
+    <section
+      className="
+      py-14
+      bg-gradient-to-b
+      from-slate-50
+      to-white
+      overflow-hidden
+      relative
+      "
+    >
+
+
+      {/* marquee animation */}
       <style
         dangerouslySetInnerHTML={{
-          __html: `
-            @keyframes marqueeScroll {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(-50%);
-              }
-            }
+          __html:`
 
-            .animate-marquee-infinite {
-              display: flex;
-              width: max-content;
-              animation: marqueeScroll 45s linear infinite;
-              will-change: transform;
-            }
+          @keyframes marqueeScroll {
 
-            .animate-marquee-infinite:hover {
-              animation-play-state: paused;
-            }
-          `,
+          0% {
+          transform:translateX(0)
+          }
+
+          100% {
+          transform:translateX(-50%)
+          }
+
+          }
+
+
+          .animate-marquee-infinite {
+          display:flex;
+          width:max-content;
+          animation:marqueeScroll 45s linear infinite;
+          }
+
+
+          .animate-marquee-infinite:hover {
+          animation-play-state:paused;
+          }
+
+          `
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+
+
+
+
+      {/* HEADER */}
+
+      <div className="max-w-7xl mx-auto px-6 mb-10">
+
+
+        <div
+          className="
+          flex
+          flex-col
+          lg:flex-row
+          lg:items-center
+          justify-between
+          gap-5
+          "
+        >
+
+
           <div>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-[0.2em] bg-pink-50 text-pink-600 border border-pink-100">
+
+
+            <span
+              className="
+              inline-flex
+              px-3
+              py-1
+              rounded-full
+              text-[10px]
+              font-black
+              uppercase
+              tracking-[0.2em]
+              bg-pink-50
+              text-pink-600
+              border
+              border-pink-100
+              "
+            >
               Clinical Excellence
             </span>
 
-            <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-slate-900">
+
+
+            <h2
+              className="
+              mt-3
+              text-3xl
+              md:text-4xl
+              font-extrabold
+              text-slate-900
+              "
+            >
+
               Meet WombCare's Expert Care Team
+
             </h2>
 
-            <p className="mt-2 text-slate-500 max-w-2xl">
-              Dedicated specialists in PCOS, fertility, nutrition,
-              endocrinology, mental wellness, yoga, and holistic healthcare.
+
+
+            <p
+              className="
+              mt-3
+              text-slate-500
+              max-w-2xl
+              "
+            >
+
+              Dedicated specialists in PCOS, fertility,
+              nutrition, hormonal health and holistic wellness.
+
             </p>
+
+
           </div>
 
-          <div className="flex items-center gap-2 bg-white border border-slate-100 rounded-full px-4 py-2 shadow-sm">
-            <Sparkles className="w-4 h-4 text-pink-500" />
+
+
+
+          <div
+            className="
+            flex
+            items-center
+            gap-2
+            bg-white
+            rounded-full
+            px-4
+            py-2
+            shadow-sm
+            border
+            "
+          >
+
+            <Sparkles className="w-4 h-4 text-pink-500"/>
+
             <span className="text-xs font-semibold text-slate-500">
               Hover to pause
             </span>
+
+
           </div>
+
+
         </div>
 
-        <div className="grid grid-cols-3 md:grid-cols-3 gap-4 mt-8">
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 text-center shadow-sm">
-            <div className="text-2xl font-extrabold text-pink-600">50+</div>
-            <div className="text-xs text-slate-500 mt-1">
-              Clinical Experts
+
+
+
+
+        {/* NATURAL TRUST SECTION */}
+
+        <div
+          className="
+          mt-8
+          flex
+          flex-col
+          sm:flex-row
+          sm:items-center
+          gap-5
+          "
+        >
+
+
+          {/* overlapping doctors */}
+
+          <div className="flex -space-x-3">
+
+
+            {DOCTORS.slice(0,5).map((doctor)=>(
+
+              <div
+
+                key={doctor.name}
+
+                className="
+                w-12
+                h-12
+                rounded-full
+                overflow-hidden
+                border-2
+                border-white
+                shadow
+                bg-slate-100
+                "
+              >
+
+                <img
+                  src={doctor.photo}
+                  alt={doctor.name}
+                  className="
+                  w-full
+                  h-full
+                  object-cover
+                  "
+                />
+
+              </div>
+
+            ))}
+
+
+
+            <div
+              className="
+              w-12
+              h-12
+              rounded-full
+              bg-[#FF4D8D]
+              text-white
+              flex
+              items-center
+              justify-center
+              font-bold
+              text-xs
+              border-2
+              border-white
+              "
+            >
+
+              +45
+
             </div>
+
+
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 text-center shadow-sm">
-            <div className="text-2xl font-extrabold text-pink-600">
-              Multi-Speciality
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              Women's Healthcare
-            </div>
+
+
+
+
+          <div>
+
+
+            <h3
+              className="
+              text-lg
+              font-extrabold
+              text-slate-900
+              "
+            >
+
+              50+ women's health experts
+
+            </h3>
+
+
+            <p
+              className="
+              text-sm
+              text-slate-500
+              "
+            >
+
+              Gynecologists, nutritionists and wellness specialists
+              supporting personalized care.
+
+            </p>
+
+
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 text-center shadow-sm">
-            <div className="text-2xl font-extrabold text-pink-600">
-              Personalized
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              Care & Guidance
-            </div>
-          </div>
+
         </div>
+
+
+
       </div>
+
+
+
+
+
+
+
+      {/* DOCTOR SLIDER */}
+
 
       <div className="relative overflow-hidden py-4">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
+
 
         <div className="animate-marquee-infinite gap-6 px-4">
-          {marqueeItems.map((doctor, index) => (
-            <div
-              key={`${doctor.name}-${index}`}
-              className="group w-[360px] bg-white rounded-3xl border border-slate-100 p-5 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all duration-300 shrink-0"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
-                  <img
-                    src={doctor.photo}
-                    alt={doctor.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
 
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-slate-900 text-sm leading-tight">
+
+          {marqueeItems.map((doctor,index)=>(
+
+
+            <div
+
+              key={`${doctor.name}-${index}`}
+
+              className="
+              w-[360px]
+              shrink-0
+              bg-white
+              rounded-3xl
+              border
+              border-slate-100
+              p-5
+              shadow-sm
+              hover:shadow-xl
+              hover:border-pink-200
+              transition-all
+              "
+            >
+
+
+
+              <div className="flex gap-4">
+
+
+                <img
+
+                  src={doctor.photo}
+
+                  alt={doctor.name}
+
+                  className="
+                  w-20
+                  h-20
+                  rounded-2xl
+                  object-cover
+                  "
+                />
+
+
+
+                <div>
+
+
+                  <div className="flex gap-2">
+
+
+                    <h3 className="font-bold text-sm">
+
                       {doctor.name}
+
                     </h3>
 
-                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+
+                    <CheckCircle
+                      className="
+                      w-4
+                      h-4
+                      text-green-500
+                      "
+                    />
+
+
                   </div>
 
-                  <p className="mt-1 text-xs font-semibold text-pink-600">
+
+
+
+                  <p className="text-xs font-semibold text-pink-600 mt-1">
+
                     {doctor.specialization}
+
                   </p>
 
-                  <p className="mt-1 text-[11px] text-slate-500 font-medium">
+
+                  <p className="text-xs text-slate-500 mt-1">
+
                     {doctor.credentials}
+
                   </p>
 
-                  <div className="mt-3">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">
-                      WombCare Verified
-                    </span>
-                  </div>
+
+
+                  <span
+                    className="
+                    inline-block
+                    mt-3
+                    px-2
+                    py-1
+                    bg-green-50
+                    text-green-700
+                    rounded-md
+                    text-[9px]
+                    font-bold
+                    "
+                  >
+
+                    WombCare Verified
+
+                  </span>
+
+
                 </div>
+
+
+
               </div>
+
+
+
             </div>
+
+
           ))}
+
+
+
         </div>
+
+
       </div>
+
+
+
     </section>
+
   );
+
 }
