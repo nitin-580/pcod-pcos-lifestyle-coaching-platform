@@ -1,251 +1,508 @@
 'use client';
 
 import { motion } from "framer-motion";
-import Link from 'next/link';
-import HormoneQuiz from '@/components/HormoneQuiz';
+import Link from "next/link";
+import HormoneQuiz from "@/components/HormoneQuiz";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 
-type FloatingCardProps = {
-  position?: string;
-  width?: string;
-  delay?: number;
-  children: React.ReactNode;
-};
 
-function FloatingCard({
-  position = "",
-  width = "w-[200px]",
-  delay = 0,
-  children,
-}: FloatingCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay }}
-      className={`absolute ${position} z-20 hidden md:block`}
-    >
-      <motion.div
-        animate={{ y: [-10, 10, -10] }}
-        transition={{
-          repeat: Infinity,
-          duration: 6,
-          ease: "easeInOut",
-        }}
-        className={`${width} backdrop-blur-xl bg-white/70 border border-white/40 shadow-xl rounded-3xl p-5`}
-      >
-        {children}
-      </motion.div>
-    </motion.div>
-  );
-}
+export default function Hero(){
 
-export default function Hero() {
-  const col1 = [
-    "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1498837167922-41c992d9bc02?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1594824432258-f7b77ab6ef89?q=80&w=600&auto=format&fit=crop"
-  ];
 
-  const col2 = [
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"
-  ];
+return (
 
-  const col3 = [
-    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1554721453-2ce52bf44bd2?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1595152772096-72c45b0d0c35?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop"
-  ];
+<section
+className="
+relative
+overflow-hidden
+min-h-screen
+bg-[#FFFBFA]
+flex
+items-center
+"
+>
 
-  const col4 = [
-    "https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1522844990619-4951c40f7eda?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1556817411-31ae72fa3ea8?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1434493789847-2f02bffa93ea?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1512438248247-f0f2a5a8b7f0?q=80&w=600&auto=format&fit=crop"
-  ];
 
-  const scrollToRegister = () => {
-    const section = document.getElementById("register");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+{/* Soft background */}
 
-  const scrollToHormone = () => {
-    const section = document.getElementById("hormone");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+<div
+className="
+absolute
+top-10
+right-0
+w-[500px]
+h-[500px]
+bg-pink-100/60
+rounded-full
+blur-[130px]
+"
+/>
 
-  const ImageColumn = ({
-    images,
-    direction,
-    duration,
-    hiddenClass = ""
-  }: {
-    images: string[];
-    direction: 'up' | 'down';
-    duration: number;
-    hiddenClass?: string;
-  }) => (
-    <div className={`relative h-[150vh] w-[140px] sm:w-[200px] md:w-[240px] lg:w-[260px] overflow-hidden ${hiddenClass}`}>
-      <motion.div
-        className="flex flex-col gap-4 sm:gap-6"
-        animate={{
-          y: direction === 'up' ? ['-50%', '0%'] : ['0%', '-50%']
-        }}
-        transition={{
-          y: {
-            repeat: Infinity,
-            repeatType: "loop",
-            duration,
-            ease: "linear",
-          },
-        }}
-      >
-        {[...images, ...images].map((src, i) => (
-          <div
-            key={i}
-            className="w-full h-[180px] sm:h-[260px] md:h-[300px] lg:h-[320px] rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-sm opacity-40 hover:opacity-60 transition-opacity duration-500"
-          >
-            <img
-              src={src}
-              alt="Wellness Lifestyle"
-              loading="lazy"
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
-        ))}
-      </motion.div>
-    </div>
-  );
+<div
+className="
+absolute
+bottom-0
+left-0
+w-[450px]
+h-[450px]
+bg-purple-100/50
+rounded-full
+blur-[120px]
+"
+/>
 
-  return (
-    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-white">
 
-      {/* Background Images */}
-      <div className="absolute inset-0 w-full h-full z-0 flex justify-center gap-4 sm:gap-6 lg:gap-8 pt-10 px-2 sm:px-4 transform -translate-y-10 overflow-hidden mask-hero-grid">
-        <ImageColumn images={col1} direction="up" duration={35} />
-        <ImageColumn images={col2} direction="down" duration={30} />
-        <ImageColumn images={col3} direction="up" duration={38} hiddenClass="hidden md:block" />
-        <ImageColumn images={col4} direction="down" duration={32} hiddenClass="hidden lg:block" />
-      </div>
 
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.95) 100%)"
-        }}
-      />
 
-      {/* Floating Cards */}
-      {/* <FloatingCard position="top-[140px] left-[8%]" delay={0.2}>
-        <p className="text-xs text-slate-500">Cycle Length</p>
-        <p className="text-2xl font-bold text-pink-600">28 Days</p>
-      </FloatingCard>
+<div
+className="
+relative
+z-10
+max-w-7xl
+mx-auto
+px-6
+py-24
+grid
+lg:grid-cols-2
+gap-20
+items-center
+"
+>
 
-      <FloatingCard position="bottom-[220px] left-[10%]" width="w-[220px]" delay={0.4}>
-        <p className="text-sm text-slate-600">Ovulation Window</p>
-        <p className="text-lg font-semibold text-purple-600">Day 13 - 15</p>
-      </FloatingCard>
 
-      <FloatingCard position="bottom-[180px] right-[8%]" width="w-[220px]" delay={0.6}>
-        <p className="text-xs text-slate-500">Progesterone</p>
-        <p className="text-lg font-semibold text-pink-600">Moderate</p>
-      </FloatingCard> */}
 
-      {/* Main Hero Layout */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-6 md:px-12 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+{/* LEFT CONTENT */}
 
-          {/* Left Content */}
-          <div className="space-y-8 text-center lg:text-left">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold mb-4 uppercase tracking-widest"
-            >
-              India’s Most Trusted Digital PCOD Care Platform
-            </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-5xl md:text-6xl xl:text-7xl font-extrabold text-slate-800 tracking-tight"
-            >
-              Take Control of PCOD &{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">
-                Period Health
-              </span>
-            </motion.h1>
+<motion.div
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl"
-            >
-              Meet your personal AI lifestyle coach designed to help you
-              balance hormones, master your cycle, and thrive every day.
-            </motion.p>
+initial={{
+opacity:0,
+y:30
+}}
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/hormonal-check"
-                className="inline-block px-8 py-4 bg-pink-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:-translate-y-0.5 transition-all"
-              >
-                Start Hormone Check
-              </Link>
-              <button
-                onClick={scrollToRegister}
-                className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-lg shadow-sm"
-              >
-                Join Early Access
-              </button>
-            </div>
-          </div>
+animate={{
+opacity:1,
+y:0
+}}
 
-          {/* Right Quiz */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, delay: 0.3 }}
-            className="max-w-lg mx-auto w-full"
-          >
-            <div className="rounded-[2rem] md:p-8">
-              <HormoneQuiz />
-            </div>
-          </motion.div>
-        </div>
-      </div>
+transition={{
+duration:.7
+}}
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .mask-hero-grid {
-              -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
-              mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
-            }
-          `
-        }}
-      />
-    </section>
-  );
+className="
+max-w-2xl
+"
+
+>
+
+
+<div
+className="
+inline-flex
+items-center
+gap-3
+mb-8
+text-sm
+font-semibold
+text-slate-600
+"
+>
+
+
+<span
+className="
+w-2
+h-2
+rounded-full
+bg-[#FF4D8D]
+"
+/>
+
+
+India's digital PCOS & hormone care platform
+
+
+</div>
+
+
+
+
+
+<h1
+className="
+text-5xl
+md:text-7xl
+font-black
+tracking-tight
+leading-[1.08]
+text-slate-950
+"
+>
+
+Your body has
+<br/>
+a pattern.
+
+
+<span
+className="
+relative
+inline-block
+ml-3
+mt-3
+"
+>
+
+
+{/* tilted background */}
+<span
+className="
+absolute
+inset-0
+bg-[#FFF7EF]
+rounded-3xl
+rotate-[-3deg]
+shadow-sm
+border
+border-orange-100
+"
+/>
+
+
+<span
+className="
+relative
+z-10
+px-5
+py-1
+inline-block
+text-[#FF4D8D]
+"
+>
+
+WombCare
+
+</span>
+
+
+</span>
+
+
+<br/>
+
+
+helps you find it.
+
+
+</h1>
+
+
+
+
+<p
+className="
+mt-8
+text-xl
+leading-relaxed
+text-slate-600
+max-w-xl
+"
+>
+
+Understand your cycle, PCOS symptoms,
+mood changes and lifestyle patterns through
+personalized wellness insights.
+
+
+</p>
+
+
+
+
+
+{/* CTA */}
+
+
+<div
+className="
+mt-10
+flex
+flex-col
+sm:flex-row
+gap-4
+"
+>
+
+
+<Link
+
+href="/hormonal-check"
+
+className="
+px-8
+py-4
+rounded-full
+bg-slate-950
+text-white
+font-bold
+flex
+items-center
+justify-center
+gap-2
+shadow-lg
+hover:-translate-y-1
+transition
+"
+
+>
+
+Start free check
+
+<ArrowRight size={18}/>
+
+
+</Link>
+
+
+
+
+<button
+
+onClick={()=>{
+
+document
+.getElementById("register")
+?.scrollIntoView({
+behavior:"smooth"
+})
+
+
+}}
+
+className="
+px-8
+py-4
+rounded-full
+bg-white
+border
+border-slate-200
+font-bold
+text-slate-700
+shadow-sm
+"
+
+>
+
+Join early access
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+{/* TRUST LINE */}
+
+
+<div
+className="
+mt-14
+flex
+items-center
+gap-4
+"
+>
+
+
+<div
+className="
+w-12
+h-12
+rounded-full
+bg-white
+shadow
+flex
+items-center
+justify-center
+"
+>
+
+<ShieldCheck
+className="
+text-[#FF4D8D]
+"
+/>
+
+
+</div>
+
+
+
+<div>
+
+
+<p
+className="
+font-bold
+text-slate-900
+"
+>
+
+Designed with women's wellness experts
+
+</p>
+
+
+<p
+className="
+text-sm
+text-slate-500
+"
+>
+
+Cycle tracking • PCOS care • Lifestyle guidance
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+</motion.div>
+
+
+
+
+
+
+
+{/* RIGHT QUIZ */}
+
+
+<motion.div
+
+initial={{
+opacity:0,
+x:40
+}}
+
+animate={{
+opacity:1,
+x:0
+}}
+
+transition={{
+duration:.8,
+delay:.2
+}}
+
+className="
+relative
+flex
+justify-center
+"
+
+>
+
+
+{/* Background glow */}
+
+<div
+className="
+absolute
+top-20
+w-[420px]
+h-[420px]
+blur-[100px]
+"
+/>
+
+
+
+
+
+{/* Floating Character */}
+
+<motion.div
+  animate={{
+    y:[0,-14,0]
+  }}
+  transition={{
+    duration:5,
+    repeat:Infinity,
+    ease:"easeInOut"
+  }}
+  className="
+    absolute
+    -top-20
+    left-1/2
+    -translate-x-1/2
+    z-20
+    hidden
+    md:block
+  "
+>
+
+<Image
+  src="/images/wellness-character.png"
+  alt="Women's wellness"
+  width={400}
+  height={400}
+  className="
+    drop-shadow-2xl
+  "
+/>
+
+</motion.div>
+
+
+
+
+
+{/* Quiz Card */}
+
+<div
+className="
+relative
+mt-16
+rounded-[2rem]
+shadow-[0_35px_90px_rgba(255,77,141,0.16)]
+
+"
+
+>
+
+<HormoneQuiz/>
+
+
+</div>
+
+
+
+</motion.div>
+
+
+
+
+</div>
+
+
+</section>
+
+
+)
+
 }
