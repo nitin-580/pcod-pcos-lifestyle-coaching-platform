@@ -47,7 +47,7 @@ export default function ApkDownload() {
             {/* Download Button */}
             <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <a
-                href="/download/Wombcare.apk"
+                href="https://pub-a67185b5775c4b26ab3cebd36d579b22.r2.dev/wombcare.apk"
                 download
                 className="inline-flex items-center justify-center gap-3.5 px-8 py-4.5 bg-slate-900 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-slate-800 transition-all text-sm group"
               >
