@@ -48,6 +48,7 @@ export default function Footer() {
               <Link href="/refund-policy" className="block hover:text-pink-400 transition-colors">Refund Policy</Link>
               <Link href="/terms-and-conditions" className="block hover:text-pink-400 transition-colors">Terms & Conditions</Link>
               <Link href="/delete-account" className="block hover:text-pink-400 transition-colors">Delete Account</Link>
+              <Link href="/support" className="block hover:text-pink-400 transition-colors">Support</Link>
             </div>
           </div>
 
