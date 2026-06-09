@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 
 const PLANS = {
   basic: {
-    name: 'Basic Plan',
+    name: 'Essential Care',
     price: 999,
     duration: '/month',
     description: 'Perfect for getting started with PCOD wellness.',
@@ -20,7 +20,7 @@ const PLANS = {
     ]
   },
   premium: {
-    name: 'Premium Plan',
+    name: 'Complete PCOD Care',
     price: 2999,
     duration: '/3 months',
     description: 'Our most popular and recommended PCOD reversal program.',
@@ -34,7 +34,7 @@ const PLANS = {
     ]
   },
   conceive: {
-    name: 'Conceive Plan',
+    name: 'Conceive Care',
     price: 4999,
     duration: '/3 months',
     description: 'Designed for fertility support and conception wellness.',
@@ -51,8 +51,21 @@ const PLANS = {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const planKey = (searchParams.get('plan') || 'premium').toLowerCase();
-  const selectedPlan = PLANS[planKey as keyof typeof PLANS] || PLANS.premium;
+  
+  // Dynamic parsing and mapping of selected plan
+  const rawPlan = searchParams.get('plan') || 'premium';
+  const cleanPlan = rawPlan.toLowerCase().trim();
+  
+  let planKey: 'basic' | 'premium' | 'conceive' = 'premium';
+  if (cleanPlan.includes('essential') || cleanPlan.includes('basic')) {
+    planKey = 'basic';
+  } else if (cleanPlan.includes('pcod') || cleanPlan.includes('complete') || cleanPlan.includes('premium')) {
+    planKey = 'premium';
+  } else if (cleanPlan.includes('conceive')) {
+    planKey = 'conceive';
+  }
+  
+  const selectedPlan = PLANS[planKey];
 
   const [formData, setFormData] = useState({ name: '', email: '', mobile: '' });
   const [loading, setLoading] = useState(false);
