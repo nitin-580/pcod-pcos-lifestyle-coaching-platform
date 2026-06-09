@@ -39,7 +39,6 @@ export default function Home() {
         <Hero />
         <DoctorMarquee />
         <ApkDownload />
-        <Counter />
 
         {/* Symptom Checker Section */}
         <section className="py-24 bg-white relative overflow-hidden">
