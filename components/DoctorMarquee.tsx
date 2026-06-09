@@ -437,13 +437,6 @@ export default function DoctorMarquee() {
 
 
 
-                  <p className="text-xs font-semibold text-pink-600 mt-1">
-
-                    {doctor.specialization}
-
-                  </p>
-
-
                   <p className="text-xs text-slate-500 mt-1">
 
                     {doctor.credentials}
