@@ -213,7 +213,7 @@ export default function LoginPage() {
             </h2>
 
             <p className="text-2xl leading-relaxed text-slate-600">
-              WombCare helps women take control of PCOD,
+              WombCare helps women take control of PMOS,
               periods, fertility, and overall wellness
               through expert guidance, tracking, and
               personalized care.

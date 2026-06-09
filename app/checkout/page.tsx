@@ -11,7 +11,7 @@ const PLANS = {
     name: 'Essential Care',
     price: 999,
     duration: '/month',
-    description: 'Perfect for getting started with PCOD wellness.',
+    description: 'Perfect for getting started with PMOS wellness.',
     features: [
       'Personalized diet suggestions',
       'Basic period tracker',
@@ -20,12 +20,12 @@ const PLANS = {
     ]
   },
   premium: {
-    name: 'Complete PCOD Care',
+    name: 'Complete PMOS Care',
     price: 2999,
     duration: '/3 months',
-    description: 'Our most popular and recommended PCOD reversal program.',
+    description: 'Our most popular and recommended PMOS reversal program.',
     features: [
-      'Custom PCOD lifestyle plan',
+      'Custom PMOS lifestyle plan',
       'Nutrition + yoga guidance',
       'Hormonal health tracking',
       '1-on-1 coach consultation',
@@ -59,7 +59,7 @@ function CheckoutContent() {
   let planKey: 'basic' | 'premium' | 'conceive' = 'premium';
   if (cleanPlan.includes('essential') || cleanPlan.includes('basic')) {
     planKey = 'basic';
-  } else if (cleanPlan.includes('pcod') || cleanPlan.includes('complete') || cleanPlan.includes('premium')) {
+  } else if (cleanPlan.includes('pcod') || cleanPlan.includes('pmos') || cleanPlan.includes('complete') || cleanPlan.includes('premium')) {
     planKey = 'premium';
   } else if (cleanPlan.includes('conceive')) {
     planKey = 'conceive';

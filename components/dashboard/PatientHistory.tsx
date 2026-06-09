@@ -4,7 +4,7 @@ const patientRecords = [
   {
     name: 'Priya Sharma',
     age: 24,
-    condition: 'PCOD Consultation',
+    condition: 'PMOS Consultation',
     lastVisit: '02 Apr 2026',
     status: 'Follow-up Due',
   },

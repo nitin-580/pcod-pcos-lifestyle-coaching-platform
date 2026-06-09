@@ -36,7 +36,7 @@ export default function PatientTable({ data }: PatientTableProps) {
             Enrolled Program Patients
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Active care members currently undergoing PCOD/PCOS recovery and coaching programs.
+            Active care members currently undergoing PMOS recovery and coaching programs.
           </p>
         </div>
         

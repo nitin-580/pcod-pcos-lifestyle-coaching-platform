@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
                   Health Information
                 </h3>
                 <ul className="list-disc pl-6 space-y-1">
-                  <li>PCOD/PCOS symptoms</li>
+                  <li>PMOS symptoms</li>
                   <li>Menstrual cycle details</li>
                   <li>Diet and lifestyle habits</li>
                   <li>Health assessment responses</li>
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
               2. How We Use Your Information
             </h2>
             <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
-              <li>Provide the WombCare PCOD reversal program</li>
+              <li>Provide the WombCare PMOS reversal program</li>
               <li>Personalize diet and lifestyle recommendations</li>
               <li>Improve our services and digital tools</li>
               <li>Communicate program updates and health information</li>
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
             </h2>
             <p className="text-slate-600 leading-relaxed">
               WombCare provides lifestyle guidance and educational content
-              related to PCOD/PCOS management. Our services are not a substitute
+              related to PMOS management. Our services are not a substitute
               for professional medical diagnosis or treatment. Users should
               consult qualified healthcare professionals for medical advice.
             </p>

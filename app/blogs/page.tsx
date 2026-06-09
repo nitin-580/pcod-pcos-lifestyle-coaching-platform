@@ -55,7 +55,7 @@ export default function BlogsPage() {
               transition={{ delay: 0.1 }}
               className="text-lg text-slate-600 max-w-2xl mx-auto"
             >
-              Insights, expert advice, and community stories about PCOD, hormone health, and mindful living.
+              Insights, expert advice, and community stories about PMOS, hormone health, and mindful living.
             </motion.p>
           </div>
         </section>

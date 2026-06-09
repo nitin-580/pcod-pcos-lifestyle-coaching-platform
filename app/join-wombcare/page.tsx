@@ -26,7 +26,7 @@ export default function JoinWombCarePage() {
 
           <p className="mt-6 text-xl text-slate-600 max-w-3xl leading-8">
             Begin your structured hormonal wellness journey with clinically
-            informed lifestyle programs designed for PCOD, cycle health,
+            informed lifestyle programs designed for PMOS, cycle health,
             fertility support, and long-term wellness.
           </p>
         </div>
@@ -45,7 +45,7 @@ export default function JoinWombCarePage() {
               <div className="space-y-6">
                 {[
                   'Personalized hormonal wellness roadmap',
-                  'PCOD and menstrual cycle management',
+                  'PMOS and menstrual cycle management',
                   'Fertility and lifestyle guidance',
                   'Structured nutrition and movement support',
                   'Continuous expert-led community access',

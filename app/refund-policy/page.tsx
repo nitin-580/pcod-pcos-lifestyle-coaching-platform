@@ -37,7 +37,7 @@ export default function RefundPolicyPage() {
               1. Program Fees
             </h2>
             <p className="text-slate-600 leading-relaxed">
-              WombCare offers digital wellness programs, including the PCOD
+              WombCare offers digital wellness programs, including the PMOS
               Reversal Program priced at <span className="font-semibold">₹2999 for 3 months</span>.
               All payments must be made through approved payment methods
               available on the WombCare platform.

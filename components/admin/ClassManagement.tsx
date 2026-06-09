@@ -1449,7 +1449,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                         required
                         value={formFields.title}
                         onChange={(e) => setFormFields(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="e.g. Hormonal PCOS Yoga Flow"
+                        placeholder="e.g. Hormonal PMOS Yoga Flow"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
                       />
                     </div>
@@ -1581,7 +1581,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                         type="text" 
                         value={formFields.tagsString}
                         onChange={(e) => setFormFields(prev => ({ ...prev, tagsString: e.target.value }))}
-                        placeholder="e.g. yoga, pcos, meditation, daily"
+                        placeholder="e.g. yoga, pmos, meditation, daily"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
                       />
                     </div>

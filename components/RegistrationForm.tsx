@@ -93,7 +93,7 @@ export default function RegistrationForm() {
           </h2>
           
           <p className="text-lg text-slate-600 leading-relaxed mb-8">
-            Join our comprehensive PCOD coaching program. Get personalized care, expert guidance, and a community that understands exactly what you're going through.
+            Join our comprehensive PMOS coaching program. Get personalized care, expert guidance, and a community that understands exactly what you're going through.
           </p>
 
           <div className="flex flex-col gap-4 text-left inline-block mt-2">
@@ -115,8 +115,8 @@ export default function RegistrationForm() {
           
           <div className="relative bg-white/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl md:rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-white">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-slate-800 mb-2">Book Consultation</h3>
-              <p className="text-slate-500 text-sm">Fill in your details to schedule your consultation.</p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Book Session</h3>
+              <p className="text-slate-500 text-sm">Fill in your details to schedule your session.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">

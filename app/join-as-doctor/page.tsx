@@ -138,7 +138,7 @@ export default function JoinDoctorPage() {
             <div className="space-y-5">
               {[
                 { title: 'Better patient retention', desc: 'Keep patients engaged and compliant between clinic visits.' },
-                { title: 'Structured PCOD programs', desc: 'Pre-designed digital lifestyle coaching plans for your patients.' },
+                { title: 'Structured PMOS programs', desc: 'Pre-designed digital lifestyle coaching plans for your patients.' },
                 { title: 'Pregnancy tracking', desc: 'Provide step-by-step prenatal monitoring and milestone support.' },
                 { title: 'Dietician access', desc: 'Direct support from in-house nutritionists to augment medical prescriptions.' },
                 { title: 'Tech-enabled follow-up', desc: 'Automate reminders, vitals logging, and digital health records.' },

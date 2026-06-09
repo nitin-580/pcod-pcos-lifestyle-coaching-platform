@@ -38,7 +38,7 @@ export default function TermsAndConditionsPage() {
             </h2>
             <p className="text-slate-600 leading-relaxed">
               WombCare is a digital wellness platform that provides lifestyle
-              guidance and educational programs related to PCOD/PCOS management,
+              guidance and educational programs related to PMOS management,
               including nutrition guidance, yoga sessions, health tracking
               tools, and lifestyle coaching.
             </p>
@@ -69,7 +69,7 @@ export default function TermsAndConditionsPage() {
               3. Services Provided
             </h2>
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
-              <li>PCOD assessment questionnaires</li>
+              <li>PMOS assessment questionnaires</li>
               <li>Nutrition and lifestyle plans</li>
               <li>Yoga and wellness guidance</li>
               <li>Diet, period, and water trackers</li>
@@ -106,7 +106,7 @@ export default function TermsAndConditionsPage() {
               Certain WombCare services require payment.
             </p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600 mt-4">
-              <li>PCOD Reversal Program – ₹2999 for 3 months</li>
+              <li>PMOS Reversal Program – ₹2999 for 3 months</li>
             </ul>
             <p className="text-slate-600 leading-relaxed mt-4">
               WombCare reserves the right to change pricing at any time.

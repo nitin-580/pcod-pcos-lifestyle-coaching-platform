@@ -28,7 +28,7 @@ export default function AboutPage() {
 
           <p className="text-xl text-slate-600 leading-relaxed mb-12">
             Supporting women through structured hormonal wellness,
-            PCOD care, cycle health, and long-term lifestyle
+            PMOS care, cycle health, and long-term lifestyle
             transformation.
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function AboutPage() {
 
             <p className="text-lg text-slate-600 leading-9">
               Millions of women experience symptoms such as
-              irregular periods, PCOD / PCOS, acne, weight
+              irregular periods, PMOS, acne, weight
               fluctuations, stress-related cycle disruption, and
               fertility concerns.
             </p>

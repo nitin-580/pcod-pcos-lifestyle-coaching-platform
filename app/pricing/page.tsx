@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import FloatingNavbar from '@/components/FloatingNavbar';
 import PricingTable from '@/components/PricingTable';
+import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Pricing | WombCare',
   description:
-    'Explore affordable hormonal wellness and PCOD care plans designed for every woman.',
+    'Explore affordable hormonal wellness and PMOS care plans designed for every woman.',
 };
 
 export default function PricingPage() {
@@ -26,26 +27,17 @@ export default function PricingPage() {
           </h1>
 
           <p className="text-lg text-slate-600 mt-6 max-w-3xl mx-auto leading-8">
-            Personalized plans built for PCOD, cycle balance, nutrition,
+            Personalized plans built for PMOS, cycle balance, nutrition,
             fertility wellness, and long-term lifestyle transformation.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link
-              href="/hormonal-check"
-              className="px-6 py-3 rounded-2xl border border-slate-200 bg-white font-semibold text-slate-700 hover:shadow-sm transition-all"
+              href="#pricing"
+              className="px-6 py-3 rounded-2xl bg-purple-600 text-white font-semibold shadow-lg hover:bg-purple-700 transition-all animate-bounce-subtle"
             >
-              Take Free Health Check
+              View Plans
             </Link>
-
-            <a
-              href="https://chat.whatsapp.com/CAFOBPDpyPBA8vG1H9oDTP"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-2xl bg-green-500 text-white font-semibold shadow-lg hover:opacity-95 transition-all"
-            >
-              Join WhatsApp Community
-            </a>
           </div>
         </div>
       </section>
@@ -67,7 +59,7 @@ export default function PricingPage() {
 
           <div className="grid md:grid-cols-4 gap-6 mt-12">
             {[
-              'PCOD-focused care',
+              'PMOS-focused care',
               'Affordable pricing',
               'Doctor-backed guidance',
               'Long-term habit support',
@@ -83,35 +75,28 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="py-24 bg-gradient-to-r from-pink-50 to-purple-50 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-slate-800 mb-4">
-            Start your healing journey today
+      {/* WhatsApp Support Community */}
+      <section className="py-16 bg-gradient-to-r from-pink-50 to-purple-50 px-6">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">
+            Join Our Support Community
           </h2>
-
-          <p className="text-lg text-slate-600 mb-8">
-            Take control of your hormonal health with a plan that fits your
-            lifestyle.
+          <p className="text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
+            Connect with women on their hormonal wellness journey. Get daily support, expert guidance, and healthy lifestyle tips.
           </p>
-
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/join-wombcare"
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-xl"
+          <div>
+            <a
+              href="https://chat.whatsapp.com/CAFOBPDpyPBA8vG1H9oDTP"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-green-500 text-white font-bold shadow-lg hover:bg-green-600 hover:-translate-y-0.5 transition-all duration-300 gap-2"
             >
-              Get Started
-            </Link>
-
-            <Link
-              href="/hormonal-check"
-              className="px-8 py-4 rounded-2xl border border-slate-300 bg-white font-semibold text-slate-700"
-            >
-              Check My Health First
-            </Link>
+              Join WhatsApp Community
+            </a>
           </div>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

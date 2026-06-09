@@ -128,7 +128,7 @@ export default function JoinWombCareFormPage() {
             <div className="space-y-5">
               {[
                 'Personalized care plan',
-                'PCOD symptom support',
+                'PMOS symptom support',
                 'Cycle tracking guidance',
                 'Nutrition + lifestyle support',
                 'Expert follow-up',

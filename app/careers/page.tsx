@@ -127,7 +127,7 @@ export default function CareersPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { icon: <Heart className="text-pink-500" />, title: 'Mission-First', desc: 'Everything we do is to improve the lives of women struggling with PCOD.' },
+                { icon: <Heart className="text-pink-500" />, title: 'Mission-First', desc: 'Everything we do is to improve the lives of women struggling with PMOS.' },
                 { icon: <Globe className="text-blue-500" />, title: 'Remote-Always', desc: 'Work from anywhere in the world. We value ownership over clock-ins.' },
                 { icon: <Users className="text-purple-500" />, title: 'Diverse Voices', desc: 'We believe solving collective problems requires unique, diverse perspectives.' },
                 { icon: <Zap className="text-amber-500" />, title: 'Bias for Action', desc: 'We move fast, experiment deeply, and learn from every interaction.' },

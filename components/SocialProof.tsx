@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 
 const testimonials = [
   {
-    tagline: 'Real progress with PCOD healing',
+    tagline: 'Real progress with PMOS healing',
     quote:
-      'Struggling with PCOD was overwhelming, but Dipshikha, our lifestyle coach, made the journey so much easier. The sessions are tailored, gentle yet effective, and focus on long-term healing. I’ve seen real changes in my energy levels, mood, and cycle regularity.',
+      'Struggling with PMOS was overwhelming, but Dipshikha, our lifestyle coach, made the journey so much easier. The sessions are tailored, gentle yet effective, and focus on long-term healing. I’ve seen real changes in my energy levels, mood, and cycle regularity.',
     author: 'Ishika',
     label: 'Lifestyle Coaching Client',
   },
@@ -28,7 +28,7 @@ const testimonials = [
 
 export default function SocialProof() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-10 md:py-12 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 md:mb-16">
@@ -109,24 +109,9 @@ export default function SocialProof() {
         </div>
 
         {/* Bottom trust */}
-        <div className="mt-12 md:mt-20 pt-8 md:pt-10 border-t border-slate-100 flex flex-col items-center justify-center">
-          <div className="flex -space-x-4 mb-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="w-12 h-12 rounded-full border-2 border-white bg-slate-200 overflow-hidden"
-              >
-                <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-300" />
-              </div>
-            ))}
-
-            <div className="w-12 h-12 rounded-full border-2 border-white bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600">
-              +2k
-            </div>
-          </div>
-
-          <p className="text-slate-600 font-medium">
-            Over 2,500+ women guided on their care journey
+        <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-slate-100 flex flex-col items-center justify-center">
+          <p className="text-slate-600 font-medium text-center">
+            Evidence-based lifestyle programs for sustainable hormonal wellness
           </p>
         </div>
       </div>

@@ -48,14 +48,14 @@ export default function Counter() {
           <div className="flex flex-col items-center relative">
              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-purple-500/10 text-purple-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-purple-200 flex items-center gap-1 whitespace-nowrap">
               <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
-              ACTIVE CARE
+              EXPERT LED
             </div>
-            <h4 className="text-purple-600 font-medium mb-2 uppercase tracking-wide text-sm">Care Journeys</h4>
+            <h4 className="text-purple-600 font-medium mb-2 uppercase tracking-wide text-sm">Care Standard</h4>
             <div className="text-5xl font-bold text-slate-800 flex items-center">
-              {hasStarted ? <AnimatedNumber value={2500} /> : "0"}
-              <span className="text-purple-500 ml-1">+</span>
+              {hasStarted ? <AnimatedNumber value={100} /> : "0"}
+              <span className="text-purple-500 ml-1">%</span>
             </div>
-            <p className="text-slate-500 text-sm mt-2 font-medium">women guided daily</p>
+            <p className="text-slate-500 text-sm mt-2 font-medium">doctor-supervised plans</p>
           </div>
 
         </div>

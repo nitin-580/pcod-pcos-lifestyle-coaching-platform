@@ -17,16 +17,16 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://wombcare.in"),
 
   title: {
-    default: "WombCare — “A Doctor-powered premium women’s health platform for PCOD & pregnancy management with structured care”",
+    default: "WombCare — “A Doctor-powered premium women’s health platform for PMOS & pregnancy management with structured care”",
     template: "%s | WombCare",
   },
 
   description:
-    "WombCare is a lifestyle coach designed to help women balance hormones, manage PCOD, track menstrual cycles, and improve period health naturally.",
+    "WombCare is a lifestyle coach designed to help women balance hormones, manage PMOS, track menstrual cycles, and improve period health naturally.",
 
   keywords: [
-    "PCOD",
-    "PCOS",
+    "PMOS",
+    "hormonal wellness",
     "period health",
     "hormone balance",
     "menstrual health",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     "cycle tracking",
     "hormone health",
     "health coach",
-    "PCOD lifestyle management",
+    "PMOS lifestyle management",
   ],
 
   authors: [{ name: "WombCare Team" }],
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   publisher: "WombCare",
 
   openGraph: {
-    title: "WombCare — Coach for PCOD & Hormone Health",
+    title: "WombCare — Coach for PMOS & Hormone Health",
     description:
-      "Understand your hormones, balance your cycle, and manage PCOD with AI-powered guidance.",
+      "Understand your hormones, balance your cycle, and manage PMOS with AI-powered guidance.",
     url: "https://wombcare.in",
     siteName: "WombCare",
     images: [
@@ -61,9 +61,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "WombCare — AI PCOD & Period Health Coach",
+    title: "WombCare — AI PMOS & Period Health Coach",
     description:
-      "Balance hormones and manage PCOD with AI-powered lifestyle coaching.",
+      "Balance hormones and manage PMOS with AI-powered lifestyle coaching.",
     images: ["/og-image.png"],
   },
 

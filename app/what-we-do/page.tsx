@@ -4,7 +4,7 @@ import RegistrationForm from '@/components/RegistrationForm';
 export const metadata = {
   title: 'What We Do | WombCare',
   description:
-    'Discover how WombCare helps women manage PCOD/PCOS through science-backed nutrition, movement, and lifestyle transformation.',
+    'Discover how WombCare helps women manage PMOS through science-backed nutrition, movement, and lifestyle transformation.',
 };
 
 export default function WhatWeDoPage() {
@@ -19,7 +19,7 @@ export default function WhatWeDoPage() {
             What We <span className="text-purple-600">Do</span>
           </h1>
           <p className="text-xl text-slate-600 leading-8 max-w-3xl mx-auto">
-            At <span className="font-semibold text-pink-600">WombCare</span>, we help women take control of their hormonal health through science-backed lifestyle programs designed specifically for PCOD/PCOS management.
+            At <span className="font-semibold text-pink-600">WombCare</span>, we help women take control of their hormonal health through science-backed lifestyle programs designed specifically for PMOS management.
           </p>
         </div>
       </section>
@@ -48,7 +48,7 @@ export default function WhatWeDoPage() {
               Our Mission
             </h3>
             <p className="text-slate-600 leading-8">
-              To make holistic PCOD management accessible, affordable, and
+              To make holistic PMOS management accessible, affordable, and
               personalized for every woman.
             </p>
           </div>
@@ -79,7 +79,7 @@ export default function WhatWeDoPage() {
                 Yoga & Movement Therapy
               </h3>
               <p className="text-slate-600 leading-8">
-                Guided PCOD-specific yoga, movement therapy, metabolism-boosting
+                Guided PMOS-specific yoga, movement therapy, metabolism-boosting
                 workouts, and stress-reducing practices that fit daily life.
               </p>
             </div>
@@ -104,7 +104,7 @@ export default function WhatWeDoPage() {
             Who We Serve
           </h2>
           <p className="text-lg text-slate-600 leading-8">
-            Women aged 18–40 who are dealing with PCOD/PCOS, irregular cycles,
+            Women aged 18–40 who are dealing with PMOS, irregular cycles,
             hormonal acne, fertility concerns, weight gain, and other
             hormone-related challenges.
           </p>
@@ -145,7 +145,7 @@ export default function WhatWeDoPage() {
           </h2>
           <p className="text-lg text-slate-600 leading-8">
             We aim to build India’s most trusted women’s hormonal health
-            platform — expanding from PCOD management into fertility support,
+            platform — expanding from PMOS management into fertility support,
             supplements, and digital health tracking tools.
           </p>
         </div>

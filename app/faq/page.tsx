@@ -4,16 +4,16 @@ import { Plus, Minus } from 'lucide-react';
 
 export const metadata = {
   title: 'Frequently Asked Questions | WombCare',
-  description: 'Everything you need to know about WombCare, PCOD management, and our wellness programs.',
+  description: 'Everything you need to know about WombCare, PMOS management, and our wellness programs.',
 };
 
 const faqs = [
   {
     question: "What is WombCare?",
-    answer: "WombCare is India's most trusted digital wellness platform dedicated to helping women manage and reverse PCOD/PCOS through personalized lifestyle coaching, nutrition, and yoga."
+    answer: "WombCare is India's most trusted digital wellness platform dedicated to helping women manage and reverse PMOS through personalized lifestyle coaching, nutrition, and yoga."
   },
   {
-    question: "How does the 3-month PCOD reversal program work?",
+    question: "How does the 3-month PMOS reversal program work?",
     answer: "Our program is built on four pillars: Science-backed nutrition, Hormonal yoga, Lifestyle coaching, and Health tracking. You'll get a personalized plan tailored to your symptoms and body type."
   },
   {
@@ -25,8 +25,8 @@ const faqs = [
     answer: "Yes, many of our members use WombCare alongside their clinical treatments. Our lifestyle changes often help medications work more effectively by improving overall systemic health."
   },
   {
-    question: "What happens after I book a consultation?",
-    answer: "Once you submit your details, you will receive a confirmation email. A healthcare coach will reach out to schedule your initial consultation and assessment."
+    question: "What happens after I book a session?",
+    answer: "Once you submit your details, you will receive a confirmation email. A healthcare coach will reach out to schedule your initial session and assessment."
   }
 ];
 

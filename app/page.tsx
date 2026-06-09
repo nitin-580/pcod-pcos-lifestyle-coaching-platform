@@ -26,7 +26,7 @@ export default function Home() {
       name: "WombCare",
       url: "https://wombcare.in",
       description:
-        "AI lifestyle coach helping women balance hormones and manage PCOD.",
+        "AI lifestyle coach helping women balance hormones and manage PMOS.",
       applicationCategory: "HealthApplication",
       operatingSystem: "Web",
     }),
@@ -48,10 +48,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 space-y-6">
               <h2 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight">
-                Is it PCOD? <br/><span className="text-purple-600">Check Your Symptoms</span>
+                Is it PMOS? <br/><span className="text-purple-600">Check Your Symptoms</span>
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed max-w-lg">
-                Many women struggle with unexplained weight gain, irregular cycles, and fatigue. Take our quick, science-backed assessment to see if your symptoms align with PCOD risk factors.
+                Many women struggle with unexplained weight gain, irregular cycles, and fatigue. Take our quick, science-backed assessment to see if your symptoms align with PMOS risk factors.
               </p>
             </div>
             <div className="flex-1 w-full">

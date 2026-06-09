@@ -167,9 +167,13 @@ export default function RegistrationModal() {
                     <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1">
                       Start Your Care Journey
                     </h3>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 mb-3">
                       Schedule your personalized hormonal health assessment.
                     </p>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-50 border border-pink-100 text-pink-600 text-[11px] font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+                      Plan starts from as low as Rs. 33.33/day
+                    </div>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">

@@ -8,33 +8,21 @@ export default function PricingTable() {
 
 const plans = [
 {
-name:"Essential Care",
-price:"₹999",
-duration:"1 Month",
-tag:"Start your journey",
-description:
-"For women beginning their PCOD wellness journey.",
-features:[
-"Personalized lifestyle guidance",
-"Cycle & wellness tracking",
-"Weekly health insights",
-"Basic care support",
-],
-highlighted:false
-},
-
-{
-name:"Complete PCOD Care",
+name:"Complete PMOS Care",
 price:"₹2999",
+originalPrice:"₹5999",
 duration:"3 Months",
 tag:"Recommended",
 description:
-"A guided PCOD care program with expert support.",
+"90 Days PMOS care program",
 features:[
-"Personalized PCOD lifestyle plan",
+"Period Tracker",
+"Water Tracker",
+"Mood Tracker",
+"Daily Journal",
+"Personalized PMOS lifestyle plan",
 "Nutrition guidance",
 "Yoga & wellness sessions",
-"Hormonal health tracking",
 "1-on-1 care consultation",
 "Priority support",
 ],
@@ -44,11 +32,16 @@ highlighted:true
 {
 name:"Conceive Care",
 price:"₹4999",
+originalPrice:"₹7999",
 duration:"3 Months",
 tag:"Fertility support",
 description:
 "Designed for women preparing their conception journey.",
 features:[
+"Period Tracker",
+"Water Tracker",
+"Mood Tracker",
+"Daily Journal",
 "Fertility-focused lifestyle plan",
 "Ovulation & cycle support",
 "Nutrition assistance",
@@ -64,9 +57,10 @@ highlighted:false
 return(
 
 <section
+id="pricing"
 className="
 relative overflow-hidden
-py-24
+py-12 md:py-16
 bg-gradient-to-b
 from-white
 via-pink-50/40
@@ -109,7 +103,7 @@ px-5
 text-center
 max-w-3xl
 mx-auto
-mb-16
+mb-10
 ">
 
 
@@ -166,7 +160,7 @@ leading-relaxed
 ">
 
 Doctor-guided wellness programs designed around
-PCOD, hormonal health and fertility care.
+PMOS, hormonal health and fertility care.
 
 </p>
 
@@ -182,7 +176,9 @@ PCOD, hormonal health and fertility care.
 <div className="
 grid
 grid-cols-1
-md:grid-cols-3
+md:grid-cols-2
+max-w-4xl
+mx-auto
 gap-8
 items-stretch
 ">
@@ -306,14 +302,14 @@ min-h-[45px]
 <div className="
 mt-8
 flex
-items-end
+items-baseline
 gap-2
 ">
 
 
 <span className="
 text-5xl
-font-bold
+font-extrabold
 text-slate-900
 ">
 
@@ -321,10 +317,23 @@ text-slate-900
 
 </span>
 
+{plan.originalPrice && (
+<span className="
+text-xl
+text-slate-400
+line-through
+font-medium
+ml-2
+">
+{plan.originalPrice}
+</span>
+)}
+
 
 <span className="
 text-slate-500
 mb-2
+ml-1
 ">
 
 / {plan.duration}

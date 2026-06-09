@@ -62,7 +62,7 @@ z-10
 max-w-7xl
 mx-auto
 px-6
-py-24
+py-12 md:py-16
 grid
 lg:grid-cols-2
 gap-20
@@ -121,7 +121,7 @@ bg-[#FF4D8D]
 />
 
 
-India's digital PCOS & hormone care platform
+India's gynecologist-empowered PMOS care platform
 
 
 </div>
@@ -211,12 +211,20 @@ max-w-xl
 "
 >
 
-Understand your cycle, PCOS symptoms,
+Understand your cycle, PMOS symptoms,
 mood changes and lifestyle patterns through
 personalized wellness insights.
 
 
 </p>
+
+
+<div className="mt-8 p-5 rounded-3xl bg-gradient-to-r from-pink-50/60 to-purple-50/60 border border-pink-100/40 max-w-lg shadow-sm">
+  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hormonal Wellness Programs</p>
+  <p className="text-2xl md:text-3xl font-black text-slate-950 mt-1">
+    Starting as low as <span className="text-[#FF4D8D]">₹33.33</span>/day
+  </p>
+</div>
 
 
 
@@ -236,9 +244,11 @@ gap-4
 >
 
 
-<Link
+<button
 
-href="/hormonal-check"
+onClick={() => {
+document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+}}
 
 className="
 px-8
@@ -258,12 +268,12 @@ transition
 
 >
 
-Start free check
+View Plans
 
 <ArrowRight size={18}/>
 
 
-</Link>
+</button>
 
 
 
@@ -295,7 +305,7 @@ shadow-sm
 
 >
 
-Book Consultation
+Book Session
 
 
 </button>
@@ -369,7 +379,7 @@ text-slate-500
 "
 >
 
-Cycle tracking • PCOS care • Lifestyle guidance
+Cycle tracking • PMOS care • Lifestyle guidance
 
 </p>
 
