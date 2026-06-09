@@ -14,55 +14,55 @@ const DOCTORS: DoctorItem[] = [
   {
     name: "Dr. Akansha Gupta",
     specialization: "Gynaecology & PCOS Expert",
-    credentials: "MD, DGO • 12+ Years Exp",
+    credentials: "Gynecologist • 10 Years Exp",
     photo: "/doctor/akansha-gupta.png"
   },
   {
     name: "Dr. Deepa Gupta",
     specialization: "Clinical Nutritionist & Dietitian",
-    credentials: "M.Sc. Nutrition • 8+ Years Exp",
+    credentials: "Gynecologist • 10 Years Exp",
     photo: "/doctor/deepa-gupta.png"
   },
   {
     name: "Dr. Manisha Ranjan",
     specialization: "Senior Consultant Gynecologist",
-    credentials: "MBBS, MS • 15+ Years Exp",
+    credentials: "Gynecologist • 26 Years Exp",
     photo: "/doctor/manisha-ranjan.png"
   },
   {
-    name: "Dr. Megha Mehra",
+    name: "Dr. Megha Mehra Tiwari",
     specialization: "Hormonal Balance & Lifestyle Coach",
-    credentials: "BAMS, MD (Ayurveda) • 9+ Years Exp",
+    credentials: "Gynecologist • 15 Years Exp",
     photo: "/doctor/megha-mehra.png"
   },
   {
     name: "Dr. Neha Raj",
     specialization: "PCOS & Fertility Consultant",
-    credentials: "DNB, Gynec • 10+ Years Exp",
+    credentials: "Gynecologist • 8 Years Exp",
     photo: "/doctor/neha-raj.png"
   },
   {
-    name: "Dr. Nyyaya Saini",
+    name: "Dr. Nyayya Saini",
     specialization: "Women's Mental Health Specialist",
-    credentials: "MD Psychiatry • 7+ Years Exp",
+    credentials: "Gynecologist • 10 Years Exp",
     photo: "/doctor/nyyaya-saini.png"
   },
   {
     name: "Dr. Prerna Gupta",
     specialization: "Endocrinologist & Metabolic Lead",
-    credentials: "DM Endocrinology • 11+ Years Exp",
+    credentials: "Gynecologist • 15 Years Exp",
     photo: "/doctor/prerna-gupta.png"
   },
   {
     name: "Dr. Sanheeta Dasgupta",
     specialization: "Yoga & Pelvic Floor Coach",
-    credentials: "RYT 500, Physio • 6+ Years Exp",
+    credentials: "Gynecologist • 25 Years Exp",
     photo: "/doctor/sanheeta-dasgupta.png"
   },
   {
     name: "Dr. Uma Mishra",
     specialization: "Holistic Health Advisor",
-    credentials: "BAMS • 14+ Years Exp",
+    credentials: "Gynecologist • 22 Years Exp",
     photo: "/doctor/uma-mishra.png"
   }
 ];
