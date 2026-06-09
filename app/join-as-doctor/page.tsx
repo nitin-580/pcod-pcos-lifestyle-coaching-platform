@@ -127,39 +127,42 @@ export default function JoinDoctorPage() {
           <div className="space-y-8">
             <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 p-8">
               <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-                Why join WombCare?
+                Empower Your Clinic
               </h2>
 
               <p className="text-slate-600 leading-8">
-                Expand your practice and help women
-                access better hormonal and reproductive
-                care through our trusted digital health
-                platform.
+                Partner with WombCare to extend your clinic’s capabilities, manage lifestyle protocols digitally, and improve clinical outcomes for your patients.
               </p>
             </div>
 
             <div className="space-y-5">
               {[
-                'Verified doctor onboarding',
-                'Online + offline consultations',
-                'Premium patient flow',
-                'Dedicated provider dashboard',
-                'Secure payouts & support',
+                { title: 'Better patient retention', desc: 'Keep patients engaged and compliant between clinic visits.' },
+                { title: 'Structured PCOD programs', desc: 'Pre-designed digital lifestyle coaching plans for your patients.' },
+                { title: 'Pregnancy tracking', desc: 'Provide step-by-step prenatal monitoring and milestone support.' },
+                { title: 'Dietician access', desc: 'Direct support from in-house nutritionists to augment medical prescriptions.' },
+                { title: 'Tech-enabled follow-up', desc: 'Automate reminders, vitals logging, and digital health records.' },
+                { title: 'Higher patient satisfaction', desc: 'Modern tools and 24/7 care companionship to delight your patients.' },
               ].map((item, index) => (
                 <div
-                  key={item}
+                  key={item.title}
                   className="flex items-start gap-4 pb-4 border-b border-pink-100"
                 >
                   <div
-                    className={`w-2.5 h-2.5 mt-3 rounded-full ${
+                    className={`w-2.5 h-2.5 mt-3 rounded-full flex-shrink-0 ${
                       index % 2 === 0
                         ? 'bg-pink-500'
                         : 'bg-purple-500'
                     }`}
                   />
-                  <p className="text-slate-600 text-lg">
-                    {item}
-                  </p>
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-lg leading-tight capitalize">
+                      {item.title}
+                    </h4>
+                    <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

@@ -85,7 +85,7 @@ export default function RegistrationForm() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
             </span>
-            Limited Spots Available
+            Start Your Care Journey
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-tight leading-[1.1] mb-6">
@@ -115,8 +115,8 @@ export default function RegistrationForm() {
           
           <div className="relative bg-white/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl md:rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-white">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-slate-800 mb-2">Claim Your Spot</h3>
-              <p className="text-slate-500 text-sm">Fill in your details to secure early access.</p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Book Consultation</h3>
+              <p className="text-slate-500 text-sm">Fill in your details to schedule your consultation.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">

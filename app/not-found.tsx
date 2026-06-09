@@ -31,7 +31,7 @@ export default function NotFoundPage() {
         <p className="text-lg text-slate-600 leading-8 max-w-xl mx-auto mb-10">
           We’re building something meaningful for your wellness journey.
           Until it’s ready, stay connected with the WombCare community
-          for updates, support, and early access.
+          for updates, support, and hormone health resources.
         </p>
 
         {/* Buttons */}

@@ -126,7 +126,7 @@ export default function SocialProof() {
           </div>
 
           <p className="text-slate-600 font-medium">
-            Over 2,000+ women joined early access
+            Over 2,500+ women guided on their care journey
           </p>
         </div>
       </div>

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://wombcare.in"),
 
   title: {
-    default: "WombCare — PCOD & Period Health Coach",
+    default: "WombCare — “A Doctor-powered premium women’s health platform for PCOD & pregnancy management with structured care”",
     template: "%s | WombCare",
   },
 

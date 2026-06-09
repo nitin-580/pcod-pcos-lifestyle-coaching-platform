@@ -28,31 +28,34 @@ export default function Counter() {
       <div className="max-w-4xl mx-auto px-6">
         <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-8 shadow-sm border border-pink-100 flex flex-col md:flex-row justify-around items-center gap-8">
           
+          {/* Clinical Reversal Rate */}
           <div className="flex flex-col items-center relative">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-green-500/10 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1 whitespace-nowrap">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-green-500/10 text-green-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-green-200 flex items-center gap-1 whitespace-nowrap">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              LIVE TRACKING
+              VERIFIED SUCCESS
             </div>
-            <h4 className="text-pink-600 font-medium mb-2 uppercase tracking-wide text-sm">Women Joined</h4>
+            <h4 className="text-pink-600 font-medium mb-2 uppercase tracking-wide text-sm">Clinical Success</h4>
             <div className="text-5xl font-bold text-slate-800 flex items-center">
-              {hasStarted ? <AnimatedNumber value={2483} /> : "0"}
-              <span className="text-pink-500 ml-1">+</span>
+              {hasStarted ? <AnimatedNumber value={94} /> : "0"}
+              <span className="text-pink-500 ml-1">%</span>
             </div>
-            <p className="text-slate-500 text-sm mt-2 font-medium">on their wellness journey</p>
+            <p className="text-slate-500 text-sm mt-2 font-medium">hormonal symptom reversal</p>
           </div>
           
           <div className="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-pink-200 to-transparent"></div>
           
+          {/* Active Patient Journeys */}
           <div className="flex flex-col items-center relative">
-             <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-amber-500/10 text-amber-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1 whitespace-nowrap">
-              STRICTLY LIMITED
+             <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-purple-500/10 text-purple-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-purple-200 flex items-center gap-1 whitespace-nowrap">
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+              ACTIVE CARE
             </div>
-            <h4 className="text-purple-600 font-medium mb-2 uppercase tracking-wide text-sm">Spots Remaining</h4>
+            <h4 className="text-purple-600 font-medium mb-2 uppercase tracking-wide text-sm">Care Journeys</h4>
             <div className="text-5xl font-bold text-slate-800 flex items-center">
-              {hasStarted ? <AnimatedNumber value={117} /> : "0"}
-              <span className="text-purple-500 ml-1">/ 2500</span>
+              {hasStarted ? <AnimatedNumber value={2500} /> : "0"}
+              <span className="text-purple-500 ml-1">+</span>
             </div>
-            <p className="text-slate-500 text-sm mt-2 font-medium">claiming fast today</p>
+            <p className="text-slate-500 text-sm mt-2 font-medium">women guided daily</p>
           </div>
 
         </div>

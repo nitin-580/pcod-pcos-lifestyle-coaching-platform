@@ -165,10 +165,10 @@ export default function RegistrationModal() {
 
                   <div className="mb-6">
                     <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1">
-                      Join Early Access
+                      Start Your Care Journey
                     </h3>
                     <p className="text-sm text-slate-500">
-                      Early access spots are filling up fast.
+                      Schedule your personalized hormonal health assessment.
                     </p>
                   </div>
 

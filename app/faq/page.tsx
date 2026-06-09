@@ -25,8 +25,8 @@ const faqs = [
     answer: "Yes, many of our members use WombCare alongside their clinical treatments. Our lifestyle changes often help medications work more effectively by improving overall systemic health."
   },
   {
-    question: "What happens after I sign up for Early Access?",
-    answer: "Once you sign up, you'll receive a confirmation email. When a spot opens up, our health coach will contact you for an initial assessment to understand your goals."
+    question: "What happens after I book a consultation?",
+    answer: "Once you submit your details, you will receive a confirmation email. A healthcare coach will reach out to schedule your initial consultation and assessment."
   }
 ];
 

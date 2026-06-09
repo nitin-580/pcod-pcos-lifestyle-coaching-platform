@@ -91,7 +91,7 @@ export default function FloatingNavbar() {
               href="/#register"
               className="bg-purple-600 hover:opacity-95 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
             >
-              Join Early Access
+              Book Consultation
             </Link>
           </nav>
 
@@ -145,7 +145,7 @@ export default function FloatingNavbar() {
             className="w-full max-w-xs text-center bg-purple-600 text-white py-4 rounded-xl font-semibold shadow-lg"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Join Early Access
+            Book Consultation
           </Link>
         </div>
       </div>

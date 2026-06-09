@@ -1,13 +1,14 @@
 import FloatingNavbar from '@/components/FloatingNavbar';
 import Hero from '@/components/Hero';
 import DoctorMarquee from '@/components/DoctorMarquee';
+import AboutMission from '@/components/AboutMission';
 import ApkDownload from '@/components/ApkDownload';
 import PeriodCards from '@/components/PeriodCards';
 import Counter from '@/components/Counter';
 import SymptomChecker from '@/components/SymptomChecker';
 import HormoneQuiz from '@/components/HormoneQuiz';
 import SocialProof from '@/components/SocialProof';
-import EarlySignup from '@/components/EarlySignup';
+import DoctorValueProp from '@/components/DoctorValueProp';
 import PeriodHealthSection from '@/components/PeriodHealthSection';
 import RegistrationForm from '@/components/RegistrationForm';
 import RegistrationModal from '@/components/RegistrationModal';
@@ -38,8 +39,9 @@ export default function Home() {
       <div className="flex-1">
         <Hero />
         <DoctorMarquee />
+        <AboutMission />
         <ApkDownload />
-
+  
         {/* Symptom Checker Section */}
         <section className="py-24 bg-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-purple-50 to-transparent opacity-60 pointer-events-none" />
@@ -68,6 +70,7 @@ export default function Home() {
           <PeriodHealthSection/>
         </div>
         <SocialProof />
+        <DoctorValueProp />
         <RegistrationForm />
       </div>
 

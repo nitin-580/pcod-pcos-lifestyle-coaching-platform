@@ -295,7 +295,7 @@ shadow-sm
 
 >
 
-Join early access
+Book Consultation
 
 
 </button>
