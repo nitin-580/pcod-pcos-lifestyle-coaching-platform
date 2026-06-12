@@ -60,12 +60,8 @@ export default function Home() {
           </div>
         </section>
         <PeriodCards />
-        {/* Hormone Quiz Section */}
-        <section className="py-24 bg-slate-50 relative">
-          <div className="max-w-6xl mx-auto px-6">
-            <PricingSection />
-          </div>
-        </section>
+        {/* Pricing Section */}
+        <PricingSection />
         <div className="hidden md:block">
           <PeriodHealthSection/>
         </div>

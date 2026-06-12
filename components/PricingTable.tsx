@@ -49,6 +49,24 @@ features:[
 "Wellness coaching",
 ],
 highlighted:false
+},
+
+{
+name:"NRI Special",
+price:"$32",
+originalPrice:"$59",
+duration:"3 Months",
+tag:"International Plan",
+description:
+"Premium doctor-guided care program tailored for international users.",
+features:[
+"Everything in Complete PMOS Care",
+"International doctor consultations",
+"Custom timezone coaching support",
+"Priority global call & support",
+"Personalized lifestyle & nutrition plans",
+],
+highlighted:false
 }
 
 ];
@@ -90,9 +108,8 @@ rounded-full"
 
 <div className="
 relative z-10
-max-w-7xl
-mx-auto
-px-5
+w-full
+px-6 md:px-12 lg:px-16
 ">
 
 
@@ -176,9 +193,8 @@ PMOS, hormonal health and fertility care.
 <div className="
 grid
 grid-cols-1
-md:grid-cols-2
-max-w-4xl
-mx-auto
+md:grid-cols-3
+w-full
 gap-8
 items-stretch
 ">

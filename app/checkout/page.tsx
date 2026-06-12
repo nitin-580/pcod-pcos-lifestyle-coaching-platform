@@ -10,6 +10,7 @@ const PLANS = {
   basic: {
     name: 'Essential Care',
     price: 999,
+    currency: 'INR',
     duration: '/month',
     description: 'Perfect for getting started with PMOS wellness.',
     features: [
@@ -22,6 +23,7 @@ const PLANS = {
   premium: {
     name: 'Complete PMOS Care',
     price: 2999,
+    currency: 'INR',
     duration: '/3 months',
     description: 'Our most popular and recommended PMOS reversal program.',
     features: [
@@ -36,6 +38,7 @@ const PLANS = {
   conceive: {
     name: 'Conceive Care',
     price: 4999,
+    currency: 'INR',
     duration: '/3 months',
     description: 'Designed for fertility support and conception wellness.',
     features: [
@@ -44,6 +47,20 @@ const PLANS = {
       'Hormone wellness support',
       'Dedicated expert consultation',
       'Lifestyle coaching',
+    ]
+  },
+  nri: {
+    name: 'NRI Special',
+    price: 32,
+    currency: 'USD',
+    duration: '/3 months',
+    description: 'Premium international care program tailored for NRIs.',
+    features: [
+      'Everything in Complete PMOS Care',
+      'International doctor consultations',
+      'Custom timezone coaching support',
+      'Priority global call & support',
+      'Personalized lifestyle & nutrition plans',
     ]
   }
 };
@@ -56,9 +73,11 @@ function CheckoutContent() {
   const rawPlan = searchParams.get('plan') || 'premium';
   const cleanPlan = rawPlan.toLowerCase().trim();
   
-  let planKey: 'basic' | 'premium' | 'conceive' = 'premium';
+  let planKey: 'basic' | 'premium' | 'conceive' | 'nri' = 'premium';
   if (cleanPlan.includes('essential') || cleanPlan.includes('basic')) {
     planKey = 'basic';
+  } else if (cleanPlan.includes('nri') || cleanPlan.includes('special')) {
+    planKey = 'nri';
   } else if (cleanPlan.includes('pcod') || cleanPlan.includes('pmos') || cleanPlan.includes('complete') || cleanPlan.includes('premium')) {
     planKey = 'premium';
   } else if (cleanPlan.includes('conceive')) {
@@ -66,6 +85,7 @@ function CheckoutContent() {
   }
   
   const selectedPlan = PLANS[planKey];
+  const currencySymbol = selectedPlan.currency === 'USD' ? '$' : '₹';
 
   const [formData, setFormData] = useState({ name: '', email: '', mobile: '' });
   const [loading, setLoading] = useState(false);
@@ -121,7 +141,8 @@ function CheckoutContent() {
           name: formData.name,
           email: formData.email,
           mobile: formData.mobile,
-          planName: selectedPlan.name
+          planName: selectedPlan.name,
+          currency: selectedPlan.currency || 'INR'
         })
       });
 
@@ -153,7 +174,9 @@ function CheckoutContent() {
                 name: formData.name,
                 mobile: formData.mobile,
                 planName: selectedPlan.name,
-                amount: orderData.totalAmount
+                amount: orderData.totalAmount,
+                currency: selectedPlan.currency || 'INR',
+                usdAmount: selectedPlan.currency === 'USD' ? totalPrice : undefined
               })
             });
 
@@ -289,7 +312,7 @@ function CheckoutContent() {
                       <span>Processing Payment...</span>
                     </>
                   ) : (
-                    <span>Pay ₹{totalPrice.toFixed(2)} Now</span>
+                    <span>Pay {currencySymbol}{totalPrice.toFixed(2)} Now</span>
                   )}
                 </button>
               </div>
@@ -321,15 +344,15 @@ function CheckoutContent() {
                 <div className="border-t border-slate-100 pt-6 space-y-3">
                   <div className="flex justify-between text-sm text-slate-600">
                     <span>Subtotal</span>
-                    <span>₹{basePrice.toFixed(2)}</span>
+                    <span>{currencySymbol}{basePrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-slate-600">
                     <span>GST (18%)</span>
-                    <span>₹{gstAmount.toFixed(2)}</span>
+                    <span>{currencySymbol}{gstAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-100 pt-4">
                     <span>Grand Total</span>
-                    <span>₹{totalPrice.toFixed(2)}</span>
+                    <span>{currencySymbol}{totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
