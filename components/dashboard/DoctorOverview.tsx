@@ -98,51 +98,88 @@ export default function DoctorOverview({
 
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-8">
-        {/* Quick Insights */}
+        {/* Quick Insights / Transaction Updates */}
         <div className="xl:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-slate-800">
-              Quick Insights
+              Quick Insights - Payout Updates
             </h2>
           </div>
 
           <div className="space-y-4">
             {quickInsights.length > 0 ? (
-              quickInsights.map((session, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-slate-100"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold shrink-0">
-                      {session.patientName?.[0] || session.userName?.[0] || 'P'}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-800">
-                        {session.patientName || session.userName || 'Unknown Patient'}
-                      </h3>
-                      <p className="text-sm text-slate-500 mt-1">
-                        {session.appointmentType || 'Consultation'}
-                      </p>
-                    </div>
-                  </div>
+              quickInsights.slice(0, 4).map((item, index) => {
+                const isTransaction = item.amount !== undefined;
 
-                  <div className="text-right">
-                    <p className="font-semibold text-slate-700">
-                      {new Date(session.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
-                      session.status === 'confirmed' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
-                    }`}>
-                      {session.status}
-                    </span>
+                if (isTransaction) {
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-slate-100"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold shrink-0">
+                          ₹
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-800">
+                            {item.description || 'Payout Transfer'}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Transferred on {new Date(item.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-bold text-emerald-600 text-lg">
+                          + ₹{item.amount.toLocaleString()}
+                        </p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full mt-1 inline-block bg-emerald-100 text-emerald-700 font-bold uppercase tracking-wider">
+                          Transferred
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Fallback for appointments
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-slate-100"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold shrink-0">
+                        {item.patientName?.[0] || item.userName?.[0] || 'P'}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-800">
+                          {item.patientName || item.userName || 'Unknown Patient'}
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {item.appointmentType || 'Consultation'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="font-semibold text-slate-700">
+                        {new Date(item.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
+                        item.status === 'confirmed' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-                <CalendarDays size={48} className="mb-4 opacity-20" />
-                <p>No insights available for today</p>
+                <Wallet size={48} className="mb-4 opacity-20" />
+                <p>No transaction payouts transferred yet</p>
               </div>
             )}
           </div>
