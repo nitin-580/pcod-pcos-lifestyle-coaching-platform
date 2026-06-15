@@ -4,8 +4,8 @@ import React from 'react';
 import { LayoutDashboard, FileText, Briefcase, RefreshCw, Loader2, LogOut, Activity, UserPlus, Calendar, Video, Share2, UserCircle, Sparkles, Coins } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -74,6 +74,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'patients' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <UserCircle className="w-4 h-4" /> Patients
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('diet-plans')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 flex-shrink-0 ${activeTab === 'diet-plans' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Sparkles className="w-4 h-4 text-purple-500" /> Diet Plans
           </button>
 
           <button 

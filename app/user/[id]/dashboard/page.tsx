@@ -7,6 +7,7 @@ import { getPublicApiBase } from '@/lib/api-config';
 import { supabase } from '@/lib/supabase-client';
 import FloatingNavbar from '@/components/FloatingNavbar';
 import Footer from '@/components/Footer';
+import DietScreen from '@/screens/diet/DietScreen';
 
 // Icons
 import {
@@ -34,7 +35,8 @@ import {
   Play,
   Video,
   ListFilter,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -92,6 +94,8 @@ export default function UserDashboardPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [periodHistory, setPeriodHistory] = useState<PeriodHistoryItem[]>([]);
   const [profileHistory, setProfileHistory] = useState<HistoryLog[]>([]);
+  const [dietPlan, setDietPlan] = useState<any>(null);
+  const [isDietViewOpen, setIsDietViewOpen] = useState(false);
   
   // Wellness Classes States
   const [allClasses, setAllClasses] = useState<WellnessClass[]>([]);
@@ -246,6 +250,24 @@ export default function UserDashboardPage() {
     }
   }, []);
 
+  const fetchDietPlan = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('userToken');
+      const res = await fetch(`${getPublicApiBase()}/diet-plans/user/${userId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDietPlan(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching diet plan:', err);
+    }
+  }, [userId]);
+
   // Combined Refresh
   const refreshData = useCallback(async () => {
     setIsLoading(true);
@@ -254,10 +276,11 @@ export default function UserDashboardPage() {
       fetchAppointments(),
       fetchPeriodHistory(),
       fetchProfileHistory(),
-      fetchClassesData()
+      fetchClassesData(),
+      fetchDietPlan()
     ]);
     setIsLoading(false);
-  }, [fetchProfile, fetchAppointments, fetchPeriodHistory, fetchProfileHistory, fetchClassesData]);
+  }, [fetchProfile, fetchAppointments, fetchPeriodHistory, fetchProfileHistory, fetchClassesData, fetchDietPlan]);
 
   useEffect(() => {
     const savedData = localStorage.getItem('userData');
@@ -570,16 +593,41 @@ export default function UserDashboardPage() {
   // Bulletproof YouTube embed link resolver
   const getYoutubeEmbedId = (videoStr: string) => {
     if (!videoStr) return 'CqtlcsxK2Xw';
-    if (videoStr.includes('youtube.com/embed/')) {
-      return videoStr.split('embed/')[1]?.split('?')[0] || 'CqtlcsxK2Xw';
+    
+    // Trim whitespace
+    const cleanUrl = videoStr.trim();
+    
+    // Check if it's already just an 11-character alphanumeric/underscore/dash ID
+    if (/^[a-zA-Z0-9_-]{11}$/.test(cleanUrl)) {
+      return cleanUrl;
     }
-    if (videoStr.includes('v=')) {
-      return videoStr.split('v=')[1]?.split('&')[0] || 'CqtlcsxK2Xw';
+    
+    // Regular expression to extract the ID from various YouTube URL formats
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+    const match = cleanUrl.match(regExp);
+    
+    if (match && match[2] && match[2].length === 11) {
+      return match[2];
     }
-    if (videoStr.includes('youtu.be/')) {
-      return videoStr.split('youtu.be/')[1]?.split('?')[0] || 'CqtlcsxK2Xw';
+    
+    // Fallback split methods
+    if (cleanUrl.includes('/shorts/')) {
+      return cleanUrl.split('/shorts/')[1]?.split('?')[0]?.split('&')[0] || 'CqtlcsxK2Xw';
     }
-    return videoStr;
+    if (cleanUrl.includes('/live/')) {
+      return cleanUrl.split('/live/')[1]?.split('?')[0]?.split('&')[0] || 'CqtlcsxK2Xw';
+    }
+    if (cleanUrl.includes('youtube.com/embed/')) {
+      return cleanUrl.split('embed/')[1]?.split('?')[0]?.split('&')[0] || 'CqtlcsxK2Xw';
+    }
+    if (cleanUrl.includes('v=')) {
+      return cleanUrl.split('v=')[1]?.split('&')[0]?.split('?')[0] || 'CqtlcsxK2Xw';
+    }
+    if (cleanUrl.includes('youtu.be/')) {
+      return cleanUrl.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0] || 'CqtlcsxK2Xw';
+    }
+    
+    return cleanUrl;
   };
 
   /* =========================================================
@@ -977,6 +1025,30 @@ export default function UserDashboardPage() {
 
                 </div>
 
+                {/* Recommended Diet Plan Card */}
+                {dietPlan && (
+                  <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-purple-100/50">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                    <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                      <div className="space-y-2">
+                        <span className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-pink-200 bg-white/10 rounded-full border border-white/20">
+                          Recommended Diet Plan
+                        </span>
+                        <h3 className="text-2xl font-black">{dietPlan.name || "PCOD + Ulcerative Colitis (UC) Diet"}</h3>
+                        <p className="text-xs text-purple-100 font-medium max-w-md">
+                          {dietPlan.description || "Hormonal Balance • Gut Healing • Healthy Weight Gain"}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setIsDietViewOpen(true)}
+                        className="px-6 py-3.5 bg-white hover:bg-purple-50 text-purple-700 font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all hover:scale-[1.02] active:scale-100 shrink-0"
+                      >
+                        Open Diet Chart 🥗
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Subordinate Trackers: Sleep log + Daily Reflections Journal */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   
@@ -1222,7 +1294,7 @@ export default function UserDashboardPage() {
                           {/* YouTube Frame */}
                           <div className="mt-6 aspect-video bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-950/20">
                             <iframe
-                              src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.videoUrl || liveClass.youtubeVideoId || '')}?autoplay=1`}
+                              src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
                               title={liveClass.title}
                               className="w-full h-full"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1455,6 +1527,46 @@ export default function UserDashboardPage() {
         </AnimatePresence>
 
       </section>
+
+      {/* Diet Plan Mobile Viewport Modal */}
+      <AnimatePresence>
+        {isDietViewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 30 }}
+              className="relative w-full max-w-[420px] h-[90vh] bg-[#FAF8FC] rounded-[3rem] border-[12px] border-slate-900 shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Camera Notch / Speaker Bar */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-[110] flex items-center justify-center">
+                <div className="w-12 h-1 bg-slate-800 rounded-full" />
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsDietViewOpen(false)}
+                className="absolute top-4 right-4 z-[110] w-8 h-8 rounded-full bg-slate-900/50 hover:bg-slate-900/80 text-white flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Screen Content Wrapper */}
+              <div className="flex-1 overflow-y-auto">
+                {dietPlan && <DietScreen dietPlan={dietPlan} />}
+              </div>
+
+              {/* Home Indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-300 rounded-full z-[110]" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </main>

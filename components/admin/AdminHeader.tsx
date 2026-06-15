@@ -4,7 +4,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings';
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans';
   onNewBlog: () => void;
   onNewCareer: () => void;
 }
@@ -24,6 +24,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'referrals' ? 'Doctor Patient Referrals' :
            activeTab === 'banners' ? 'Dashboard Banners' :
            activeTab === 'doctor-earnings' ? 'Doctor Finance & Payouts' :
+           activeTab === 'diet-plans' ? 'Diet Plan Library' :
            'Career Opportunities'}
         </h2>
         <p className="text-slate-500">
@@ -37,6 +38,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeTab, onNewBlog, onNewCa
            activeTab === 'referrals' ? 'Track and convert patient referrals submitted by verified network doctors.' :
            activeTab === 'banners' ? 'Add, edit, or configure mobile application dashboard banners.' :
            activeTab === 'doctor-earnings' ? 'Manage doctor commissions, add earnings, and configure verified payout bank accounts.' :
+           activeTab === 'diet-plans' ? 'Manage, assign, and customize clinical wellness diet charts for patients.' :
            'Manage job openings and hiring.'}
         </p>
       </div>

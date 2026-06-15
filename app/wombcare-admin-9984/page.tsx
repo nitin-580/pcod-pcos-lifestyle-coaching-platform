@@ -15,6 +15,7 @@ import ClassManagement from '@/components/admin/ClassManagement';
 import ReferralManagement from '@/components/admin/ReferralManagement';
 import BannerManagement from '@/components/admin/BannerManagement';
 import DoctorFinance from '@/components/admin/DoctorFinance';
+import DietPlanManagement from '@/components/admin/DietPlanManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
@@ -37,7 +38,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -412,6 +413,8 @@ export default function AdminPage() {
           <BannerManagement apiKey={apiKey} />
         ) : activeTab === 'doctor-earnings' ? (
           <DoctorFinance apiKey={apiKey} />
+        ) : activeTab === 'diet-plans' ? (
+          <DietPlanManagement apiKey={apiKey} registrations={registrations} />
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}
