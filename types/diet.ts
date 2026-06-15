@@ -28,4 +28,5 @@ export interface DietPlan {
   foodsToAvoid: string[];
   dailyTargets: DailyTarget[];
   userIds?: string[];
+  pdfUrl?: string;
 }

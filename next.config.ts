@@ -4,10 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   async rewrites() {
-    const isDev = process.env.NODE_ENV === 'development';
-    const backendUrl = isDev
-      ? "http://localhost:8080"
-      : "https://womb-care-backend-76858014616.europe-west1.run.app";
+    const backendUrl = "https://womb-care-backend-76858014616.europe-west1.run.app";
 
     return [
       {

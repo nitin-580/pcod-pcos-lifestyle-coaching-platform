@@ -89,7 +89,7 @@ export default function AdminPage() {
 
   const fetchRegistrations = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/users`, {
+      const response = await fetch(`${API_BASE}/users?limit=1000`, {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
@@ -259,7 +259,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCFD] font-sans pb-20">
+    <div className="min-h-screen bg-[#FDFCFD] font-sans flex flex-col md:flex-row">
       <AdminSidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -268,15 +268,16 @@ export default function AdminPage() {
         onLogout={handleLogout}
       />
 
-      <main className="max-w-7xl mx-auto px-6 pt-10">
-        <AdminHeader 
-          activeTab={activeTab} 
-          onNewBlog={() => router.push('/wombcare-admin-9984/blogs/new')}
-          onNewCareer={() => { 
-            setEditingCareer(null); 
-            setIsCareerModalOpen(true); 
-          }}
-        />
+      <main className="flex-1 md:pl-64 px-6 md:px-10 py-10 overflow-y-auto w-full">
+        <div className="max-w-7xl mx-auto">
+          <AdminHeader 
+            activeTab={activeTab} 
+            onNewBlog={() => router.push('/wombcare-admin-9984/blogs/new')}
+            onNewCareer={() => { 
+              setEditingCareer(null); 
+              setIsCareerModalOpen(true); 
+            }}
+          />
 
         {activeTab === 'registrations' ? (
           <AdminTable data={registrations} />
@@ -418,6 +419,7 @@ export default function AdminPage() {
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}
+        </div>
       </main>
     </div>
   );

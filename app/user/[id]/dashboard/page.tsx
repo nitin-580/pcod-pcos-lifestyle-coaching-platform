@@ -36,7 +36,8 @@ import {
   Video,
   ListFilter,
   Check,
-  X
+  X,
+  ShieldAlert
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -85,8 +86,8 @@ export default function UserDashboardPage() {
   const params = useParams();
   const userId = params.id as string;
 
-  // Active View Tabs: 'tracker' or 'classes'
-  const [activeTab, setActiveTab] = useState<'tracker' | 'classes'>('tracker');
+  // Active View Tabs: 'tracker', 'classes', or 'nutrition'
+  const [activeTab, setActiveTab] = useState<'tracker' | 'classes' | 'nutrition'>('tracker');
 
   // Core Data States
   const [profile, setProfile] = useState<any>(null);
@@ -768,20 +769,20 @@ export default function UserDashboardPage() {
           </div>
         </motion.div>
 
-        {/* Sliding Dual-View Tabs Controller */}
+        {/* Sliding 3-View Tabs Controller */}
         <div className="mt-12 flex justify-center">
-          <div className="relative p-1.5 bg-slate-100/80 backdrop-blur-lg rounded-[24px] flex gap-1 w-full max-w-md shadow-inner border border-slate-200/50">
+          <div className="relative p-1.5 bg-slate-100/80 backdrop-blur-lg rounded-[24px] flex gap-1 w-full max-w-lg shadow-inner border border-slate-200/50">
             <div 
               className="absolute top-1.5 bottom-1.5 left-1.5 rounded-[18px] bg-white shadow-md transition-all duration-300 pointer-events-none"
               style={{
-                width: 'calc(50% - 6px)',
-                transform: activeTab === 'classes' ? 'translateX(100%)' : 'translateX(0%)'
+                width: 'calc(33.33% - 6px)',
+                transform: activeTab === 'tracker' ? 'translateX(0%)' : activeTab === 'nutrition' ? 'translateX(100%)' : 'translateX(200%)'
               }}
             />
             
             <button
               onClick={() => setActiveTab('tracker')}
-              className={`flex-1 py-3.5 px-4 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'tracker' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -790,8 +791,18 @@ export default function UserDashboardPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab('nutrition')}
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+                activeTab === 'nutrition' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Coffee className="w-4 h-4" />
+              Nutrition Chart
+            </button>
+
+            <button
               onClick={() => setActiveTab('classes')}
-              className={`flex-1 py-3.5 px-4 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'classes' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -804,7 +815,7 @@ export default function UserDashboardPage() {
         {/* Tab Animation Content wrapper */}
         <AnimatePresence mode="wait">
           
-          {activeTab === 'tracker' ? (
+          {activeTab === 'tracker' && (
             <motion.div
               key="tracker-view"
               initial={{ opacity: 0, y: 15 }}
@@ -1247,7 +1258,9 @@ export default function UserDashboardPage() {
               </div>
 
             </motion.div>
-          ) : (
+          )}
+
+          {activeTab === 'classes' && (
             <motion.div
               key="classes-view"
               initial={{ opacity: 0, y: 15 }}
@@ -1521,6 +1534,30 @@ export default function UserDashboardPage() {
                 </>
               )}
 
+            </motion.div>
+          )}
+
+          {activeTab === 'nutrition' && (
+            <motion.div
+              key="nutrition-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+            >
+              {dietPlan ? (
+                <DietScreen dietPlan={dietPlan} />
+              ) : (
+                <div className="max-w-md mx-auto bg-white border border-slate-100 rounded-[32px] p-8 text-center shadow-sm space-y-4 my-12">
+                  <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center text-pink-500 mx-auto">
+                    <ShieldAlert className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900">No Diet Plan Assigned</h3>
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    Your coaching doctor has not assigned a personalized nutrition and diet plan to your profile yet.
+                    Once assigned, your daily schedule and tracking will appear here.
+                  </p>
+                </div>
+              )}
             </motion.div>
           )}
 
