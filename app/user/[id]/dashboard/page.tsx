@@ -225,12 +225,15 @@ export default function UserDashboardPage() {
       if (data.success) {
         setProfile(data.data);
         setJournalInput(data.data.journal || '');
+        return data.data;
       } else {
         setError(data.message || 'Failed to load profile');
+        return null;
       }
     } catch (err) {
       console.error('Fetch profile error:', err);
       setError('Connection failed');
+      return null;
     }
   }, [userId]);
 
@@ -297,11 +300,14 @@ export default function UserDashboardPage() {
     }
   }, []);
 
-  const fetchClassesData = useCallback(async () => {
+  const fetchClassesData = useCallback(async (resolvedProfile?: any) => {
     try {
       setClassesLoading(true);
       const token = localStorage.getItem('userToken');
       
+      const currentProfile = resolvedProfile || profile;
+      const isVerified = currentProfile?.planStatus === 'verified' || currentProfile?.planStatus === 'Active';
+
       // 1. Fetch all classes
       const allRes = await fetch(`${getPublicApiBase()}/classes`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -310,6 +316,9 @@ export default function UserDashboardPage() {
       let fetchedClasses: WellnessClass[] = [];
       if (allData.success && Array.isArray(allData.data)) {
         fetchedClasses = allData.data;
+        if (!isVerified) {
+          fetchedClasses = fetchedClasses.filter(c => !(c.videoUrl && c.videoUrl.startsWith('jitsi:')));
+        }
         setAllClasses(fetchedClasses);
       }
 
@@ -344,7 +353,7 @@ export default function UserDashboardPage() {
     } finally {
       setClassesLoading(false);
     }
-  }, [fetchPreviousRecordings]);
+  }, [fetchPreviousRecordings, profile]);
 
   const fetchDietPlan = useCallback(async () => {
     try {
@@ -367,12 +376,12 @@ export default function UserDashboardPage() {
   // Combined Refresh
   const refreshData = useCallback(async () => {
     setIsLoading(true);
+    const prof = await fetchProfile();
     await Promise.all([
-      fetchProfile(),
       fetchAppointments(),
       fetchPeriodHistory(),
       fetchProfileHistory(),
-      fetchClassesData(),
+      fetchClassesData(prof),
       fetchDietPlan()
     ]);
     setIsLoading(false);
