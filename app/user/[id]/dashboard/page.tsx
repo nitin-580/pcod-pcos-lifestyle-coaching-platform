@@ -123,6 +123,7 @@ export default function UserDashboardPage() {
   // Active playing Class & Chat States
   const [liveClass, setLiveClass] = useState<WellnessClass | null>(null);
   const [jitsiToken, setJitsiToken] = useState<string>('');
+  const [isClassFullScreen, setIsClassFullScreen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
@@ -1402,7 +1403,15 @@ export default function UserDashboardPage() {
                               </div>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{liveClass.duration} mins</span>
                             </div>
-                            <span className="text-xs font-bold text-slate-400 tracking-tight">Coach: {liveClass.instructorName}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-bold text-slate-400 tracking-tight">Coach: {liveClass.instructorName}</span>
+                              <button
+                                onClick={() => setIsClassFullScreen(true)}
+                                className="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase hover:bg-slate-800 transition shadow-sm active:scale-95 flex items-center gap-1"
+                              >
+                                <span>📺</span> Maximize
+                              </button>
+                            </div>
                           </div>
 
                           <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{liveClass.title}</h2>
@@ -1835,6 +1844,132 @@ export default function UserDashboardPage() {
               {/* Home Indicator */}
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-300 rounded-full z-[110]" />
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Video + Chat Overlay */}
+      <AnimatePresence>
+        {isClassFullScreen && liveClass && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950 z-[120] flex flex-col md:flex-row items-stretch overflow-hidden"
+          >
+            {/* Left Column: Video Container */}
+            <div className="flex-1 flex flex-col justify-between p-6 relative bg-black">
+              {/* Header inside Fullscreen */}
+              <div className="flex items-center justify-between text-white pb-4">
+                <div>
+                  <h2 className="text-lg font-black">{liveClass.title}</h2>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Coach: {liveClass.instructorName}</span>
+                </div>
+                <button
+                  onClick={() => setIsClassFullScreen(false)}
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                >
+                  Exit Fullscreen
+                </button>
+              </div>
+
+              {/* Video Player */}
+              <div className="flex-1 w-full h-full min-h-0 rounded-2xl overflow-hidden border border-slate-900 bg-black flex items-center justify-center">
+                {liveClass.videoUrl && liveClass.videoUrl.startsWith('jitsi:') ? (
+                  <iframe
+                    src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
+                    title={liveClass.title}
+                    className="w-full h-full"
+                    allow="camera; microphone; fullscreen; display-capture; autoplay"
+                  />
+                ) : isYoutubeUrl(liveClass.youtubeVideoId || liveClass.videoUrl || '') ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
+                    title={liveClass.title}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={liveClass.videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Chat container */}
+            <div className="w-full md:w-80 lg:w-96 bg-white flex flex-col justify-between border-l border-slate-100 h-full">
+              {/* Header */}
+              <div className="px-6 py-4.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">Room Chat Logs</h4>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={`w-2 h-2 rounded-full ${chatConnection === 'connected' ? 'bg-green-500' : 'bg-amber-500'}`} />
+                    <span className="text-[9px] font-bold text-slate-400 tracking-tight">
+                      Replication active
+                    </span>
+                  </div>
+                </div>
+                <RefreshCw onClick={fetchClassesData} className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 cursor-pointer transition" />
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {chatMessages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-slate-300 gap-2">
+                    <span className="text-4xl">💬</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">No messages yet</span>
+                  </div>
+                ) : (
+                  chatMessages.map((msg) => {
+                    const isMe = msg.userId === userId;
+                    const isDoc = msg.senderRole === 'doctor';
+                    const isAdmin = msg.senderRole === 'admin';
+
+                    return (
+                      <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        <span className="text-[8px] font-black text-slate-400 tracking-tight mb-1 uppercase flex items-center gap-1">
+                          {msg.senderName}
+                          {isDoc && <span className="text-[7px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-1 rounded">DOCTOR</span>}
+                          {isAdmin && <span className="text-[7px] bg-rose-50 text-rose-600 border border-rose-100 px-1 rounded">ADMIN</span>}
+                        </span>
+                        
+                        <div className={`max-w-[85%] p-3.5 rounded-2xl text-[11px] font-medium leading-relaxed ${
+                          isMe 
+                            ? 'bg-slate-900 text-white rounded-tr-none' 
+                            : 'bg-slate-100 text-slate-800 rounded-tl-none'
+                        }`}>
+                          {msg.message}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* Send Inputs */}
+              <form onSubmit={handleSendChatMessage} className="p-4 bg-slate-50/50 border-t border-slate-100 flex gap-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Type a message to class..."
+                  className="flex-1 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-400/50 text-xs px-4 py-2.5 text-slate-700 font-medium placeholder-slate-400 transition"
+                />
+                <button
+                  type="submit"
+                  disabled={!chatInput.trim() || chatSending}
+                  className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition flex items-center justify-center disabled:opacity-55"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
