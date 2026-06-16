@@ -11,14 +11,29 @@ export default function FloatingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 15);
     };
 
     window.addEventListener('scroll', handleScroll);
+    
+    // Check auth status
+    const token = localStorage.getItem('userToken');
+    setIsLoggedIn(!!token);
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('doctorToken');
+    setIsLoggedIn(false);
+    window.location.href = '/';
+  };
 
   const navLinks = [
     { name: 'About Us', href: '/about' },
@@ -78,13 +93,22 @@ export default function FloatingNavbar() {
               );
             })}
 
-            {/* Login */}
-            <Link
-              href="/login"
-              className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-xl border border-slate-200 bg-white hover:shadow-sm"
-            >
-              Login
-            </Link>
+            {/* Login / Logout */}
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="text-sm font-semibold text-rose-600 hover:text-rose-700 transition-all px-4 py-2 rounded-xl border border-rose-200 bg-rose-50/50 hover:shadow-sm"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-xl border border-slate-200 bg-white hover:shadow-sm"
+              >
+                Login
+              </Link>
+            )}
 
             {/* CTA */}
             <Link
@@ -132,13 +156,22 @@ export default function FloatingNavbar() {
             </Link>
           ))}
 
-          <Link
-            href="/login"
-            className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Login
-          </Link>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="w-full max-w-xs text-center border border-rose-200 bg-rose-50/30 text-rose-600 py-4 rounded-xl font-semibold"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+          )}
 
           <Link
             href="/#register"

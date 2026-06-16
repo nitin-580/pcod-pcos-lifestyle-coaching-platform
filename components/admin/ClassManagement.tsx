@@ -25,7 +25,8 @@ import {
   AlertCircle,
   MessageSquare,
   Send,
-  Trash
+  Trash,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@supabase/supabase-js';
@@ -58,6 +59,8 @@ interface WellnessClass {
   isActive: boolean;
   tags: string[];
   createdAt: string;
+  jitsiRecordingUrl?: string;
+  jitsiSessionStatus?: string;
 }
 
 interface VideoPlacement {
@@ -113,6 +116,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
   const [categories, setCategories] = useState<ClassCategory[]>([]);
   const [placements, setPlacements] = useState<VideoPlacement[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [teachers, setTeachers] = useState<any[]>([]);
   
   // UI States
   const [loading, setLoading] = useState(false);
@@ -146,11 +150,14 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
     googleMeetLink: '',
     scheduledAt: '',
     instructorName: '',
+    instructorId: '',
     duration: 30,
     categoryId: '',
     isFeatured: false,
     isActive: true,
-    tagsString: ''
+    tagsString: '',
+    liveProvider: 'youtube' as 'youtube' | 'jitsi',
+    jitsiRoom: ''
   });
 
   const getProxyBase = () => '/api/public-proxy';
@@ -169,11 +176,12 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       };
 
       // Fetch categories, classes, placements
-      const [catsRes, classesRes, placementsRes, analyticsRes] = await Promise.all([
+      const [catsRes, classesRes, placementsRes, analyticsRes, doctorsRes] = await Promise.all([
         fetch(`${getProxyBase()}/classes/categories`, { headers }),
         fetch(`${getProxyBase()}/classes`, { headers }),
         fetch(`${getProxyBase()}/classes/placements`, { headers }),
-        fetch(`${getProxyBase()}/classes/analytics`, { headers })
+        fetch(`${getProxyBase()}/classes/analytics`, { headers }),
+        fetch(`${getProxyBase()}/doctors`, { headers }).catch(() => null)
       ]);
 
       const catsData = await catsRes.json();
@@ -185,6 +193,15 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
         const res = await analyticsRes.json();
         analyticsData = res.data;
       }
+
+      let teachersList: any[] = [];
+      if (doctorsRes) {
+        const doctorsData = await doctorsRes.json();
+        if (doctorsData.success) {
+          teachersList = doctorsData.data || [];
+        }
+      }
+      setTeachers(teachersList);
 
       setCategories(catsData.data || []);
       
@@ -385,12 +402,15 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       videoUrl: '',
       googleMeetLink: '',
       scheduledAt: '',
-      instructorName: '',
+      instructorName: teachers[0]?.name || '',
+      instructorId: teachers[0]?.id || '',
       duration: 30,
       categoryId: categories[0]?.id || '',
       isFeatured: false,
       isActive: true,
-      tagsString: ''
+      tagsString: '',
+      liveProvider: 'youtube',
+      jitsiRoom: ''
     });
     setIsModalOpen(true);
   };
@@ -406,6 +426,9 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       }
     }
 
+    const isJitsi = cls.videoUrl && cls.videoUrl.startsWith('jitsi:');
+    const jitsiRoomName = isJitsi ? cls.videoUrl.replace('jitsi:', '') : '';
+
     setFormFields({
       title: cls.title,
       description: cls.description,
@@ -415,18 +438,25 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
       googleMeetLink: cls.googleMeetLink || '',
       scheduledAt: formattedDate,
       instructorName: cls.instructorName,
+      instructorId: (cls as any).instructorId || '',
       duration: cls.duration,
       categoryId: cls.categoryId,
       isFeatured: cls.isFeatured,
       isActive: cls.isActive,
-      tagsString: (cls.tags || []).join(', ')
+      tagsString: (cls.tags || []).join(', '),
+      liveProvider: isJitsi ? 'jitsi' : 'youtube',
+      jitsiRoom: jitsiRoomName
     });
     setIsModalOpen(true);
   };
 
   const handleSaveClass = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formFields.title || !formFields.description || !formFields.instructorName || !formFields.videoUrl) {
+    
+    const isJitsiLive = formFields.type === 'live' && formFields.liveProvider === 'jitsi';
+    const hasVideoUrl = isJitsiLive ? true : !!formFields.videoUrl;
+
+    if (!formFields.title || !formFields.description || !formFields.instructorName || !hasVideoUrl) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -437,13 +467,19 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
         ? formFields.tagsString.split(',').map(t => t.trim()).filter(t => t.length > 0)
         : [];
 
+      let finalVideoUrl = formFields.videoUrl;
+      if (isJitsiLive) {
+        finalVideoUrl = `jitsi:${formFields.jitsiRoom || 'wombcare-class-' + Math.floor(1000 + Math.random() * 9000)}`;
+      }
+
       const payload: any = {
         title: formFields.title,
         description: formFields.description,
         type: formFields.type,
         thumbnailUrl: formFields.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b',
-        videoUrl: formFields.videoUrl,
+        videoUrl: finalVideoUrl,
         instructorName: formFields.instructorName,
+        instructorId: formFields.instructorId || undefined,
         duration: Number(formFields.duration),
         categoryId: formFields.categoryId,
         isFeatured: formFields.isFeatured,
@@ -1060,6 +1096,18 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                           >
                             <MessageSquare className="w-3.5 h-3.5" /> Monitor Chat
                           </button>
+                          {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
+                            <a
+                              href={cls.jitsiRecordingUrl || cls.videoUrl}
+                              download
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Download Recording"
+                              className="flex items-center justify-center p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl transition-all"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                          )}
                           <button
                             onClick={() => handleOpenEditModal(cls)}
                             className="flex items-center justify-center p-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition-all"
@@ -1454,17 +1502,30 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                       />
                     </div>
 
-                    {/* Instructor */}
+                    {/* Instructor Dropdown Selection */}
                     <div className="space-y-2">
-                      <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Instructor Name*</label>
-                      <input 
-                        type="text" 
+                      <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Wellness Instructor*</label>
+                      <select 
                         required
-                        value={formFields.instructorName}
-                        onChange={(e) => setFormFields(prev => ({ ...prev, instructorName: e.target.value }))}
-                        placeholder="e.g. Dr. Aaradhya Sharma"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
-                      />
+                        value={formFields.instructorId}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          const selectedTeacher = teachers.find(t => t.id === selectedId);
+                          setFormFields(prev => ({ 
+                            ...prev, 
+                            instructorId: selectedId,
+                            instructorName: selectedTeacher ? selectedTeacher.name : '' 
+                          }));
+                        }}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-700 outline-none focus:ring-2 focus:ring-pink-400"
+                      >
+                        <option value="">Select Instructor...</option>
+                        {teachers.map(teacher => (
+                          <option key={teacher.id} value={teacher.id}>
+                            {teacher.name} ({teacher.email})
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     {/* Class Type */}
@@ -1507,18 +1568,62 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                       />
                     </div>
 
-                    {/* YouTube Video URL */}
-                    <div className="space-y-2">
-                      <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">YouTube URL*</label>
-                      <input 
-                        type="url" 
-                        required
-                        value={formFields.videoUrl}
-                        onChange={(e) => setFormFields(prev => ({ ...prev, videoUrl: e.target.value }))}
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
-                      />
-                    </div>
+                    {/* Dynamic Inputs based on Recorded vs Live */}
+                    {formFields.type === 'recorded' ? (
+                      /* Pre-Recorded YouTube Video URL */
+                      <div className="space-y-2">
+                        <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">YouTube URL*</label>
+                        <input 
+                          type="url" 
+                          required
+                          value={formFields.videoUrl}
+                          onChange={(e) => setFormFields(prev => ({ ...prev, videoUrl: e.target.value }))}
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
+                        />
+                      </div>
+                    ) : (
+                      /* Live Broadcast Options */
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Live Broadcast Provider*</label>
+                          <select 
+                            value={formFields.liveProvider}
+                            onChange={(e) => setFormFields(prev => ({ ...prev, liveProvider: e.target.value as any }))}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-700 outline-none focus:ring-2 focus:ring-pink-400"
+                          >
+                            <option value="youtube">YouTube Live Stream</option>
+                            <option value="jitsi">8x8 JaaS Jitsi Classroom</option>
+                          </select>
+                        </div>
+
+                        {formFields.liveProvider === 'youtube' ? (
+                          <div className="space-y-2">
+                            <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">YouTube Live Stream URL*</label>
+                            <input 
+                              type="url" 
+                              required
+                              value={formFields.videoUrl}
+                              onChange={(e) => setFormFields(prev => ({ ...prev, videoUrl: e.target.value }))}
+                              placeholder="https://www.youtube.com/watch?v=..."
+                              className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
+                            />
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Jitsi Classroom Room ID*</label>
+                            <input 
+                              type="text" 
+                              required
+                              value={formFields.jitsiRoom}
+                              onChange={(e) => setFormFields(prev => ({ ...prev, jitsiRoom: e.target.value.replace(/\s+/g, '-').toLowerCase() }))}
+                              placeholder="e.g. prenatal-care-yoga"
+                              className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-400"
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
 
                     {/* Dynamic Scheduled At (Only shown if type is live) */}
                     {formFields.type === 'live' && (
@@ -1537,10 +1642,9 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                     {/* Dynamic Google Meet Link (Only shown if type is live) */}
                     {formFields.type === 'live' && (
                       <div className="space-y-2">
-                        <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Google Meet Link*</label>
+                        <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Alternative Google Meet Link</label>
                         <input 
                           type="url" 
-                          required
                           value={formFields.googleMeetLink}
                           onChange={(e) => setFormFields(prev => ({ ...prev, googleMeetLink: e.target.value }))}
                           placeholder="https://meet.google.com/abc-defg-hij"

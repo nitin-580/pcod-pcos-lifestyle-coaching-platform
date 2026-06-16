@@ -52,6 +52,14 @@ export default function LoginPage() {
       );
 
       // Redirect based on Role
+      if (userRole === 'teacher') {
+        const classesUrl = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1'))
+          ? 'http://localhost:5173'
+          : 'https://classes.wombcare.in';
+        window.location.href = `${classesUrl}/login?token=${data.token}&email=${encodeURIComponent(email)}`;
+        return;
+      }
+
       if (userRole === 'doctor') {
         localStorage.setItem('doctorToken', data.token);
         router.push(`/doctor/${userId}/dashboard`);

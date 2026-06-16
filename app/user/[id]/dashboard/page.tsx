@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPublicApiBase } from '@/lib/api-config';
@@ -37,7 +37,8 @@ import {
   ListFilter,
   Check,
   X,
-  ShieldAlert
+  ShieldAlert,
+  Download
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -80,10 +81,13 @@ interface WellnessClass {
   categoryId: string;
   isActive: boolean;
   tags?: string[];
+  jitsiRecordingUrl?: string;
+  jitsiSessionStatus?: string;
 }
 
 export default function UserDashboardPage() {
   const params = useParams();
+  const router = useRouter();
   const userId = params.id as string;
 
   // Active View Tabs: 'tracker', 'classes', or 'nutrition'
@@ -102,6 +106,8 @@ export default function UserDashboardPage() {
   const [allClasses, setAllClasses] = useState<WellnessClass[]>([]);
   const [classesLoading, setClassesLoading] = useState(true);
   const [selectedClassFilter, setSelectedClassFilter] = useState<'all' | 'live' | 'recorded'>('all');
+  const [previousRecordings, setPreviousRecordings] = useState<WellnessClass[]>([]);
+  const [recordingsLoading, setRecordingsLoading] = useState(false);
   
   // App states
   const [isLoading, setIsLoading] = useState(true);
@@ -116,6 +122,7 @@ export default function UserDashboardPage() {
 
   // Active playing Class & Chat States
   const [liveClass, setLiveClass] = useState<WellnessClass | null>(null);
+  const [jitsiToken, setJitsiToken] = useState<string>('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
@@ -132,6 +139,72 @@ export default function UserDashboardPage() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3000);
   };
+
+  const isYoutubeUrl = (url: string) => {
+    if (!url) return false;
+    return url.includes('youtube.com') || url.includes('youtu.be') || /^[a-zA-Z0-9_-]{11}$/.test(url);
+  };
+
+  const getJitsiIframeSrc = (roomNameUrl: string, token: string) => {
+    const rName = roomNameUrl.replace('jitsi:', '');
+    const configHash = '#config.startWithAudioMuted=true' +
+      '&config.startWithVideoMuted=true' +
+      '&config.prejoinPageEnabled=false' +
+      '&config.toolbarButtons=["chat","raisehand","hangup"]' +
+      '&config.participantsPane.enabled=false' +
+      '&config.disableTileView=true' +
+      '&config.hideConferenceSubject=true' +
+      '&config.hideConferenceTimer=true' +
+      '&config.filmstrip.enabled=false' +
+      '&config.disableSelfView=true';
+    return `https://8x8.vc/vpaas-magic-cookie-fdbdcbb19a264008a307ac74211da6c7/${rName}${token ? `?jwt=${token}` : ''}${configHash}`;
+  };
+
+  // Security ownership check
+  useEffect(() => {
+    const token = localStorage.getItem('userToken');
+    const userDataStr = localStorage.getItem('userData');
+    let localUserId = '';
+    
+    if (userDataStr) {
+      try {
+        const parsed = JSON.parse(userDataStr);
+        localUserId = parsed.id;
+      } catch {}
+    }
+    
+    if (!token || !localUserId || localUserId !== userId) {
+      console.warn('[SECURITY] Unauthorized access attempt to user dashboard.');
+      router.push('/login');
+    }
+  }, [userId, router]);
+
+  // Load secure Jitsi token for students
+  useEffect(() => {
+    if (!liveClass || liveClass.type !== 'live' || !liveClass.videoUrl || !liveClass.videoUrl.startsWith('jitsi:')) {
+      setJitsiToken('');
+      return;
+    }
+
+    const fetchJitsiToken = async () => {
+      try {
+        const token = localStorage.getItem('userToken');
+        const res = await fetch(`${getPublicApiBase()}/classes/${liveClass.id}/jitsi-token`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success && data.jwt) {
+          setJitsiToken(data.jwt);
+        }
+      } catch (err) {
+        console.error('Failed to load secure Jitsi token:', err);
+      }
+    };
+
+    fetchJitsiToken();
+  }, [liveClass]);
 
   /* =========================================================
      API DATA ORCHESTRATION
@@ -205,6 +278,24 @@ export default function UserDashboardPage() {
     }
   }, [userId]);
 
+  const fetchPreviousRecordings = useCallback(async () => {
+    try {
+      setRecordingsLoading(true);
+      const token = localStorage.getItem('userToken');
+      const res = await fetch(`${getPublicApiBase()}/classes/student/recordings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setPreviousRecordings(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch previous recordings error:', err);
+    } finally {
+      setRecordingsLoading(false);
+    }
+  }, []);
+
   const fetchClassesData = useCallback(async () => {
     try {
       setClassesLoading(true);
@@ -244,12 +335,15 @@ export default function UserDashboardPage() {
       }
 
       setLiveClass(resolvedClass);
+
+      // Fetch recordings
+      await fetchPreviousRecordings();
     } catch (err) {
       console.error('Fetch classes error:', err);
     } finally {
       setClassesLoading(false);
     }
-  }, []);
+  }, [fetchPreviousRecordings]);
 
   const fetchDietPlan = useCallback(async () => {
     try {
@@ -753,6 +847,16 @@ export default function UserDashboardPage() {
                   <Sparkles className="w-4 h-4 text-pink-600" />
                   <span className="font-bold text-xs uppercase tracking-wider">PCOS Care Plan: Active</span>
                 </div>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('userToken');
+                    localStorage.removeItem('userId');
+                    router.push('/login');
+                  }}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-sm"
+                >
+                  Logout
+                </button>
               </div>
             </div>
 
@@ -1304,15 +1408,31 @@ export default function UserDashboardPage() {
                           <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{liveClass.title}</h2>
                           <p className="text-slate-500 text-xs font-medium mt-2 leading-relaxed">{liveClass.description}</p>
 
-                          {/* YouTube Frame */}
+                          {/* Video or Jitsi Classroom Frame */}
                           <div className="mt-6 aspect-video bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-950/20">
-                            <iframe
-                              src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
-                              title={liveClass.title}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
+                            {liveClass.videoUrl && liveClass.videoUrl.startsWith('jitsi:') ? (
+                              <iframe
+                                src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
+                                title={liveClass.title}
+                                className="w-full h-full"
+                                allow="camera; microphone; fullscreen; display-capture; autoplay"
+                              />
+                            ) : isYoutubeUrl(liveClass.youtubeVideoId || liveClass.videoUrl || '') ? (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
+                                title={liveClass.title}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            ) : (
+                              <video
+                                src={liveClass.videoUrl}
+                                controls
+                                autoPlay
+                                className="w-full h-full object-contain"
+                              />
+                            )}
                           </div>
                         </div>
 
@@ -1499,13 +1619,13 @@ export default function UserDashboardPage() {
                                 </div>
                               </div>
 
-                              <div className="p-6 pt-0">
+                              <div className="p-6 pt-0 flex gap-2">
                                 <button
                                   onClick={() => {
                                     setLiveClass(cls);
                                     showToast(`Now playing: ${cls.title} 🎥`);
                                   }}
-                                  className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                  className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
                                     isActive 
                                       ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
                                       : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
@@ -1523,6 +1643,18 @@ export default function UserDashboardPage() {
                                     </>
                                   )}
                                 </button>
+                                {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
+                                  <a
+                                    href={cls.jitsiRecordingUrl || cls.videoUrl}
+                                    download
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Download Recording"
+                                    className="p-3.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-600 hover:text-pink-700 border border-pink-100 transition-all flex items-center justify-center shadow-sm"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                )}
                               </div>
                             </motion.div>
                           );
@@ -1530,6 +1662,108 @@ export default function UserDashboardPage() {
                       </div>
                     )}
 
+                  </div>
+
+                  {/* Previous Class Recordings */}
+                  <div className="bg-white border border-slate-100 rounded-[40px] p-8 md:p-12 shadow-sm space-y-8">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-600">Past Lectures</span>
+                      <h3 className="text-3xl font-extrabold text-slate-950 mt-1">Class Recordings</h3>
+                      <p className="text-slate-400 text-xs mt-1.5 font-medium">Replay past lectures and sessions anytime. All interactions and video streams are archived.</p>
+                    </div>
+
+                    {recordingsLoading ? (
+                      <div className="py-12 text-center text-slate-400 text-xs font-semibold">
+                        Loading class recordings...
+                      </div>
+                    ) : previousRecordings.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                        <span className="text-4xl">🎥</span>
+                        <p className="text-xs font-bold uppercase tracking-widest mt-4">No completed recordings yet</p>
+                        <p className="text-[10px] text-slate-400 mt-1">Recordings automatically populate once live classrooms end.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {previousRecordings.map((rec) => {
+                          const isActive = liveClass?.id === rec.id;
+                          return (
+                            <motion.div
+                              key={rec.id}
+                              whileHover={{ y: -4 }}
+                              className={`group overflow-hidden rounded-[28px] border bg-white flex flex-col justify-between shadow-sm hover:shadow-md transition-all ${
+                                isActive ? 'border-purple-300 ring-2 ring-purple-500/20' : 'border-slate-100'
+                              }`}
+                            >
+                              <div>
+                                <div className="relative aspect-video bg-slate-50 overflow-hidden">
+                                  <img 
+                                    src={rec.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'} 
+                                    alt={rec.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  />
+                                  <div className="absolute top-4 left-4 py-1.5 px-3 rounded-full bg-purple-600 text-white text-[9px] font-black uppercase tracking-wider shadow">
+                                    COMPLETED RECORDING
+                                  </div>
+                                </div>
+
+                                <div className="p-6 space-y-3">
+                                  <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <span>{rec.instructorName}</span>
+                                    <span>{rec.duration} Mins</span>
+                                  </div>
+
+                                  <h4 className="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors leading-snug line-clamp-1">
+                                    {rec.title}
+                                  </h4>
+                                  
+                                  <p className="text-slate-400 text-[11px] font-medium leading-relaxed line-clamp-2">
+                                    {rec.description}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="p-6 pt-0 flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setLiveClass(rec);
+                                    showToast(`Playing recording: ${rec.title} 🎥`);
+                                  }}
+                                  className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                    isActive 
+                                      ? 'bg-purple-50 text-purple-600 border border-purple-100 cursor-default'
+                                      : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                  }`}
+                                >
+                                  {isActive ? (
+                                    <>
+                                      <Check className="w-4 h-4" />
+                                      Playing
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="w-4 h-4 fill-current" />
+                                      Watch Recording
+                                    </>
+                                  )}
+                                </button>
+                                {((rec.jitsiRecordingUrl) || (rec.type === 'recorded' && rec.videoUrl && !rec.videoUrl.includes('youtube') && !rec.videoUrl.includes('youtu.be') && !rec.videoUrl.startsWith('jitsi:'))) && (
+                                  <a
+                                    href={rec.jitsiRecordingUrl || rec.videoUrl}
+                                    download
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Download Recording"
+                                    className="p-3.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-700 border border-purple-100 transition-all flex items-center justify-center shadow-sm"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
