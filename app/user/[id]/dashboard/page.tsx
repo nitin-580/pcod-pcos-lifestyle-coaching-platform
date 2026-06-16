@@ -163,6 +163,8 @@ export default function UserDashboardPage() {
 
   // Security ownership check
   useEffect(() => {
+    if (!userId) return;
+
     const token = localStorage.getItem('userToken');
     const userDataStr = localStorage.getItem('userData');
     let localUserId = '';
@@ -316,9 +318,6 @@ export default function UserDashboardPage() {
       let fetchedClasses: WellnessClass[] = [];
       if (allData.success && Array.isArray(allData.data)) {
         fetchedClasses = allData.data;
-        if (!isVerified) {
-          fetchedClasses = fetchedClasses.filter(c => !(c.videoUrl && c.videoUrl.startsWith('jitsi:')));
-        }
         setAllClasses(fetchedClasses);
       }
 
@@ -334,14 +333,14 @@ export default function UserDashboardPage() {
         }
       }
 
-      // Fallback: use first active live class from array
+      // Fallback: use first active live class from array (ensure not Jitsi if unverified)
       if (!resolvedClass) {
-        resolvedClass = fetchedClasses.find(c => c.type === 'live' && c.isActive) || null;
+        resolvedClass = fetchedClasses.find(c => c.type === 'live' && c.isActive && (isVerified || !(c.videoUrl && c.videoUrl.startsWith('jitsi:')))) || null;
       }
 
-      // Final fallback: use first recorded class from array as initial player screen
+      // Final fallback: use first recorded class from array as initial player screen (ensure not Jitsi if unverified)
       if (!resolvedClass && fetchedClasses.length > 0) {
-        resolvedClass = fetchedClasses[0];
+        resolvedClass = fetchedClasses.find(c => isVerified || !(c.videoUrl && c.videoUrl.startsWith('jitsi:'))) || fetchedClasses[0];
       }
 
       setLiveClass(resolvedClass);
@@ -1596,6 +1595,10 @@ export default function UserDashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredClasses.map((cls) => {
                           const isActive = liveClass?.id === cls.id;
+                          const isJitsi = !!(cls.videoUrl && cls.videoUrl.startsWith('jitsi:'));
+                          const isVerified = !!(profile?.planStatus === 'verified' || profile?.planStatus === 'Active');
+                          const isLocked = !!(isJitsi && !isVerified);
+
                           return (
                             <motion.div
                               key={cls.id}
@@ -1619,6 +1622,12 @@ export default function UserDashboardPage() {
                                     <span className={`w-1.5 h-1.5 rounded-full ${cls.type === 'live' ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
                                     {cls.type}
                                   </div>
+
+                                  {isLocked && (
+                                    <div className="absolute top-4 right-4 py-1.5 px-3 rounded-full bg-rose-600 text-white text-[9px] font-black uppercase tracking-wider shadow flex items-center gap-1">
+                                      <Lock className="w-3 h-3" /> PREMIUM
+                                    </div>
+                                  )}
                                 </div>
 
                                 <div className="p-6 space-y-3">
@@ -1640,16 +1649,28 @@ export default function UserDashboardPage() {
                               <div className="p-6 pt-0 flex gap-2">
                                 <button
                                   onClick={() => {
+                                    if (isLocked) {
+                                      showToast('Verified premium plan is required to join Jitsi live sessions! 🔒');
+                                      return;
+                                    }
                                     setLiveClass(cls);
                                     showToast(`Now playing: ${cls.title} 🎥`);
                                   }}
+                                  disabled={isLocked && !isActive}
                                   className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                                    isActive 
-                                      ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
-                                      : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                    isLocked
+                                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75'
+                                      : isActive 
+                                        ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
+                                        : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
                                   }`}
                                 >
-                                  {isActive ? (
+                                  {isLocked ? (
+                                    <>
+                                      <Lock className="w-4 h-4" />
+                                      Premium Verified Only
+                                    </>
+                                  ) : isActive ? (
                                     <>
                                       <Check className="w-4 h-4" />
                                       Now Active
