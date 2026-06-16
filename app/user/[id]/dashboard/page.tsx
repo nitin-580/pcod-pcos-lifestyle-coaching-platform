@@ -176,8 +176,11 @@ export default function UserDashboardPage() {
       } catch {}
     }
     
-    if (!token || !localUserId || localUserId !== userId) {
-      console.warn('[SECURITY] Unauthorized access attempt to user dashboard.');
+    const cleanLocalId = localUserId ? String(localUserId).trim().toLowerCase() : '';
+    const cleanUserId = userId ? String(userId).trim().toLowerCase() : '';
+
+    if (!token || !cleanLocalId || cleanLocalId !== cleanUserId) {
+      console.warn('[SECURITY] Unauthorized access attempt to user dashboard.', { cleanLocalId, cleanUserId });
       router.push('/login');
     }
   }, [userId, router]);
