@@ -163,8 +163,6 @@ export default function UserDashboardPage() {
 
   // Security ownership check
   useEffect(() => {
-    if (!userId) return;
-
     const token = localStorage.getItem('userToken');
     const userDataStr = localStorage.getItem('userData');
     let localUserId = '';
@@ -176,11 +174,8 @@ export default function UserDashboardPage() {
       } catch {}
     }
     
-    const cleanLocalId = localUserId ? String(localUserId).trim().toLowerCase() : '';
-    const cleanUserId = userId ? String(userId).trim().toLowerCase() : '';
-
-    if (!token || !cleanLocalId || cleanLocalId !== cleanUserId) {
-      console.warn('[SECURITY] Unauthorized access attempt to user dashboard.', { cleanLocalId, cleanUserId });
+    if (!token || !localUserId || localUserId !== userId) {
+      console.warn('[SECURITY] Unauthorized access attempt to user dashboard.');
       router.push('/login');
     }
   }, [userId, router]);
@@ -230,15 +225,12 @@ export default function UserDashboardPage() {
       if (data.success) {
         setProfile(data.data);
         setJournalInput(data.data.journal || '');
-        return data.data;
       } else {
         setError(data.message || 'Failed to load profile');
-        return null;
       }
     } catch (err) {
       console.error('Fetch profile error:', err);
       setError('Connection failed');
-      return null;
     }
   }, [userId]);
 
@@ -305,14 +297,11 @@ export default function UserDashboardPage() {
     }
   }, []);
 
-  const fetchClassesData = useCallback(async (resolvedProfile?: any) => {
+  const fetchClassesData = useCallback(async () => {
     try {
       setClassesLoading(true);
       const token = localStorage.getItem('userToken');
       
-      const currentProfile = resolvedProfile || profile;
-      const isVerified = currentProfile?.planStatus === 'verified' || currentProfile?.planStatus === 'Active';
-
       // 1. Fetch all classes
       const allRes = await fetch(`${getPublicApiBase()}/classes`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -336,14 +325,14 @@ export default function UserDashboardPage() {
         }
       }
 
-      // Fallback: use first active live class from array (ensure not Jitsi if unverified)
+      // Fallback: use first active live class from array
       if (!resolvedClass) {
-        resolvedClass = fetchedClasses.find(c => c.type === 'live' && c.isActive && (isVerified || !(c.videoUrl && c.videoUrl.startsWith('jitsi:')))) || null;
+        resolvedClass = fetchedClasses.find(c => c.type === 'live' && c.isActive) || null;
       }
 
-      // Final fallback: use first recorded class from array as initial player screen (ensure not Jitsi if unverified)
+      // Final fallback: use first recorded class from array as initial player screen
       if (!resolvedClass && fetchedClasses.length > 0) {
-        resolvedClass = fetchedClasses.find(c => isVerified || !(c.videoUrl && c.videoUrl.startsWith('jitsi:'))) || fetchedClasses[0];
+        resolvedClass = fetchedClasses[0];
       }
 
       setLiveClass(resolvedClass);
@@ -355,7 +344,7 @@ export default function UserDashboardPage() {
     } finally {
       setClassesLoading(false);
     }
-  }, [fetchPreviousRecordings, profile]);
+  }, [fetchPreviousRecordings]);
 
   const fetchDietPlan = useCallback(async () => {
     try {
@@ -378,12 +367,12 @@ export default function UserDashboardPage() {
   // Combined Refresh
   const refreshData = useCallback(async () => {
     setIsLoading(true);
-    const prof = await fetchProfile();
     await Promise.all([
+      fetchProfile(),
       fetchAppointments(),
       fetchPeriodHistory(),
       fetchProfileHistory(),
-      fetchClassesData(prof),
+      fetchClassesData(),
       fetchDietPlan()
     ]);
     setIsLoading(false);
@@ -1431,12 +1420,22 @@ export default function UserDashboardPage() {
                           {/* Video or Jitsi Classroom Frame */}
                           <div className="mt-6 aspect-video bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-950/20">
                             {liveClass.videoUrl && liveClass.videoUrl.startsWith('jitsi:') ? (
-                              <iframe
-                                src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
-                                title={liveClass.title}
-                                className="w-full h-full"
-                                allow="camera; microphone; fullscreen; display-capture; autoplay"
-                              />
+                              (profile?.planStatus !== 'verified') ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-8 text-white space-y-4">
+                                  <span className="text-4xl">🔒</span>
+                                  <h4 className="text-lg font-black uppercase tracking-wider text-pink-400">Premium Live Stream</h4>
+                                  <p className="text-xs text-slate-400 max-w-sm">
+                                    A verified subscription plan is required to enter this classroom. Please verify your plan to join.
+                                  </p>
+                                </div>
+                              ) : (
+                                <iframe
+                                  src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
+                                  title={liveClass.title}
+                                  className="w-full h-full"
+                                  allow="camera; microphone; fullscreen; display-capture; autoplay"
+                                />
+                              )
                             ) : isYoutubeUrl(liveClass.youtubeVideoId || liveClass.videoUrl || '') ? (
                               <iframe
                                 src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
@@ -1598,10 +1597,6 @@ export default function UserDashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredClasses.map((cls) => {
                           const isActive = liveClass?.id === cls.id;
-                          const isJitsi = !!(cls.videoUrl && cls.videoUrl.startsWith('jitsi:'));
-                          const isVerified = !!(profile?.planStatus === 'verified' || profile?.planStatus === 'Active');
-                          const isLocked = !!(isJitsi && !isVerified);
-
                           return (
                             <motion.div
                               key={cls.id}
@@ -1625,10 +1620,9 @@ export default function UserDashboardPage() {
                                     <span className={`w-1.5 h-1.5 rounded-full ${cls.type === 'live' ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
                                     {cls.type}
                                   </div>
-
-                                  {isLocked && (
-                                    <div className="absolute top-4 right-4 py-1.5 px-3 rounded-full bg-rose-600 text-white text-[9px] font-black uppercase tracking-wider shadow flex items-center gap-1">
-                                      <Lock className="w-3 h-3" /> PREMIUM
+                                  {cls.videoUrl && cls.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') && (
+                                    <div className="absolute top-4 right-4 py-1.5 px-3 rounded-full bg-slate-900/95 backdrop-blur-md text-[9px] font-black uppercase tracking-wider text-pink-400 shadow flex items-center gap-1">
+                                      <span>🔒</span> Premium
                                     </div>
                                   )}
                                 </div>
@@ -1650,52 +1644,52 @@ export default function UserDashboardPage() {
                               </div>
 
                               <div className="p-6 pt-0 flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    if (isLocked) {
-                                      showToast('Verified premium plan is required to join Jitsi live sessions! 🔒');
-                                      return;
-                                    }
-                                    setLiveClass(cls);
-                                    showToast(`Now playing: ${cls.title} 🎥`);
-                                  }}
-                                  disabled={isLocked && !isActive}
-                                  className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                                    isLocked
-                                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75'
-                                      : isActive 
-                                        ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
-                                        : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
-                                  }`}
-                                >
-                                  {isLocked ? (
-                                    <>
-                                      <Lock className="w-4 h-4" />
-                                      Premium Verified Only
-                                    </>
-                                  ) : isActive ? (
-                                    <>
-                                      <Check className="w-4 h-4" />
-                                      Now Active
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Play className="w-4 h-4 fill-current" />
-                                      Play Session
-                                    </>
-                                  )}
-                                </button>
-                                {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
-                                  <a
-                                    href={cls.jitsiRecordingUrl || cls.videoUrl}
-                                    download
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title="Download Recording"
-                                    className="p-3.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-600 hover:text-pink-700 border border-pink-100 transition-all flex items-center justify-center shadow-sm"
+                                {cls.videoUrl && cls.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') ? (
+                                  <button
+                                    disabled
+                                    className="w-full py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
                                   >
-                                    <Download className="w-4 h-4" />
-                                  </a>
+                                    <Lock className="w-4 h-4" />
+                                    Premium Locked
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setLiveClass(cls);
+                                        showToast(`Now playing: ${cls.title} 🎥`);
+                                      }}
+                                      className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                        isActive 
+                                          ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
+                                          : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                      }`}
+                                    >
+                                      {isActive ? (
+                                        <>
+                                          <Check className="w-4 h-4" />
+                                          Now Active
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Play className="w-4 h-4 fill-current" />
+                                          Play Session
+                                        </>
+                                      )}
+                                    </button>
+                                    {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
+                                      <a
+                                        href={cls.jitsiRecordingUrl || cls.videoUrl}
+                                        download
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="Download Recording"
+                                        className="p-3.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-600 hover:text-pink-700 border border-pink-100 transition-all flex items-center justify-center shadow-sm"
+                                      >
+                                        <Download className="w-4 h-4" />
+                                      </a>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             </motion.div>
@@ -1765,40 +1759,52 @@ export default function UserDashboardPage() {
                               </div>
 
                               <div className="p-6 pt-0 flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    setLiveClass(rec);
-                                    showToast(`Playing recording: ${rec.title} 🎥`);
-                                  }}
-                                  className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                                    isActive 
-                                      ? 'bg-purple-50 text-purple-600 border border-purple-100 cursor-default'
-                                      : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
-                                  }`}
-                                >
-                                  {isActive ? (
-                                    <>
-                                      <Check className="w-4 h-4" />
-                                      Playing
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Play className="w-4 h-4 fill-current" />
-                                      Watch Recording
-                                    </>
-                                  )}
-                                </button>
-                                {((rec.jitsiRecordingUrl) || (rec.type === 'recorded' && rec.videoUrl && !rec.videoUrl.includes('youtube') && !rec.videoUrl.includes('youtu.be') && !rec.videoUrl.startsWith('jitsi:'))) && (
-                                  <a
-                                    href={rec.jitsiRecordingUrl || rec.videoUrl}
-                                    download
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title="Download Recording"
-                                    className="p-3.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-700 border border-purple-100 transition-all flex items-center justify-center shadow-sm"
+                                {rec.videoUrl && rec.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') ? (
+                                  <button
+                                    disabled
+                                    className="w-full py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
                                   >
-                                    <Download className="w-4 h-4" />
-                                  </a>
+                                    <Lock className="w-4 h-4" />
+                                    Premium Locked
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setLiveClass(rec);
+                                        showToast(`Playing recording: ${rec.title} 🎥`);
+                                      }}
+                                      className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                        isActive 
+                                          ? 'bg-purple-50 text-purple-600 border border-purple-100 cursor-default'
+                                          : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                      }`}
+                                    >
+                                      {isActive ? (
+                                        <>
+                                          <Check className="w-4 h-4" />
+                                          Playing
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Play className="w-4 h-4 fill-current" />
+                                          Watch Recording
+                                        </>
+                                      )}
+                                    </button>
+                                    {((rec.jitsiRecordingUrl) || (rec.type === 'recorded' && rec.videoUrl && !rec.videoUrl.includes('youtube') && !rec.videoUrl.includes('youtu.be') && !rec.videoUrl.startsWith('jitsi:'))) && (
+                                      <a
+                                        href={rec.jitsiRecordingUrl || rec.videoUrl}
+                                        download
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="Download Recording"
+                                        className="p-3.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-700 border border-purple-100 transition-all flex items-center justify-center shadow-sm"
+                                      >
+                                        <Download className="w-4 h-4" />
+                                      </a>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             </motion.div>
@@ -1909,12 +1915,22 @@ export default function UserDashboardPage() {
               {/* Video Player */}
               <div className="flex-1 w-full h-full min-h-0 rounded-2xl overflow-hidden border border-slate-900 bg-black flex items-center justify-center">
                 {liveClass.videoUrl && liveClass.videoUrl.startsWith('jitsi:') ? (
-                  <iframe
-                    src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
-                    title={liveClass.title}
-                    className="w-full h-full"
-                    allow="camera; microphone; fullscreen; display-capture; autoplay"
-                  />
+                  (profile?.planStatus !== 'verified') ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-8 text-white space-y-4">
+                      <span className="text-4xl">🔒</span>
+                      <h4 className="text-lg font-black uppercase tracking-wider text-pink-400">Premium Live Stream</h4>
+                      <p className="text-xs text-slate-400 max-w-sm">
+                        A verified subscription plan is required to enter this classroom. Please verify your plan to join.
+                      </p>
+                    </div>
+                  ) : (
+                    <iframe
+                      src={getJitsiIframeSrc(liveClass.videoUrl, jitsiToken)}
+                      title={liveClass.title}
+                      className="w-full h-full"
+                      allow="camera; microphone; fullscreen; display-capture; autoplay"
+                    />
+                  )
                 ) : isYoutubeUrl(liveClass.youtubeVideoId || liveClass.videoUrl || '') ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${getYoutubeEmbedId(liveClass.youtubeVideoId || liveClass.videoUrl || '')}?autoplay=1`}
