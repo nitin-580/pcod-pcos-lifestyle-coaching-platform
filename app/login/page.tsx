@@ -14,11 +14,42 @@ export default function LoginPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showLogoutOtherBtn, setShowLogoutOtherBtn] = useState(false);
+
+  const handleLogoutOtherDevices = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await fetch(
+        `${getPublicApiBase()}/doctors/logout-other-devices`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setError('Successfully logged out from other devices. Please sign in now.');
+        setShowLogoutOtherBtn(false);
+      } else {
+        setError(data.message || 'Failed to logout from other devices.');
+      }
+    } catch (err) {
+      setError('Connection failed. Could not clear other sessions.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setShowLogoutOtherBtn(false);
 
     try {
       // Step 1: Login
@@ -37,6 +68,9 @@ export default function LoginPage() {
 
       if (!data.success) {
         setError(data.message || 'Invalid email or password');
+        if (data.message && data.message.includes('2 concurrent IP addresses')) {
+          setShowLogoutOtherBtn(true);
+        }
         return;
       }
 
@@ -112,8 +146,17 @@ export default function LoginPage() {
               onSubmit={handleSubmit}
             >
               {error && (
-                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
-                  {error}
+                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex flex-col gap-2">
+                  <span>{error}</span>
+                  {showLogoutOtherBtn && (
+                    <button
+                      type="button"
+                      onClick={handleLogoutOtherDevices}
+                      className="mt-1 text-xs font-bold text-left underline text-purple-700 hover:text-pink-600 cursor-pointer focus:outline-none"
+                    >
+                      Logout from all other devices & login here
+                    </button>
+                  )}
                 </div>
               )}
 

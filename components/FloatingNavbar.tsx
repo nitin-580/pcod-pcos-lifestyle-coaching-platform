@@ -12,6 +12,7 @@ export default function FloatingNavbar() {
   const pathname = usePathname();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accountUrl, setAccountUrl] = useState('/login');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +24,31 @@ export default function FloatingNavbar() {
     // Check auth status
     const token = localStorage.getItem('userToken');
     setIsLoggedIn(!!token);
+
+    if (token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          const role = (payload.role || 'user').toLowerCase();
+          const userId = payload.id;
+          if (role === 'doctor') {
+            setAccountUrl(`/doctor/${userId}/dashboard`);
+          } else if (role === 'admin') {
+            setAccountUrl(`/wombcare-admin-9984`);
+          } else if (role === 'teacher') {
+            const classesUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')
+              ? 'http://localhost:5173'
+              : 'https://classes.wombcare.in';
+            setAccountUrl(`${classesUrl}/login?token=${token}`);
+          } else {
+            setAccountUrl(`/user/${userId}/dashboard`);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to decode token', err);
+      }
+    }
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -95,12 +121,12 @@ export default function FloatingNavbar() {
 
             {/* Login / Logout */}
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="text-sm font-semibold text-rose-600 hover:text-rose-700 transition-all px-4 py-2 rounded-xl border border-rose-200 bg-rose-50/50 hover:shadow-sm"
+              <Link
+                href={accountUrl}
+                className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-all px-4 py-2 rounded-xl border border-purple-200 bg-purple-50/50 hover:shadow-sm"
               >
-                Logout
-              </button>
+                My Account
+              </Link>
             ) : (
               <Link
                 href="/login"
@@ -157,16 +183,17 @@ export default function FloatingNavbar() {
           ))}
 
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="w-full max-w-xs text-center border border-rose-200 bg-rose-50/30 text-rose-600 py-4 rounded-xl font-semibold"
+            <Link
+              href={accountUrl}
+              className="w-full max-w-xs text-center border border-purple-200 bg-purple-50/30 text-purple-600 py-4 rounded-xl font-semibold text-2xl"
+              onClick={() => setMobileMenuOpen(false)}
             >
-              Logout
-            </button>
+              My Account
+            </Link>
           ) : (
             <Link
               href="/login"
-              className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold"
+              className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold text-2xl"
               onClick={() => setMobileMenuOpen(false)}
             >
               Login
