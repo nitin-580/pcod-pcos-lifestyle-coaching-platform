@@ -1594,103 +1594,108 @@ export default function UserDashboardPage() {
                         <p className="text-xs font-bold uppercase tracking-widest mt-4">No matching sessions found</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      <div className="flex flex-col gap-6">
                         {filteredClasses.map((cls) => {
                           const isActive = liveClass?.id === cls.id;
+                          const isJitsiClass = cls.videoUrl && cls.videoUrl.startsWith('jitsi:');
+                          const isPlanVerified = profile?.planStatus === 'verified';
+                          const isLockedPremium = isJitsiClass && !isPlanVerified;
                           return (
                             <motion.div
                               key={cls.id}
-                              whileHover={{ y: -4 }}
-                              className={`group overflow-hidden rounded-[28px] border bg-white flex flex-col justify-between shadow-sm hover:shadow-md transition-all ${
+                              whileHover={isLockedPremium ? {} : { y: -2 }}
+                              className={`group overflow-hidden rounded-[24px] border bg-white flex flex-col md:flex-row shadow-sm hover:shadow-md transition-all ${
                                 isActive ? 'border-pink-300 ring-2 ring-pink-500/20' : 'border-slate-100'
-                              }`}
+                              } ${isLockedPremium ? 'opacity-85' : ''}`}
                             >
-                              <div>
-                                {/* Class Thumbnail preview */}
-                                <div className="relative aspect-video bg-slate-50 overflow-hidden">
-                                  <img 
-                                    src={cls.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'} 
-                                    alt={cls.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-                                  
-                                  {/* Overlay Type Icon Badge */}
-                                  <div className="absolute top-4 left-4 py-1.5 px-3 rounded-full bg-white/95 backdrop-blur-md text-[9px] font-black uppercase tracking-wider shadow flex items-center gap-1.5">
-                                    <span className={`w-1.5 h-1.5 rounded-full ${cls.type === 'live' ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
-                                    {cls.type}
-                                  </div>
-                                  {cls.videoUrl && cls.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') && (
-                                    <div className="absolute top-4 right-4 py-1.5 px-3 rounded-full bg-slate-900/95 backdrop-blur-md text-[9px] font-black uppercase tracking-wider text-pink-400 shadow flex items-center gap-1">
-                                      <span>🔒</span> Premium
-                                    </div>
-                                  )}
+                              {/* Left side: Thumbnail preview */}
+                              <div className="relative w-full md:w-60 h-40 md:h-auto overflow-hidden flex-shrink-0 bg-slate-50">
+                                <img 
+                                  src={cls.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'} 
+                                  alt={cls.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+                                
+                                {/* Overlay Type Icon Badge */}
+                                <div className="absolute top-3 left-3 py-1 px-2.5 rounded-full bg-white/95 backdrop-blur-md text-[8px] font-black uppercase tracking-wider shadow flex items-center gap-1">
+                                  <span className={`w-1 h-1 rounded-full ${cls.type === 'live' ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
+                                  {cls.type}
                                 </div>
+                                {isLockedPremium && (
+                                  <div className="absolute top-3 right-3 py-1 px-2.5 rounded-full bg-slate-900/95 backdrop-blur-md text-[8px] font-black uppercase tracking-wider text-pink-400 shadow flex items-center gap-1">
+                                    <span>🔒</span> Premium
+                                  </div>
+                                )}
+                              </div>
 
-                                <div className="p-6 space-y-3">
-                                  <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              {/* Center/Right side: Content & Actions */}
+                              <div className="flex-1 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                                <div className="space-y-2.5 flex-1 min-w-0">
+                                  <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                     <span>{cls.instructorName}</span>
+                                    <span>•</span>
                                     <span>{cls.duration} Mins</span>
                                   </div>
 
-                                  <h4 className="text-lg font-bold text-slate-900 group-hover:text-pink-600 transition-colors leading-snug line-clamp-1">
+                                  <h4 className="text-lg font-bold text-slate-900 group-hover:text-pink-600 transition-colors leading-snug truncate">
                                     {cls.title}
                                   </h4>
                                   
-                                  <p className="text-slate-400 text-[11px] font-medium leading-relaxed line-clamp-2">
+                                  <p className="text-slate-400 text-xs font-medium leading-relaxed line-clamp-2 md:line-clamp-1 max-w-xl">
                                     {cls.description}
                                   </p>
                                 </div>
-                              </div>
 
-                              <div className="p-6 pt-0 flex gap-2">
-                                {cls.videoUrl && cls.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') ? (
-                                  <button
-                                    disabled
-                                    className="w-full py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
-                                  >
-                                    <Lock className="w-4 h-4" />
-                                    Premium Locked
-                                  </button>
-                                ) : (
-                                  <>
+                                <div className="w-full md:w-auto flex flex-row md:flex-col lg:flex-row items-center gap-2 flex-shrink-0">
+                                  {isLockedPremium ? (
                                     <button
-                                      onClick={() => {
-                                        setLiveClass(cls);
-                                        showToast(`Now playing: ${cls.title} 🎥`);
-                                      }}
-                                      className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                                        isActive 
-                                          ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
-                                          : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
-                                      }`}
+                                      disabled
+                                      className="w-full md:w-48 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
                                     >
-                                      {isActive ? (
-                                        <>
-                                          <Check className="w-4 h-4" />
-                                          Now Active
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Play className="w-4 h-4 fill-current" />
-                                          Play Session
-                                        </>
-                                      )}
+                                      <Lock className="w-4 h-4" />
+                                      Premium Locked
                                     </button>
-                                    {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
-                                      <a
-                                        href={cls.jitsiRecordingUrl || cls.videoUrl}
-                                        download
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        title="Download Recording"
-                                        className="p-3.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-600 hover:text-pink-700 border border-pink-100 transition-all flex items-center justify-center shadow-sm"
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          setLiveClass(cls);
+                                          showToast(`Now playing: ${cls.title} 🎥`);
+                                        }}
+                                        className={`w-full md:w-36 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                          isActive 
+                                            ? 'bg-pink-50 text-pink-600 border border-pink-100 cursor-default'
+                                            : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                        }`}
                                       >
-                                        <Download className="w-4 h-4" />
-                                      </a>
-                                    )}
-                                  </>
-                                )}
+                                        {isActive ? (
+                                          <>
+                                            <Check className="w-4 h-4" />
+                                            Active
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Play className="w-3.5 h-3.5 fill-current" />
+                                            Play
+                                          </>
+                                        )}
+                                      </button>
+                                      {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
+                                        <a
+                                          href={cls.jitsiRecordingUrl || cls.videoUrl}
+                                          download
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          title="Download Recording"
+                                          className="p-3 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-600 hover:text-pink-700 border border-pink-100 transition-all flex items-center justify-center shadow-sm"
+                                        >
+                                          <Download className="w-4 h-4" />
+                                        </a>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </motion.div>
                           );
@@ -1719,93 +1724,106 @@ export default function UserDashboardPage() {
                         <p className="text-[10px] text-slate-400 mt-1">Recordings automatically populate once live classrooms end.</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      <div className="flex flex-col gap-6">
                         {previousRecordings.map((rec) => {
                           const isActive = liveClass?.id === rec.id;
+                          const isJitsiClass = rec.videoUrl && rec.videoUrl.startsWith('jitsi:');
+                          const isPlanVerified = profile?.planStatus === 'verified';
+                          const isLockedPremium = isJitsiClass && !isPlanVerified;
                           return (
                             <motion.div
                               key={rec.id}
-                              whileHover={{ y: -4 }}
-                              className={`group overflow-hidden rounded-[28px] border bg-white flex flex-col justify-between shadow-sm hover:shadow-md transition-all ${
+                              whileHover={isLockedPremium ? {} : { y: -2 }}
+                              className={`group overflow-hidden rounded-[24px] border bg-white flex flex-col md:flex-row shadow-sm hover:shadow-md transition-all ${
                                 isActive ? 'border-purple-300 ring-2 ring-purple-500/20' : 'border-slate-100'
-                              }`}
+                              } ${isLockedPremium ? 'opacity-85' : ''}`}
                             >
-                              <div>
-                                <div className="relative aspect-video bg-slate-50 overflow-hidden">
-                                  <img 
-                                    src={rec.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'} 
-                                    alt={rec.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                  />
-                                  <div className="absolute top-4 left-4 py-1.5 px-3 rounded-full bg-purple-600 text-white text-[9px] font-black uppercase tracking-wider shadow">
-                                    COMPLETED RECORDING
-                                  </div>
+                              {/* Left: Thumbnail image */}
+                              <div className="relative w-full md:w-60 h-40 md:h-auto overflow-hidden flex-shrink-0 bg-slate-50">
+                                <img 
+                                  src={rec.thumbnailUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'} 
+                                  alt={rec.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+                                
+                                <div className="absolute top-3 left-3 py-1 px-2.5 rounded-full bg-purple-600 text-white text-[8px] font-black uppercase tracking-wider shadow">
+                                  RECORDING
                                 </div>
+                                {isLockedPremium && (
+                                  <div className="absolute top-3 right-3 py-1 px-2.5 rounded-full bg-slate-900/95 backdrop-blur-md text-[8px] font-black uppercase tracking-wider text-pink-400 shadow flex items-center gap-1">
+                                    <span>🔒</span> Premium
+                                  </div>
+                                )}
+                              </div>
 
-                                <div className="p-6 space-y-3">
-                                  <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              {/* Center/Right: Info & Actions */}
+                              <div className="flex-1 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                                <div className="space-y-2.5 flex-1 min-w-0">
+                                  <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                     <span>{rec.instructorName}</span>
+                                    <span>•</span>
                                     <span>{rec.duration} Mins</span>
                                   </div>
 
-                                  <h4 className="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors leading-snug line-clamp-1">
+                                  <h4 className="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors leading-snug truncate">
                                     {rec.title}
                                   </h4>
                                   
-                                  <p className="text-slate-400 text-[11px] font-medium leading-relaxed line-clamp-2">
+                                  <p className="text-slate-400 text-xs font-medium leading-relaxed line-clamp-2 md:line-clamp-1 max-w-xl">
                                     {rec.description}
                                   </p>
                                 </div>
-                              </div>
 
-                              <div className="p-6 pt-0 flex gap-2">
-                                {rec.videoUrl && rec.videoUrl.startsWith('jitsi:') && (profile?.planStatus !== 'verified') ? (
-                                  <button
-                                    disabled
-                                    className="w-full py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
-                                  >
-                                    <Lock className="w-4 h-4" />
-                                    Premium Locked
-                                  </button>
-                                ) : (
-                                  <>
+                                <div className="w-full md:w-auto flex flex-row md:flex-col lg:flex-row items-center gap-2 flex-shrink-0">
+                                  {isLockedPremium ? (
                                     <button
-                                      onClick={() => {
-                                        setLiveClass(rec);
-                                        showToast(`Playing recording: ${rec.title} 🎥`);
-                                      }}
-                                      className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                                        isActive 
-                                          ? 'bg-purple-50 text-purple-600 border border-purple-100 cursor-default'
-                                          : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
-                                      }`}
+                                      disabled
+                                      className="w-full md:w-48 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2"
                                     >
-                                      {isActive ? (
-                                        <>
-                                          <Check className="w-4 h-4" />
-                                          Playing
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Play className="w-4 h-4 fill-current" />
-                                          Watch Recording
-                                        </>
-                                      )}
+                                      <Lock className="w-4 h-4" />
+                                      Premium Locked
                                     </button>
-                                    {((rec.jitsiRecordingUrl) || (rec.type === 'recorded' && rec.videoUrl && !rec.videoUrl.includes('youtube') && !rec.videoUrl.includes('youtu.be') && !rec.videoUrl.startsWith('jitsi:'))) && (
-                                      <a
-                                        href={rec.jitsiRecordingUrl || rec.videoUrl}
-                                        download
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        title="Download Recording"
-                                        className="p-3.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-700 border border-purple-100 transition-all flex items-center justify-center shadow-sm"
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          setLiveClass(rec);
+                                          showToast(`Playing recording: ${rec.title} 🎥`);
+                                        }}
+                                        className={`w-full md:w-36 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                          isActive 
+                                            ? 'bg-purple-50 text-purple-600 border border-purple-100 cursor-default'
+                                            : 'bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 border border-slate-100 shadow-sm'
+                                        }`}
                                       >
-                                        <Download className="w-4 h-4" />
-                                      </a>
-                                    )}
-                                  </>
-                                )}
+                                        {isActive ? (
+                                          <>
+                                            <Check className="w-4 h-4" />
+                                            Active
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Play className="w-3.5 h-3.5 fill-current" />
+                                            Play
+                                          </>
+                                        )}
+                                      </button>
+                                      {((rec.jitsiRecordingUrl) || (rec.type === 'recorded' && rec.videoUrl && !rec.videoUrl.includes('youtube') && !rec.videoUrl.includes('youtu.be') && !rec.videoUrl.startsWith('jitsi:'))) && (
+                                        <a
+                                          href={rec.jitsiRecordingUrl || rec.videoUrl}
+                                          download
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          title="Download Recording"
+                                          className="p-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-700 border border-purple-100 transition-all flex items-center justify-center shadow-sm"
+                                        >
+                                          <Download className="w-4 h-4" />
+                                        </a>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </motion.div>
                           );

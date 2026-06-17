@@ -951,7 +951,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
             </div>
 
             {/* Classes Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-6">
               
               {filteredClasses.map((cls) => {
                 const category = categories.find(c => c.id === cls.categoryId);
@@ -962,11 +962,11 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                 return (
                   <div 
                     key={cls.id}
-                    className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:border-pink-200 transition-all translate-y-0 hover:-translate-y-1.5"
+                    className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col md:flex-row justify-between group hover:border-pink-200 transition-all"
                   >
                     
-                    {/* Top Thumbnail Section */}
-                    <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
+                    {/* Left Thumbnail Section */}
+                    <div className="relative w-full md:w-60 h-40 md:h-auto overflow-hidden flex-shrink-0 bg-slate-100">
                       <img 
                         src={cls.thumbnailUrl} 
                         alt={cls.title}
@@ -974,27 +974,27 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                       />
                       
                       {/* Top Badges */}
-                      <div className="absolute top-4 left-4 flex gap-2 z-10">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm ${cls.type === 'live' ? 'bg-pink-600/90' : 'bg-purple-600/90'}`}>
+                      <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm ${cls.type === 'live' ? 'bg-pink-600/90' : 'bg-purple-600/90'}`}>
                           {cls.type === 'live' ? '🔴 Live' : '🎬 Recorded'}
                         </span>
                         {cls.isFeatured && (
-                          <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-slate-900 bg-amber-300/90 backdrop-blur-md shadow-sm">
+                          <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider text-slate-900 bg-amber-300/90 backdrop-blur-md shadow-sm">
                             ⭐ Featured
                           </span>
                         )}
                       </div>
 
                       {/* Duration Tag */}
-                      <div className="absolute bottom-4 right-4 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-white text-[10px] font-black tracking-wider flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-pink-400" /> {cls.duration} Min
+                      <div className="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded text-white text-[9px] font-black tracking-wider flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-pink-400" /> {cls.duration} Min
                       </div>
                     </div>
 
-                    {/* Class Info */}
-                    <div className="p-6 flex-1 flex flex-col justify-between gap-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
+                    {/* Right Info Section */}
+                    <div className="p-6 flex-1 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+                      <div className="space-y-2 flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-4">
                           <span className="text-[10px] bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">
                             {category?.name || 'Wellness'}
                           </span>
@@ -1003,7 +1003,7 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                           <button
                             onClick={() => toggleClassActive(cls.id, isJoinActive)}
                             disabled={updatingId === cls.id}
-                            className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border transition-all ${
+                            className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
                               isJoinActive 
                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' 
                                 : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
@@ -1013,88 +1013,84 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                               <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
                             ) : (
                               <>
-                                <span className={`w-2 h-2 rounded-full ${isJoinActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                <span className={`w-1.5 h-1.5 rounded-full ${isJoinActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                                 {isJoinActive ? 'Active' : 'Inactive'}
                               </>
                             )}
                           </button>
                         </div>
 
-                        <h4 className="font-extrabold text-slate-800 text-base leading-snug line-clamp-1 mb-2">
+                        <h4 className="font-extrabold text-slate-800 text-base leading-snug truncate">
                           {cls.title}
                         </h4>
                         
-                        <p className="text-slate-400 text-xs font-medium line-clamp-2 leading-relaxed mb-4">
+                        <p className="text-slate-400 text-xs font-medium line-clamp-2 leading-relaxed max-w-xl">
                           {cls.description}
                         </p>
-                      </div>
 
-                      <div className="space-y-4">
-                        
-                        {/* Dynamic Button Mode Selector (Google Meet vs YouTube Video watch) */}
-                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3">
-                          <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-                            ⚙️ ACTIVE BUTTON TYPE SELECTOR
-                          </span>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setButtonMode(cls.id, cls.tags, 'gmeet')}
-                              disabled={updatingId === cls.id}
-                              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                                isMeetMode 
-                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
-                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
-                              }`}
-                            >
-                              <Video className="w-3.5 h-3.5" /> Meet Link
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setButtonMode(cls.id, cls.tags, 'youtube')}
-                              disabled={updatingId === cls.id}
-                              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                                isYoutubeMode 
-                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
-                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
-                              }`}
-                            >
-                              <Play className="w-3.5 h-3.5" /> Watch Video
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-500">
-                          <span className="font-semibold text-slate-600">Instructor: <span className="font-black text-slate-800">{cls.instructorName}</span></span>
-                        </div>
-
-                        {cls.type === 'live' && cls.scheduledAt && (
-                          <div className="bg-pink-50/50 rounded-xl p-3 flex items-center gap-2.5 text-[11px] text-pink-700 font-bold border border-pink-100/30">
-                            <Calendar className="w-4 h-4 text-pink-500 flex-shrink-0" />
-                            <span className="truncate">
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 pt-1">
+                          <span className="font-semibold">Instructor: <span className="font-black text-slate-800">{cls.instructorName}</span></span>
+                          {cls.type === 'live' && cls.scheduledAt && (
+                            <span className="text-pink-600 font-bold bg-pink-50 px-2 py-0.5 rounded">
                               {new Date(cls.scheduledAt).toLocaleString()}
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
 
                         {/* Tags list */}
                         {cls.tags && cls.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1 pt-1">
                             {cls.tags.map(t => (
-                              <span key={t} className="text-[9px] bg-slate-50 text-slate-400 font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                              <span key={t} className="text-[8px] bg-slate-50 text-slate-400 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                                 #{t}
                               </span>
                             ))}
                           </div>
                         )}
-                        
+                      </div>
+
+                      {/* Controls and Actions Column */}
+                      <div className="w-full md:w-52 flex-shrink-0 space-y-4">
+                        {/* Dynamic Button Mode Selector (Google Meet vs YouTube Video watch) */}
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5">
+                          <span className="block text-[8px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">
+                            ⚙️ ACTIVE BUTTON TYPE
+                          </span>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setButtonMode(cls.id, cls.tags, 'gmeet')}
+                              disabled={updatingId === cls.id}
+                              className={`flex items-center justify-center gap-1 py-1 rounded text-[9px] font-bold uppercase transition-all ${
+                                isMeetMode 
+                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
+                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              <Video className="w-3 h-3" /> Meet
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setButtonMode(cls.id, cls.tags, 'youtube')}
+                              disabled={updatingId === cls.id}
+                              className={`flex items-center justify-center gap-1 py-1 rounded text-[9px] font-bold uppercase transition-all ${
+                                isYoutubeMode 
+                                  ? 'bg-pink-500 text-white shadow-sm shadow-pink-100' 
+                                  : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              <Play className="w-3 h-3" /> Video
+                            </button>
+                          </div>
+                        </div>
+
                         {/* Admin Action Buttons */}
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-1.5">
                           <button
                             onClick={() => setActiveChatClass(cls)}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl text-xs font-bold transition-all"
+                            className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl text-[10px] font-bold transition-all"
                           >
-                            <MessageSquare className="w-3.5 h-3.5" /> Monitor Chat
+                            <MessageSquare className="w-3 h-3" /> Monitor
                           </button>
                           {((cls.jitsiRecordingUrl) || (cls.type === 'recorded' && cls.videoUrl && !cls.videoUrl.includes('youtube') && !cls.videoUrl.includes('youtu.be') && !cls.videoUrl.startsWith('jitsi:'))) && (
                             <a
@@ -1103,22 +1099,22 @@ const ClassManagement: React.FC<ClassManagementProps> = ({ apiKey }) => {
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Download Recording"
-                              className="flex items-center justify-center p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl transition-all"
+                              className="flex items-center justify-center p-2 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-xl transition-all"
                             >
-                              <Download className="w-4 h-4" />
+                              <Download className="w-3.5 h-3.5" />
                             </a>
                           )}
                           <button
                             onClick={() => handleOpenEditModal(cls)}
-                            className="flex items-center justify-center p-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition-all"
+                            className="flex items-center justify-center p-2 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <Edit3 className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleDeleteClass(cls.id)}
-                            className="flex items-center justify-center p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all"
+                            className="flex items-center justify-center p-2 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
