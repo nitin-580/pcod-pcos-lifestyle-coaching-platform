@@ -115,6 +115,10 @@ export default function UserDashboardPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+  // Refs for optimistic & debounced water updates
+  const waterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const optimisticWaterRef = useRef<number | null>(null);
+
   // Period calendar States
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -421,6 +425,65 @@ export default function UserDashboardPage() {
       setIsUpdating(false);
     }
   };
+
+  // Optimistic & Debounced update specifically for water intake
+  const handleUpdateWaterIntake = useCallback((newAmount: number) => {
+    const nextWater = Math.max(newAmount, 0);
+    optimisticWaterRef.current = nextWater;
+
+    // 1. Instantly update profile state
+    setProfile((prev: any) => prev ? { ...prev, waterIntake: nextWater } : prev);
+
+    // 2. Instantly update history cache so graphs re-render instantly
+    const todayStr = new Date().toISOString().split('T')[0];
+    setProfileHistory(prev => {
+      const exists = prev.findIndex(p => p.date === todayStr);
+      if (exists > -1) {
+        const updated = [...prev];
+        updated[exists] = { ...updated[exists], waterIntake: nextWater };
+        return updated;
+      }
+      return [{ date: todayStr, waterIntake: nextWater, sleep: 0, mood: '', waterIntakeDate: new Date().toISOString() }, ...prev];
+    });
+
+    // 3. Clear any pending timeout and schedule the backend update
+    if (waterTimeoutRef.current) {
+      clearTimeout(waterTimeoutRef.current);
+    }
+
+    waterTimeoutRef.current = setTimeout(async () => {
+      const finalWater = optimisticWaterRef.current;
+      if (finalWater === null) return;
+
+      try {
+        const token = localStorage.getItem('userToken');
+        const res = await fetch(`${getPublicApiBase()}/profiles/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            waterIntake: finalWater, 
+            waterIntakeDate: new Date().toISOString() 
+          }),
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          console.error('Failed to sync water intake with backend:', data.message);
+          showToast('Failed to sync water intake with server.');
+        }
+      } catch (err) {
+        console.error('Error syncing water intake:', err);
+        showToast('Network error: water intake not synced.');
+      } finally {
+        if (optimisticWaterRef.current === finalWater) {
+          optimisticWaterRef.current = null;
+        }
+      }
+    }, 1000); // 1-second debounce
+  }, [userId]);
 
   /* =========================================================
      LIVE CHAT SOCKET MANAGEMENT (SUPABASE)
@@ -1123,14 +1186,14 @@ export default function UserDashboardPage() {
 
                     <div className="mt-6 flex gap-4">
                       <button
-                        onClick={() => handleUpdateProfile({ waterIntake: (profile?.waterIntake || 0) + 1, waterIntakeDate: new Date().toISOString() })}
+                        onClick={() => handleUpdateWaterIntake((profile?.waterIntake || 0) + 1)}
                         className="flex-1 py-3.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold border border-slate-100 text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
                       >
                         Add Glass 💧
                       </button>
                       {profile?.waterIntake > 0 && (
                         <button
-                          onClick={() => handleUpdateProfile({ waterIntake: Math.max((profile?.waterIntake || 0) - 1, 0), waterIntakeDate: new Date().toISOString() })}
+                          onClick={() => handleUpdateWaterIntake(Math.max((profile?.waterIntake || 0) - 1, 0))}
                           className="py-3.5 px-6 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider transition"
                         >
                           Undo
