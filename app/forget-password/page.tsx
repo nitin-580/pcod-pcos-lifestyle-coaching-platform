@@ -27,7 +27,16 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const responseText = await res.text();
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        if (!res.ok) {
+          throw new Error(`Server returned error (${res.status})`);
+        }
+      }
+
       if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
 
       setStep('otp');
@@ -50,7 +59,16 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email, otp }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const responseText = await res.text();
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        if (!res.ok) {
+          throw new Error(`Server returned error (${res.status})`);
+        }
+      }
+
       if (!res.ok) throw new Error(data.message || 'Invalid OTP');
 
       setStep('reset');
@@ -73,7 +91,16 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email, otp, newPassword }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const responseText = await res.text();
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        if (!res.ok) {
+          throw new Error(`Server returned error (${res.status})`);
+        }
+      }
+
       if (!res.ok) throw new Error(data.message || 'Reset failed');
 
       setSuccess(true);

@@ -1,0 +1,30 @@
+export interface HealthAssessmentData {
+  name: string;
+  age: string;
+  city: string;
+  height: string;
+  weight: string;
+  occupation: string;
+  workschedule: string;
+  pcos: string;
+  cyclePattern: string[];
+  medications: string;
+  thyroid: string;
+  diabetes: string;
+  htn: string;
+  fattyliver: string;
+  vitamins: string[];
+  otherConditions: string;
+  diet: string;
+  allergies: string;
+  foodPrefs: string;
+  wakeTime: string;
+  bedTime: string;
+  sleepHours: string;
+  waterIntake: string;
+  activityLevel: string;
+  dailySteps: string;
+  exerciseRoutine: string;
+  stressLevel: number;
+  goals: string[];
+}

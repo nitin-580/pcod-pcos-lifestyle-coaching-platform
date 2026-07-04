@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   async rewrites() {
-    const backendUrl = "https://womb-care-backend-76858014616.europe-west1.run.app";
+    const backendUrl = process.env.BACKEND_URL || "https://womb-care-backend-76858014616.europe-west1.run.app";
 
     return [
       {

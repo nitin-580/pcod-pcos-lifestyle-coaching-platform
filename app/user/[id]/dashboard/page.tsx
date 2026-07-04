@@ -90,8 +90,8 @@ export default function UserDashboardPage() {
   const router = useRouter();
   const userId = params.id as string;
 
-  // Active View Tabs: 'tracker', 'classes', or 'nutrition'
-  const [activeTab, setActiveTab] = useState<'tracker' | 'classes' | 'nutrition'>('tracker');
+  // Active View Tabs: 'tracker', 'classes', 'nutrition', or 'history'
+  const [activeTab, setActiveTab] = useState<'tracker' | 'classes' | 'nutrition' | 'history'>('tracker');
 
   // Core Data States
   const [profile, setProfile] = useState<any>(null);
@@ -101,6 +101,12 @@ export default function UserDashboardPage() {
   const [profileHistory, setProfileHistory] = useState<HistoryLog[]>([]);
   const [dietPlan, setDietPlan] = useState<any>(null);
   const [isDietViewOpen, setIsDietViewOpen] = useState(false);
+  const [historyRange, setHistoryRange] = useState<'week' | 'month' | '6months'>('6months');
+  const [showAllPeriods, setShowAllPeriods] = useState(false);
+  const [updatingWater, setUpdatingWater] = useState(false);
+  const [updatingSleep, setUpdatingSleep] = useState(false);
+  const [updatingJournal, setUpdatingJournal] = useState(false);
+  const [updatingMood, setUpdatingMood] = useState(false);
   
   // Wellness Classes States
   const [allClasses, setAllClasses] = useState<WellnessClass[]>([]);
@@ -698,10 +704,87 @@ export default function UserDashboardPage() {
 
   const computedPhase = useMemo(() => {
     const day = computedCycleDay;
-    if (day <= 5) return { name: 'Menstrual Phase', color: 'text-rose-500 bg-rose-50 border-rose-100', icon: '🩸', desc: 'Hormones are low. Prioritize rest, slow hydration, and iron-rich meals.' };
-    if (day <= 14) return { name: 'Follicular & Ovulation', color: 'text-amber-600 bg-amber-50 border-amber-100', icon: '⚡', desc: 'Estrogen spikes. Maximum stamina, dynamic hydration, and metabolic strength.' };
-    return { name: 'Luteal Phase', color: 'text-indigo-600 bg-indigo-50 border-indigo-100', icon: '🧘', desc: 'Progesterone climbs. Higher water retention, stable sleep, and steady energy flow.' };
+    if (day <= 5) {
+      return { 
+        name: 'Menstrual Phase', 
+        color: 'text-rose-500 bg-rose-50 border-rose-100', 
+        icon: '🩸', 
+        desc: 'Hormones are low. Prioritize rest, slow hydration, and iron-rich meals.',
+        message: `You're on Day ${day} of your period. Remember to stay hydrated and take care of yourself.` 
+      };
+    }
+    if (day <= 11) {
+      return { 
+        name: 'Follicular Phase', 
+        color: 'text-green-600 bg-green-50 border-green-100', 
+        icon: '🌱', 
+        desc: 'Estrogen is rising. Your strength, focus, and energy levels begin to increase.',
+        message: 'Your energy levels may begin to increase during this phase.' 
+      };
+    }
+    if (day <= 16) {
+      return { 
+        name: 'Ovulation Phase', 
+        color: 'text-amber-600 bg-amber-50 border-amber-100', 
+        icon: '🥚', 
+        desc: 'Luteinizing hormone peaks. You may be approaching ovulation over the next few days.',
+        message: 'You may be approaching ovulation over the next few days.' 
+      };
+    }
+    return { 
+      name: 'Luteal Phase', 
+      color: 'text-indigo-600 bg-indigo-50 border-indigo-100', 
+      icon: '🌙', 
+      desc: 'Progesterone climbs. Higher water retention, stable sleep, and steady energy flow.',
+      message: 'Your next period is approaching. Listen to your body and get enough rest.' 
+    };
   }, [computedCycleDay]);
+
+  const isCurrentlyOnPeriod = useMemo(() => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return periodHistory.some(p => {
+      const start = new Date(p.startDate);
+      start.setHours(0,0,0,0);
+      if (!p.endDate) {
+        const diffTime = today.getTime() - start.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 && diffDays < 7;
+      }
+      const end = new Date(p.endDate);
+      end.setHours(0,0,0,0);
+      return today >= start && today <= end;
+    });
+  }, [periodHistory]);
+
+  const currentPeriodLog = useMemo(() => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return periodHistory.find(p => {
+      const start = new Date(p.startDate);
+      start.setHours(0,0,0,0);
+      if (!p.endDate) {
+        const diffTime = today.getTime() - start.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 && diffDays < 7;
+      }
+      const end = new Date(p.endDate);
+      end.setHours(0,0,0,0);
+      return today >= start && today <= end;
+    });
+  }, [periodHistory]);
+
+  const nextFuturePeriod = useMemo(() => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return periodHistory
+      .filter(p => {
+        const start = new Date(p.startDate);
+        start.setHours(0,0,0,0);
+        return start > today;
+      })
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0];
+  }, [periodHistory]);
 
   // Next appointment
   const nextAppointmentDisplay = useMemo(() => {
@@ -734,6 +817,37 @@ export default function UserDashboardPage() {
     }
     return days;
   }, [profileHistory, profile?.waterIntake, profile?.targetWater]);
+
+  const computedCycleLengths = useMemo(() => {
+    const sorted = [...periodHistory].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const result = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = new Date(sorted[i - 1].startDate);
+      const curr = new Date(sorted[i].startDate);
+      const diffTime = Math.abs(curr.getTime() - prev.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      result.push({
+        date: new Date(sorted[i].startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        days: diffDays,
+      });
+    }
+    return result;
+  }, [periodHistory]);
+
+  const computedFlowDurations = useMemo(() => {
+    return periodHistory
+      .filter(p => p.endDate)
+      .map(p => {
+        const start = new Date(p.startDate);
+        const end = new Date(p.endDate!);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        return {
+          date: new Date(p.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+          duration: diffDays
+        };
+      });
+  }, [periodHistory]);
 
   // Filtered classes library
   const filteredClasses = useMemo(() => {
@@ -937,45 +1051,61 @@ export default function UserDashboardPage() {
           </div>
         </motion.div>
 
-        {/* Sliding 3-View Tabs Controller */}
+        {/* Sliding 4-View Tabs Controller */}
         <div className="mt-12 flex justify-center">
-          <div className="relative p-1.5 bg-slate-100/80 backdrop-blur-lg rounded-[24px] flex gap-1 w-full max-w-lg shadow-inner border border-slate-200/50">
+          <div className="relative p-1.5 bg-slate-100/80 backdrop-blur-lg rounded-[24px] flex gap-1 w-full max-w-2xl shadow-inner border border-slate-200/50">
             <div 
               className="absolute top-1.5 bottom-1.5 left-1.5 rounded-[18px] bg-white shadow-md transition-all duration-300 pointer-events-none"
               style={{
-                width: 'calc(33.33% - 6px)',
-                transform: activeTab === 'tracker' ? 'translateX(0%)' : activeTab === 'nutrition' ? 'translateX(100%)' : 'translateX(200%)'
+                width: 'calc(25% - 5px)',
+                transform: activeTab === 'tracker' 
+                  ? 'translateX(0%)' 
+                  : activeTab === 'nutrition' 
+                  ? 'translateX(100%)' 
+                  : activeTab === 'classes'
+                  ? 'translateX(200%)'
+                  : 'translateX(300%)'
               }}
             />
             
             <button
               onClick={() => setActiveTab('tracker')}
-              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'tracker' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Activity className="w-4 h-4" />
+              <Activity className="w-4 h-4 text-pink-500" />
               Health Space
             </button>
 
             <button
               onClick={() => setActiveTab('nutrition')}
-              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'nutrition' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Coffee className="w-4 h-4" />
+              <Coffee className="w-4 h-4 text-amber-500" />
               Nutrition Chart
             </button>
 
             <button
               onClick={() => setActiveTab('classes')}
-              className={`flex-1 py-3.5 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'classes' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Tv className="w-4 h-4" />
+              <Tv className="w-4 h-4 text-purple-500" />
               Classes Hub
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex-1 py-3.5 px-2 rounded-[18px] text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+                activeTab === 'history' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Calendar className="w-4 h-4 text-teal-500" />
+              Wellness History
             </button>
           </div>
         </div>
@@ -1099,7 +1229,14 @@ export default function UserDashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   
                   {/* Premium Period Logger widget */}
-                  <div className="bg-[#FAFDF8] rounded-[32px] p-6 md:p-8 border border-[#E0EDD4] shadow-sm flex flex-col justify-between">
+                  <div className="bg-[#FAFDF8] rounded-[32px] p-6 md:p-8 border border-[#E0EDD4] shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    {/* Container loading spinner */}
+                    {isUpdating && (
+                      <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center backdrop-blur-sm">
+                        <RefreshCw className="w-8 h-8 animate-spin text-pink-500" />
+                      </div>
+                    )}
+                    
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <div>
@@ -1111,47 +1248,188 @@ export default function UserDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Center Day Circle */}
-                      <div className="flex justify-center my-6">
-                        <div className="relative w-48 h-48 rounded-full border-[6px] border-slate-100/80 bg-white flex flex-col items-center justify-center shadow-lg">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Current state</span>
-                          <h2 className="text-4xl font-extrabold text-slate-800 mt-1">Day {computedCycleDay}</h2>
-                          <div className="mt-2.5 px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider uppercase border bg-white shadow-sm flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                            {computedPhase.name}
+                      {isCurrentlyOnPeriod ? (
+                        /* Current Period View */
+                        <div className="space-y-6">
+                          <div className="flex justify-center">
+                            <div className="relative w-48 h-48 rounded-full border-[6px] border-rose-100 bg-white flex flex-col items-center justify-center shadow-lg">
+                              <span className="text-[10px] uppercase font-bold text-rose-500 tracking-wider">Menstrual flow</span>
+                              <h2 className="text-2xl font-black text-slate-800 mt-1">
+                                Day {(() => {
+                                  if (!currentPeriodLog) return 1;
+                                  const start = new Date(currentPeriodLog.startDate);
+                                  const today = new Date();
+                                  today.setHours(0,0,0,0);
+                                  start.setHours(0,0,0,0);
+                                  return Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                })()} of {(() => {
+                                  if (!currentPeriodLog || !currentPeriodLog.endDate) return 6;
+                                  const start = new Date(currentPeriodLog.startDate);
+                                  const end = new Date(currentPeriodLog.endDate);
+                                  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                })()}
+                              </h2>
+                              <div className="mt-2.5 px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider uppercase border border-rose-100 bg-rose-50/50 text-rose-600 shadow-sm flex items-center gap-1.5 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                Menstrual Phase
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                              <span>Period Progress</span>
+                              <span>
+                                {(() => {
+                                  if (!currentPeriodLog) return 0;
+                                  const start = new Date(currentPeriodLog.startDate);
+                                  const today = new Date();
+                                  today.setHours(0,0,0,0);
+                                  start.setHours(0,0,0,0);
+                                  const end = currentPeriodLog.endDate ? new Date(currentPeriodLog.endDate) : new Date(start.getTime() + 5 * 24 * 60 * 60 * 1000);
+                                  const total = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                  const done = Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                  return Math.min(Math.round((done / total) * 100), 100);
+                                })()}% Passed
+                              </span>
+                            </div>
+                            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${(() => {
+                                    if (!currentPeriodLog) return 0;
+                                    const start = new Date(currentPeriodLog.startDate);
+                                    const today = new Date();
+                                    today.setHours(0,0,0,0);
+                                    start.setHours(0,0,0,0);
+                                    const end = currentPeriodLog.endDate ? new Date(currentPeriodLog.endDate) : new Date(start.getTime() + 5 * 24 * 60 * 60 * 1000);
+                                    const total = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                    const done = Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                    return Math.min((done / total) * 100, 100);
+                                  })()}%`
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-rose-50/30 border border-rose-100 rounded-2xl text-[11px] text-rose-600 font-medium italic">
+                            "{computedPhase.message}"
                           </div>
                         </div>
-                      </div>
+                      ) : nextFuturePeriod ? (
+                        /* Pre-Period Countdown View */
+                        <div className="space-y-6">
+                          <div className="flex justify-center">
+                            <div className="relative w-48 h-48 rounded-full border-[6px] border-teal-100 bg-white flex flex-col items-center justify-center shadow-lg">
+                              <span className="text-[10px] uppercase font-bold text-teal-500 tracking-wider">Next Period</span>
+                              <h2 className="text-2xl font-black text-slate-800 mt-1">
+                                In {(() => {
+                                  const today = new Date();
+                                  today.setHours(0,0,0,0);
+                                  const start = new Date(nextFuturePeriod.startDate);
+                                  start.setHours(0,0,0,0);
+                                  return Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                                })()} Days
+                              </h2>
+                              <span className="text-[9px] font-bold text-slate-400 mt-1">Starts {new Date(nextFuturePeriod.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                            </div>
+                          </div>
 
-                      <div className="space-y-2 mt-4 p-3 rounded-2xl bg-white/70 border border-[#E9F3E1] text-xs">
-                        <p className="text-slate-600 flex justify-between">
-                          <span>Next Expected Period:</span>
-                          <span className="font-bold text-slate-800">{profile?.nextPeriodDate || 'Calculating...'}</span>
-                        </p>
-                        <p className="text-slate-500 leading-relaxed pt-1.5 border-t border-slate-100">
-                          {computedPhase.desc}
-                        </p>
+                          <div className="p-3 bg-teal-50/30 border border-teal-100 rounded-2xl text-[11px] text-teal-650 font-medium italic">
+                            Your next period starts on {new Date(nextFuturePeriod.startDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}.
+                          </div>
+                        </div>
+                      ) : (
+                        /* Off-Period / Normal Cycle View */
+                        <div className="space-y-6">
+                          <div className="flex justify-center">
+                            <div className="relative w-48 h-48 rounded-full border-[6px] border-[#E8F4DE] bg-white flex flex-col items-center justify-center shadow-lg">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Current Cycle</span>
+                              <h2 className="text-3xl font-black text-slate-850 mt-1">Day {computedCycleDay}</h2>
+                              <div className="mt-2.5 px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider uppercase border border-slate-100 bg-slate-50 text-slate-650 shadow-sm flex items-center gap-1.5">
+                                <span>{computedPhase.icon}</span>
+                                {computedPhase.name}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2.5 text-xs bg-slate-50/50 p-4 rounded-2xl border border-slate-100 font-medium">
+                            <div className="flex justify-between text-slate-600">
+                              <span>Next Expected Period:</span>
+                              <span className="font-bold text-slate-850">{profile?.nextPeriodDate || 'Calculating...'}</span>
+                            </div>
+                            <div className="flex justify-between text-slate-600 border-t border-slate-100 pt-2">
+                              <span>Countdown:</span>
+                              <span className="font-bold text-rose-500">
+                                {(() => {
+                                  if (!profile?.nextPeriodDate) return '—';
+                                  const today = new Date();
+                                  today.setHours(0,0,0,0);
+                                  const next = new Date(profile.nextPeriodDate);
+                                  next.setHours(0,0,0,0);
+                                  const diff = Math.ceil((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                                  return diff > 0 ? `${diff} days left` : 'Starting soon';
+                                })()}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-pink-50/30 border border-pink-100 rounded-2xl text-[11px] text-pink-650 font-medium italic">
+                            "{computedPhase.message}"
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Small Cycle Timeline at all times */}
+                      <div className="mt-6 border-t border-slate-100 pt-4">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-3.5">Cycle Timeline</span>
+                        <div className="grid grid-cols-4 gap-1 text-[9px] md:text-[10px] font-bold text-center">
+                          <span className={`py-1 rounded-lg border transition ${computedPhase.name === 'Menstrual Phase' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-slate-400 bg-white border-slate-100'}`}>🩸 Menstrual</span>
+                          <span className={`py-1 rounded-lg border transition ${computedPhase.name === 'Follicular Phase' ? 'text-green-600 bg-green-50 border-green-200' : 'text-slate-400 bg-white border-slate-100'}`}>🌱 Follicular</span>
+                          <span className={`py-1 rounded-lg border transition ${computedPhase.name === 'Ovulation Phase' ? 'text-amber-600 bg-amber-50 border-amber-200' : 'text-slate-400 bg-white border-slate-100'}`}>🥚 Ovulation</span>
+                          <span className={`py-1 rounded-lg border transition ${computedPhase.name === 'Luteal Phase' ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-slate-400 bg-white border-slate-100'}`}>🌙 Luteal</span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="mt-6 grid grid-cols-2 gap-4">
                       <button
-                        onClick={() => startPeriod(new Date().toISOString().split('T')[0])}
-                        className="py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-100 text-rose-500 font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
+                        onClick={() => {
+                          if (isCurrentlyOnPeriod) {
+                            const dailySymptomSec = document.getElementById('daily-reflections');
+                            if (dailySymptomSec) dailySymptomSec.scrollIntoView({ behavior: 'smooth' });
+                          } else {
+                            startPeriod(new Date().toISOString().split('T')[0]);
+                          }
+                        }}
+                        className="py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-150 text-rose-500 font-extrabold text-[10px] md:text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
                       >
-                        Start Period 🩸
+                        {isCurrentlyOnPeriod ? "Log Symptoms" : "Start Period 🩸"}
                       </button>
                       <button
-                        onClick={() => endPeriod(new Date().toISOString().split('T')[0])}
-                        className="py-3 px-4 rounded-2xl bg-[#8EBC63] hover:bg-[#80AA55] text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-green-100 hover:scale-[1.02] transition"
+                        onClick={() => {
+                          if (isCurrentlyOnPeriod) {
+                            endPeriod(new Date().toISOString().split('T')[0]);
+                          } else {
+                            setActiveTab('history');
+                          }
+                        }}
+                        className="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider transition"
                       >
-                        End Period 🌿
+                        {isCurrentlyOnPeriod ? "End Period 🌿" : "Cycle Details"}
                       </button>
                     </div>
                   </div>
 
                   {/* Premium Hydration Tracker widget */}
-                  <div className="bg-[#FAFDFE] rounded-[32px] p-6 md:p-8 border border-[#DFEDF2] shadow-sm flex flex-col justify-between">
+                  <div className="bg-[#FAFDFE] rounded-[32px] p-6 md:p-8 border border-[#DFEDF2] shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    {updatingWater && (
+                      <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center backdrop-blur-sm">
+                        <RefreshCw className="w-6 h-6 animate-spin text-[#419BBF]" />
+                      </div>
+                    )}
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <div>
@@ -1169,12 +1447,12 @@ export default function UserDashboardPage() {
                           {/* Animated Wave simulation overlay */}
                           <div 
                             className="absolute bottom-0 left-0 right-0 bg-sky-200/40 transition-all duration-500 wave"
-                            style={{ height: `${Math.min(((profile?.waterIntake || 0) / (profile?.targetWater || 8)) * 100, 100)}%` }}
+                            style={{ height: `${Math.min(((profile?.waterIntake || 0) / (profile?.targetWater || 2.5)) * 100, 100)}%` }}
                           />
                           <div className="relative z-10 flex flex-col items-center">
                             <span className="text-3xl">💧</span>
-                            <h2 className="text-4xl font-extrabold text-slate-800 mt-1">{profile?.waterIntake || 0}</h2>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">of {profile?.targetWater || 8} glasses</p>
+                            <h2 className="text-4xl font-extrabold text-slate-800 mt-1">{(profile?.waterIntake || 0).toFixed(2)}</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">of {profile?.targetWater || 2.5} Liters</p>
                           </div>
                         </div>
                       </div>
@@ -1186,14 +1464,14 @@ export default function UserDashboardPage() {
 
                     <div className="mt-6 flex gap-4">
                       <button
-                        onClick={() => handleUpdateWaterIntake((profile?.waterIntake || 0) + 1)}
+                        onClick={() => handleUpdateWaterIntake((profile?.waterIntake || 0) + 0.25)}
                         className="flex-1 py-3.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold border border-slate-100 text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
                       >
-                        Add Glass 💧
+                        Add 250ml 💧
                       </button>
                       {profile?.waterIntake > 0 && (
                         <button
-                          onClick={() => handleUpdateWaterIntake(Math.max((profile?.waterIntake || 0) - 1, 0))}
+                          onClick={() => handleUpdateWaterIntake(Math.max((profile?.waterIntake || 0) - 0.25, 0))}
                           className="py-3.5 px-6 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider transition"
                         >
                           Undo
@@ -1206,21 +1484,26 @@ export default function UserDashboardPage() {
 
                 {/* Recommended Diet Plan Card */}
                 {dietPlan && (
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-purple-100/50">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                  <div className="bg-pink-50/40 rounded-[32px] border border-pink-100/70 p-8 text-slate-800 relative overflow-hidden shadow-sm">
                     <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                       <div className="space-y-2">
-                        <span className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-pink-200 bg-white/10 rounded-full border border-white/20">
+                        <span className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-pink-600 bg-pink-100/50 rounded-full border border-pink-200">
                           Recommended Diet Plan
                         </span>
-                        <h3 className="text-2xl font-black">{dietPlan.name || "PCOD + Ulcerative Colitis (UC) Diet"}</h3>
-                        <p className="text-xs text-purple-100 font-medium max-w-md">
+                        <h3 className="text-2xl font-black text-slate-900">{dietPlan.name || "PCOD + Ulcerative Colitis (UC) Diet"}</h3>
+                        <p className="text-xs text-slate-500 font-medium max-w-md">
                           {dietPlan.description || "Hormonal Balance • Gut Healing • Healthy Weight Gain"}
                         </p>
                       </div>
                       <button
-                        onClick={() => setIsDietViewOpen(true)}
-                        className="px-6 py-3.5 bg-white hover:bg-purple-50 text-purple-700 font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all hover:scale-[1.02] active:scale-100 shrink-0"
+                        onClick={() => {
+                          if (dietPlan.pdfUrl) {
+                            window.open(dietPlan.pdfUrl, '_blank');
+                          } else {
+                            setIsDietViewOpen(true);
+                          }
+                        }}
+                        className="px-6 py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all hover:scale-[1.02] active:scale-100 shrink-0"
                       >
                         Open Diet Chart 🥗
                       </button>
@@ -1232,7 +1515,13 @@ export default function UserDashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   
                   {/* Sleep Log dial card */}
-                  <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm">
+                  <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm relative overflow-hidden">
+                    {updatingSleep && (
+                      <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center backdrop-blur-sm">
+                        <RefreshCw className="w-6 h-6 animate-spin text-indigo-500" />
+                      </div>
+                    )}
+                    
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <span className="text-[10px] font-bold tracking-widest text-indigo-500 uppercase">Sleep Dial</span>
@@ -1242,6 +1531,44 @@ export default function UserDashboardPage() {
                     </div>
 
                     <div className="flex flex-col items-center justify-center p-4">
+                      {/* Bed & Wake inputs */}
+                      <div className="w-full grid grid-cols-2 gap-4 mb-5 text-xs font-semibold text-slate-600">
+                        <div>
+                          <label className="block mb-1 text-slate-400 uppercase text-[9px] tracking-wider font-bold">Bed Time</label>
+                          <input 
+                            type="time"
+                            value={profile?.bedTime || '22:00'}
+                            onChange={(e) => {
+                              const b = e.target.value;
+                              const w = profile?.wakeTime || '06:00';
+                              const [bh, bm] = b.split(':').map(Number);
+                              const [wh, wm] = w.split(':').map(Number);
+                              let diff = (wh + wm / 60) - (bh + bm / 60);
+                              if (diff < 0) diff += 24;
+                              handleUpdateProfile({ bedTime: b, sleep: Number(diff.toFixed(2)) });
+                            }}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-1 focus:ring-indigo-400 text-slate-700 font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-slate-400 uppercase text-[9px] tracking-wider font-bold">Wake Time</label>
+                          <input 
+                            type="time"
+                            value={profile?.wakeTime || '06:00'}
+                            onChange={(e) => {
+                              const b = profile?.bedTime || '22:00';
+                              const w = e.target.value;
+                              const [bh, bm] = b.split(':').map(Number);
+                              const [wh, wm] = w.split(':').map(Number);
+                              let diff = (wh + wm / 60) - (bh + bm / 60);
+                              if (diff < 0) diff += 24;
+                              handleUpdateProfile({ wakeTime: w, sleep: Number(diff.toFixed(2)) });
+                            }}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-1 focus:ring-indigo-400 text-slate-700 font-bold"
+                          />
+                        </div>
+                      </div>
+
                       <div className="flex items-center gap-6 mb-6">
                         <button
                           onClick={() => handleUpdateProfile({ sleep: Math.max((profile?.sleep || 0) - 0.5, 0) })}
@@ -1270,7 +1597,12 @@ export default function UserDashboardPage() {
                   </div>
 
                   {/* Daily check-in reflections journal */}
-                  <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    {updatingJournal && (
+                      <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center backdrop-blur-sm">
+                        <RefreshCw className="w-6 h-6 animate-spin text-[#7CA851]" />
+                      </div>
+                    )}
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div>
@@ -1921,6 +2253,460 @@ export default function UserDashboardPage() {
                   </p>
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {activeTab === 'history' && (
+            <motion.div
+              key="history-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              className="mt-8 space-y-8"
+            >
+              {/* Range Filters Control */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-3xl border border-slate-100">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Telemetry History Filter</h4>
+                  <p className="text-xs text-slate-400">Select range to adjust charts for sleep, water and mood trends</p>
+                </div>
+                <div className="flex gap-2">
+                  {(['week', 'month', '6months'] as const).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setHistoryRange(r)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                        historyRange === r
+                          ? 'bg-slate-900 text-white shadow'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {r === 'week' ? '1 Week' : r === 'month' ? '1 Month' : '6 Months'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Period Analytics (Limited to last 6 entries unless showAllPeriods is true) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Flow duration chart */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                      <span className="text-rose-500">🌸</span> Menstrual Flow Days
+                    </h3>
+                    {periodHistory.length > 6 && (
+                      <button
+                        onClick={() => setShowAllPeriods(!showAllPeriods)}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-600"
+                      >
+                        {showAllPeriods ? 'Show Last 6 Only' : `Show All (${periodHistory.length})`}
+                      </button>
+                    )}
+                  </div>
+                  {(() => {
+                    const logs = showAllPeriods ? periodHistory : periodHistory.slice(0, 6);
+                    const durations = logs.map(p => {
+                      if (!p.endDate) return { date: new Date(p.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), duration: 5 };
+                      const start = new Date(p.startDate);
+                      const end = new Date(p.endDate);
+                      const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                      return { date: start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), duration: diff };
+                    }).reverse();
+
+                    if (durations.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">No completed period logs found.</p>;
+                    }
+
+                    return (
+                      <div className="w-full">
+                        <svg viewBox="0 0 500 220" className="w-full overflow-visible">
+                          {[2, 4, 6, 8, 10].map((yVal) => {
+                            const y = 170 - (yVal * 14);
+                            return (
+                              <g key={yVal}>
+                                <line x1="40" y1={y} x2="480" y2={y} stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" />
+                                <text x="15" y={y + 4} className="text-[10px] font-bold fill-slate-400">{yVal}d</text>
+                              </g>
+                            );
+                          })}
+                          {durations.map((item, idx) => {
+                            const barWidth = 28;
+                            const barHeight = item.duration * 14;
+                            const x = 60 + idx * (420 / Math.max(durations.length, 1));
+                            const y = 170 - barHeight;
+                            return (
+                              <g key={idx} className="group">
+                                <rect
+                                  x={x}
+                                  y={y}
+                                  width={barWidth}
+                                  height={barHeight}
+                                  rx="6"
+                                  fill="#FDA4AF"
+                                  className="transition-all duration-350 cursor-pointer hover:fill-rose-400"
+                                />
+                                <text x={x + 14} y={y - 8} textAnchor="middle" className="text-[10px] font-black fill-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {item.duration}d
+                                </text>
+                                <text x={x + 14} y="192" textAnchor="middle" className="text-[9px] font-bold fill-slate-400 select-none">
+                                  {item.date}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          <line x1="40" y1="170" x2="480" y2="170" stroke="#E2E8F0" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Cycle length chart */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-indigo-500">🔄</span> Cycle Length History
+                  </h3>
+                  {(() => {
+                    const logs = showAllPeriods ? periodHistory : periodHistory.slice(0, 6);
+                    const lengths: Array<{ date: string; days: number }> = [];
+                    for (let i = 0; i < logs.length - 1; i++) {
+                      const nextStart = new Date(logs[i].startDate);
+                      const prevStart = new Date(logs[i + 1].startDate);
+                      const diff = Math.ceil((nextStart.getTime() - prevStart.getTime()) / (1000 * 60 * 60 * 24));
+                      lengths.push({
+                        date: nextStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                        days: diff
+                      });
+                    }
+                    lengths.reverse();
+
+                    if (lengths.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">Need at least 2 period logs to calculate cycle lengths.</p>;
+                    }
+
+                    return (
+                      <div className="w-full">
+                        <svg viewBox="0 0 500 220" className="w-full overflow-visible">
+                          {[15, 30, 45, 60].map((yVal) => {
+                            const y = 170 - (yVal * 2.2);
+                            return (
+                              <g key={yVal}>
+                                <line x1="40" y1={y} x2="480" y2={y} stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" />
+                                <text x="15" y={y + 4} className="text-[10px] font-bold fill-slate-400">{yVal}d</text>
+                              </g>
+                            );
+                          })}
+                          {(() => {
+                            const points = lengths.map((item, idx) => {
+                              const x = 60 + idx * (420 / Math.max(lengths.length, 1));
+                              const y = 170 - (item.days * 2.2);
+                              return { x, y };
+                            });
+                            const pathD = `M ${points[0].x} 170 ` + points.map(p => `L ${p.x} ${p.y}`).join(' ') + ` L ${points[points.length - 1].x} 170 Z`;
+                            const strokeD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                            return (
+                              <g>
+                                <path d={pathD} fill="#EEF2FF" opacity="0.6" />
+                                <path d={strokeD} fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </g>
+                            );
+                          })()}
+                          {lengths.map((item, idx) => {
+                            const x = 60 + idx * (420 / Math.max(lengths.length, 1));
+                            const y = 170 - (item.days * 2.2);
+                            return (
+                              <g key={idx} className="group">
+                                <circle cx={x} cy={y} r="5" fill="#6366F1" stroke="#FFFFFF" strokeWidth="1.5" className="cursor-pointer transition hover:scale-125" />
+                                <text x={x} y={y - 12} textAnchor="middle" className="text-[9px] font-black fill-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {item.days} days
+                                </text>
+                                <text x={x} y="192" textAnchor="middle" className="text-[9px] font-bold fill-slate-400 select-none">
+                                  {item.date}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          <line x1="40" y1="170" x2="480" y2="170" stroke="#E2E8F0" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Water, Sleep, and Mood Analytics Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Water Intake Chart (Liters) */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4 lg:col-span-2">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-sky-500">💧</span> Hydration Trends
+                  </h3>
+                  {(() => {
+                    const today = new Date();
+                    let limitDays = 180;
+                    if (historyRange === 'week') limitDays = 7;
+                    if (historyRange === 'month') limitDays = 30;
+                    const cutoff = new Date(today.getTime() - limitDays * 24 * 60 * 60 * 1000);
+                    const logs = profileHistory
+                      .filter(h => new Date(h.date) >= cutoff && h.waterIntake > 0)
+                      .slice(0, 10)
+                      .reverse();
+
+                    if (logs.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">No hydration metrics logged in this range.</p>;
+                    }
+
+                    return (
+                      <div className="w-full">
+                        <svg viewBox="0 0 500 200" className="w-full overflow-visible">
+                          {[1.0, 2.0, 3.0].map((yVal) => {
+                            const y = 150 - (yVal * 40);
+                            return (
+                              <g key={yVal}>
+                                <line x1="40" y1={y} x2="480" y2={y} stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" />
+                                <text x="15" y={y + 4} className="text-[10px] font-bold fill-slate-400">{yVal.toFixed(1)}L</text>
+                              </g>
+                            );
+                          })}
+                          {logs.map((item, idx) => {
+                            const barWidth = 24;
+                            const barHeight = Math.min(item.waterIntake * 40, 140);
+                            const x = 60 + idx * (420 / Math.max(logs.length, 1));
+                            const y = 150 - barHeight;
+                            const label = new Date(item.date).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' });
+                            return (
+                              <g key={idx} className="group">
+                                <rect
+                                  x={x}
+                                  y={y}
+                                  width={barWidth}
+                                  height={barHeight}
+                                  rx="4"
+                                  fill="#38BDF8"
+                                  className="transition-all duration-350 cursor-pointer hover:fill-sky-500"
+                                />
+                                <text x={x + 12} y={y - 8} textAnchor="middle" className="text-[9px] font-black fill-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {item.waterIntake.toFixed(2)}L
+                                </text>
+                                <text x={x + 12} y="172" textAnchor="middle" className="text-[9px] font-bold fill-slate-400 select-none">
+                                  {label}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          <line x1="40" y1="150" x2="480" y2="150" stroke="#E2E8F0" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Mood & Sleep Tracker Logs */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-amber-500">🌙</span> Mood & Sleep Logs
+                  </h3>
+                  {(() => {
+                    const today = new Date();
+                    let limitDays = 180;
+                    if (historyRange === 'week') limitDays = 7;
+                    if (historyRange === 'month') limitDays = 30;
+                    const cutoff = new Date(today.getTime() - limitDays * 24 * 60 * 60 * 1000);
+                    const logs = profileHistory
+                      .filter(h => new Date(h.date) >= cutoff)
+                      .slice(0, 10);
+
+                    if (logs.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">No logs recorded in this range.</p>;
+                    }
+
+                    return (
+                      <div className="space-y-3 max-h-[160px] overflow-y-auto pr-1">
+                        {logs.map((log, idx) => (
+                          <div key={idx} className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <div>
+                              <span className="text-[10px] font-bold text-slate-400">{new Date(log.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                              <div className="text-xs text-slate-700 font-semibold mt-0.5">Sleep: {log.sleep || '—'} hrs</div>
+                            </div>
+                            {log.mood && (
+                              <span className="px-2 py-1 bg-white border border-slate-100 rounded-lg text-xs font-bold text-amber-600 flex items-center gap-1">
+                                <span>{log.mood === 'Happy' ? '😊' : log.mood === 'Energetic' ? '⚡' : log.mood === 'Sad' ? '😢' : log.mood === 'Tired' ? '🥱' : log.mood === 'Irritable' ? '😠' : log.mood === 'Anxious' ? '🥺' : '😐'}</span>
+                                {log.mood}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Extra visual Sleep & Mood Graphs */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Sleep History SVG */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-indigo-500">🌙</span> Sleep Duration Trends (Hours)
+                  </h3>
+                  {(() => {
+                    const today = new Date();
+                    let limitDays = 180;
+                    if (historyRange === 'week') limitDays = 7;
+                    if (historyRange === 'month') limitDays = 30;
+                    const cutoff = new Date(today.getTime() - limitDays * 24 * 60 * 60 * 1000);
+                    const logs = profileHistory
+                      .filter(h => new Date(h.date) >= cutoff && h.sleep > 0)
+                      .slice(0, 10)
+                      .reverse();
+
+                    if (logs.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">No sleep logs found.</p>;
+                    }
+
+                    return (
+                      <div className="w-full">
+                        <svg viewBox="0 0 500 200" className="w-full overflow-visible">
+                          {[4, 8, 12].map((yVal) => {
+                            const y = 150 - (yVal * 10);
+                            return (
+                              <g key={yVal}>
+                                <line x1="40" y1={y} x2="480" y2={y} stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" />
+                                <text x="15" y={y + 4} className="text-[10px] font-bold fill-slate-400">{yVal} hrs</text>
+                              </g>
+                            );
+                          })}
+                          {(() => {
+                            const points = logs.map((item, idx) => {
+                              const x = 60 + idx * (420 / Math.max(logs.length, 1));
+                              const y = 150 - (item.sleep * 10);
+                              return { x, y };
+                            });
+                            const strokeD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                            return <path d={strokeD} fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" />;
+                          })()}
+                          {logs.map((item, idx) => {
+                            const x = 60 + idx * (420 / Math.max(logs.length, 1));
+                            const y = 150 - (item.sleep * 10);
+                            const label = new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                            return (
+                              <g key={idx} className="group">
+                                <circle cx={x} cy={y} r="4" fill="#6366F1" stroke="#FFFFFF" strokeWidth="1" className="cursor-pointer" />
+                                <text x={x} y={y - 10} textAnchor="middle" className="text-[9px] font-black fill-indigo-750 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {item.sleep} hrs
+                                </text>
+                                <text x={x} y="172" textAnchor="middle" className="text-[9px] font-bold fill-slate-400 select-none">
+                                  {label}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          <line x1="40" y1="150" x2="480" y2="150" stroke="#E2E8F0" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Mood Score Trends SVG */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-amber-500">✨</span> Mood Trend History
+                  </h3>
+                  {(() => {
+                    const moodValue = (mood: string) => {
+                      if (mood === 'Happy') return 5;
+                      if (mood === 'Energetic') return 4;
+                      if (mood === 'Neutral' || !mood) return 3;
+                      if (mood === 'Tired') return 2;
+                      return 1; // Sad, Irritable, Anxious
+                    };
+
+                    const today = new Date();
+                    let limitDays = 180;
+                    if (historyRange === 'week') limitDays = 7;
+                    if (historyRange === 'month') limitDays = 30;
+                    const cutoff = new Date(today.getTime() - limitDays * 24 * 60 * 60 * 1000);
+                    const logs = profileHistory
+                      .filter(h => new Date(h.date) >= cutoff && h.mood)
+                      .slice(0, 10)
+                      .reverse();
+
+                    if (logs.length === 0) {
+                      return <p className="text-sm text-slate-400 italic py-10 text-center">No mood logs found.</p>;
+                    }
+
+                    return (
+                      <div className="w-full">
+                        <svg viewBox="0 0 500 200" className="w-full overflow-visible">
+                          {[1, 2, 3, 4, 5].map((yVal) => {
+                            const y = 150 - (yVal * 24);
+                            const emoji = yVal === 5 ? '😊' : yVal === 4 ? '⚡' : yVal === 3 ? '😐' : yVal === 2 ? '🥱' : '😢';
+                            return (
+                              <g key={yVal}>
+                                <line x1="40" y1={y} x2="480" y2={y} stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" />
+                                <text x="15" y={y + 4} className="text-[10px] fill-slate-450">{emoji}</text>
+                              </g>
+                            );
+                          })}
+                          {(() => {
+                            const points = logs.map((item, idx) => {
+                              const x = 60 + idx * (420 / Math.max(logs.length, 1));
+                              const y = 150 - (moodValue(item.mood) * 24);
+                              return { x, y };
+                            });
+                            const strokeD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                            return <path d={strokeD} fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round" />;
+                          })()}
+                          {logs.map((item, idx) => {
+                            const x = 60 + idx * (420 / Math.max(logs.length, 1));
+                            const y = 150 - (moodValue(item.mood) * 24);
+                            const label = new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                            return (
+                              <g key={idx} className="group">
+                                <circle cx={x} cy={y} r="5" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="1.5" className="cursor-pointer" />
+                                <text x={x} y={y - 10} textAnchor="middle" className="text-[9px] font-bold fill-amber-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {item.mood}
+                                </text>
+                                <text x={x} y="172" textAnchor="middle" className="text-[9px] font-bold fill-slate-400 select-none">
+                                  {label}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          <line x1="40" y1="150" x2="480" y2="150" stroke="#E2E8F0" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Bio Journal Notes */}
+              <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <span className="text-purple-500">📖</span> Bio Journal History
+                </h3>
+                {profileHistory.filter(h => h.journal).length === 0 ? (
+                  <p className="text-sm text-slate-400 italic py-6 text-center">No journal logs written yet.</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {profileHistory
+                      .filter(h => h.journal)
+                      .slice(0, 9)
+                      .map((log, idx) => (
+                        <div key={idx} className="bg-slate-50 p-5 rounded-[24px] border border-slate-100 space-y-3 relative overflow-hidden">
+                          <div className="flex justify-between items-center border-b border-slate-200/50 pb-2">
+                            <span className="text-[10px] font-bold text-slate-400">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+                            <span className="text-[10px] bg-pink-50 text-pink-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Entry</span>
+                          </div>
+                          <p className="text-xs text-slate-650 italic leading-relaxed">"{log.journal}"</p>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 

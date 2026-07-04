@@ -164,15 +164,22 @@ export default function PatientTable({ data }: PatientTableProps) {
                        <span className="line-clamp-2">{patient.notes}</span>
                      </div>
                    )}
-                   
-                   <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-mono">
-                     <span>ID: #{patient.id.slice(0, 8)}</span>
-                     <span>Enrolled: {format(new Date(patientCreatedAt), 'MMM dd, yyyy')}</span>
-                   </div>
-                 </div>
-               </div>
-             );
-           })}
+                   <div className="flex justify-between items-center mt-4">
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        <span>ID: #{patient.id.slice(0, 8)}</span>
+                        <span className="block">Enrolled: {format(new Date(patientCreatedAt), 'MMM dd, yyyy')}</span>
+                      </div>
+                      <a
+                        href={`/wombcare-admin-9984/patients/${patient.id}`}
+                        className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-pink-600 bg-pink-50 rounded-xl hover:bg-pink-100 transition shrink-0"
+                      >
+                        Open Profile →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       )}
     </div>

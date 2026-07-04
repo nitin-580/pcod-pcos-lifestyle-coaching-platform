@@ -1,12 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getPublicApiBase } from '@/lib/api-config';
+import { Sparkles, Check, Smile, Heart, RefreshCw } from 'lucide-react';
 
 interface Props {
   userId: string;
   onComplete: () => void;
 }
+
+const SYMPTOM_OPTIONS = [
+  'Irregular periods',
+  'Acne / Pimples',
+  'Excessive hair growth (Hirsutism)',
+  'Weight gain',
+  'Hair thinning / Loss',
+  'Fatigue / Low energy',
+  'Severe cramps',
+  'Mood swings',
+  'Bloating',
+  'Headache'
+];
+
+const GOAL_OPTIONS = [
+  'Regularize menstrual cycle',
+  'Weight management / Loss',
+  'Clear skin / Reduce acne',
+  'Improve sleep & energy levels',
+  'Reduce stress & anxiety',
+  'Conceive naturally',
+  'Manage insulin resistance'
+];
 
 export default function Form({ userId, onComplete }: Props) {
   const [formData, setFormData] = useState({
@@ -14,11 +38,11 @@ export default function Form({ userId, onComplete }: Props) {
     weight: '',
     height: '',
     cycleLength: '28',
-    targetWater: '8',
-    activePlan: '',
-    symptoms: '',
+    targetWater: '2.5', // Default 2.5 Liters
+    activePlan: 'Premium 90-Day Hormonal Wellness', // Default Premium Active Plan
+    symptoms: [] as string[],
     personalNotes: '',
-    wellnessGoal: '',
+    wellnessGoals: [] as string[],
   });
 
   const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
@@ -47,6 +71,26 @@ export default function Form({ userId, onComplete }: Props) {
     }));
   };
 
+  const toggleSymptom = (sym: string) => {
+    setFormData(prev => {
+      const exists = prev.symptoms.includes(sym);
+      const symptoms = exists 
+        ? prev.symptoms.filter(s => s !== sym)
+        : [...prev.symptoms, sym];
+      return { ...prev, symptoms };
+    });
+  };
+
+  const toggleGoal = (goal: string) => {
+    setFormData(prev => {
+      const exists = prev.wellnessGoals.includes(goal);
+      const wellnessGoals = exists 
+        ? prev.wellnessGoals.filter(g => g !== goal)
+        : [...prev.wellnessGoals, goal];
+      return { ...prev, wellnessGoals };
+    });
+  };
+
   const calculateBMI = () => {
     const h = Number(formData.height) / 100;
     const w = Number(formData.weight);
@@ -62,11 +106,20 @@ export default function Form({ userId, onComplete }: Props) {
     setError('');
 
     // Ensure all fields are filled
-    const requiredFields = ['age', 'weight', 'height', 'cycleLength', 'targetWater', 'activePlan', 'symptoms', 'wellnessGoal'];
-    const missing = requiredFields.filter(f => !formData[f as keyof typeof formData]);
-    
-    if (missing.length > 0) {
-      setError(`Please fill in all details: ${missing.join(', ')}`);
+    if (!formData.age || !formData.weight || !formData.height || !formData.cycleLength || !formData.targetWater) {
+      setError('Please fill in age, weight, height, cycle length, and water target.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.symptoms.length === 0) {
+      setError('Please select at least one common symptom.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.wellnessGoals.length === 0) {
+      setError('Please select at least one wellness goal.');
       setIsLoading(false);
       return;
     }
@@ -94,20 +147,17 @@ export default function Form({ userId, onComplete }: Props) {
         weight: Number(formData.weight),
         height: Number(formData.height),
         cycleLength: Number(formData.cycleLength),
-        targetWater: Number(formData.targetWater),
+        targetWater: Number(formData.targetWater), // in Liters
         activePlan: formData.activePlan,
-        symptoms: formData.symptoms
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean),
+        symptoms: formData.symptoms,
         personalNotes: formData.personalNotes,
-        wellnessGoal: formData.wellnessGoal,
+        wellnessGoal: formData.wellnessGoals.join(', '),
         bmi: calculateBMI(),
         wellnessScore: 82,
-        profileCompleted: true, // Mark as completed in DB
+        profileCompleted: true,
       };
 
-      console.log('Submitting payload:', profilePayload);
+      console.log('Submitting onboarding payload:', profilePayload);
 
       const res = await fetch(
         `${getPublicApiBase()}/profiles`,
@@ -128,7 +178,7 @@ export default function Form({ userId, onComplete }: Props) {
         return;
       }
 
-      onComplete(); // redirect to dashboard
+      onComplete(); // Redirect to dashboard
     } catch (err) {
       setError('Connection failed. Please check if backend is running.');
       console.error('Profile save error:', err);
@@ -138,134 +188,158 @@ export default function Form({ userId, onComplete }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-7">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 font-medium">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 font-bold text-sm">
           {error}
         </div>
       )}
 
-      {/* Age + Cycle */}
-      <div className="grid grid-cols-2 gap-6">
+      {/* Basic Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Age *</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Age *</label>
           <input
             name="age"
+            type="number"
             placeholder="e.g. 24"
             value={formData.age}
             onChange={handleChange}
             required
-            className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+            className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Cycle Length * (Days)</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Cycle Length * (Days)</label>
           <input
             name="cycleLength"
+            type="number"
             placeholder="e.g. 28"
             value={formData.cycleLength}
             onChange={handleChange}
             required
-            className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+            className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
           />
         </div>
-      </div>
 
-      {/* Height + Weight */}
-      <div className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Height * (cm)</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Height * (cm)</label>
           <input
             name="height"
+            type="number"
             placeholder="e.g. 165"
             value={formData.height}
             onChange={handleChange}
             required
-            className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+            className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Weight * (kg)</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Weight * (kg)</label>
           <input
             name="weight"
+            type="number"
             placeholder="e.g. 62"
             value={formData.weight}
             onChange={handleChange}
             required
-            className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+            className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
           />
         </div>
       </div>
 
-      {/* Water */}
+      {/* Target Water - in Liters */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Daily Water Target * (Glasses)</label>
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Daily Water Target * (Liters)</label>
         <input
           name="targetWater"
-          placeholder="e.g. 8"
+          type="number"
+          step="0.1"
+          placeholder="e.g. 2.5"
           value={formData.targetWater}
           onChange={handleChange}
           required
-          className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+          className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
         />
       </div>
 
-      {/* Symptoms */}
+      {/* Symptoms Checkboxes */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Common Symptoms *</label>
-        <textarea
-          name="symptoms"
-          rows={2}
-          placeholder="e.g. Acne, bloating, fatigue (comma separated)"
-          value={formData.symptoms}
-          onChange={handleChange}
-          required
-          className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors resize-none"
-        />
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Common Symptoms * (Select all that apply)</label>
+        <div className="flex flex-wrap gap-2.5">
+          {SYMPTOM_OPTIONS.map((sym) => {
+            const isSelected = formData.symptoms.includes(sym);
+            return (
+              <button
+                key={sym}
+                type="button"
+                onClick={() => toggleSymptom(sym)}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold border transition flex items-center gap-1.5 ${
+                  isSelected 
+                    ? 'bg-pink-500 border-pink-500 text-white shadow-md shadow-pink-100'
+                    : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50'
+                }`}
+              >
+                {isSelected && <Check className="w-3.5 h-3.5" />}
+                {sym}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Wellness Goal */}
+      {/* Goals Checkboxes */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Wellness Goal *</label>
-        <textarea
-          name="wellnessGoal"
-          rows={2}
-          placeholder="e.g. Regularize periods, manage weight"
-          value={formData.wellnessGoal}
-          onChange={handleChange}
-          required
-          className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors resize-none"
-        />
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Wellness Recovery Goals * (Select all that apply)</label>
+        <div className="flex flex-wrap gap-2.5">
+          {GOAL_OPTIONS.map((goal) => {
+            const isSelected = formData.wellnessGoals.includes(goal);
+            return (
+              <button
+                key={goal}
+                type="button"
+                onClick={() => toggleGoal(goal)}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold border transition flex items-center gap-1.5 ${
+                  isSelected 
+                    ? 'bg-purple-650 border-purple-650 bg-gradient-to-r from-purple-600 to-indigo-650 text-white shadow-md shadow-purple-100'
+                    : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50'
+                }`}
+              >
+                {isSelected && <Check className="w-3.5 h-3.5" />}
+                {goal}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Personal Notes */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Additional Health Notes (Optional)</label>
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Additional Health Notes (Optional)</label>
         <textarea
           name="personalNotes"
           rows={2}
-          placeholder="Anything else you'd like to share..."
+          placeholder="Anything else you'd like to share with your care team..."
           value={formData.personalNotes}
           onChange={handleChange}
-          className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors resize-none"
+          className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-medium focus:outline-none focus:border-pink-500 transition-colors text-sm resize-none"
         />
       </div>
 
-      {/* Plan */}
-      <div className="pt-2">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Active Plan *</label>
+      {/* Plan Selection */}
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Active Plan *</label>
         <select
           name="activePlan"
           value={formData.activePlan}
           onChange={handleChange}
           required
-          className="w-full border-b border-pink-200 py-3 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
+          className="w-full border-b border-pink-100 py-3 bg-transparent text-slate-800 font-semibold focus:outline-none focus:border-pink-500 transition-colors text-sm"
         >
-          <option value="">Select active plan</option>
+          <option value="Premium 90-Day Hormonal Wellness">Premium 90-Day Hormonal Wellness (Default)</option>
           <option value="Starter Plan">Starter Plan</option>
-          <option value="Premium 90-Day Hormonal Wellness">Premium 90-Day Hormonal Wellness</option>
           <option value="Doctor Consultation">Doctor Consultation</option>
         </select>
       </div>
@@ -273,9 +347,9 @@ export default function Form({ userId, onComplete }: Props) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-6 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold text-lg shadow-xl shadow-pink-100 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50"
+        className="w-full mt-6 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-base shadow-xl shadow-pink-100 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50"
       >
-        {isLoading ? 'Saving...' : 'Complete Profile'}
+        {isLoading ? 'Saving your health profile...' : 'Complete & Open Dashboard'}
       </button>
     </form>
   );

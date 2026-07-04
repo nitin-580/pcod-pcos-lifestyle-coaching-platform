@@ -16,9 +16,12 @@ import ReferralManagement from '@/components/admin/ReferralManagement';
 import BannerManagement from '@/components/admin/BannerManagement';
 import DoctorFinance from '@/components/admin/DoctorFinance';
 import DietPlanManagement from '@/components/admin/DietPlanManagement';
+import HealthAssessmentTable from '@/components/admin/HealthAssessmentTable';
+import DoctorManagement from '@/components/admin/DoctorManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
+import { supabase } from '@/lib/supabase-client';
 
 interface Blog {
   id: string;
@@ -38,7 +41,7 @@ export default function AdminPage() {
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -48,6 +51,7 @@ export default function AdminPage() {
   const [careers, setCareers] = useState<any[]>([]);
   const [doctorRequests, setDoctorRequests] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [healthAssessments, setHealthAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,7 +86,8 @@ export default function AdminPage() {
       fetchEnrollments(key),
       fetchPatients(key),
       fetchDoctorRequests(key),
-      fetchAdminAppointments(key)
+      fetchAdminAppointments(key),
+      fetchHealthAssessments(key)
     ]);
     setLoading(false);
   };
@@ -93,7 +98,22 @@ export default function AdminPage() {
         headers: { 'x-admin-api-key': key },
       });
       const result = await response.json();
-      setRegistrations(result.data || []);
+      
+      const { data: profiles } = await supabase
+        .from('wombcare_user_profiles')
+        .select('*');
+
+      const merged = (result.data || []).map((user: any) => {
+        const profile = (profiles || []).find(
+          (p: any) => p.email.toLowerCase() === user.email.toLowerCase() || p.id === user.id
+        );
+        return {
+          ...user,
+          profile: profile || null
+        };
+      });
+      
+      setRegistrations(merged);
     } catch (err: any) {
       console.error('Fetch registrations error:', err);
     }
@@ -168,6 +188,16 @@ export default function AdminPage() {
       setAppointments(result.data || []);
     } catch (err: any) {
       console.error('Fetch admin appointments error:', err);
+    }
+  };
+
+  const fetchHealthAssessments = async (key: string) => {
+    try {
+      const response = await fetch(`/api/health-assessments?apiKey=${key}`);
+      const result = await response.json();
+      setHealthAssessments(result.data || []);
+    } catch (err: any) {
+      console.error('Fetch health assessments error:', err);
     }
   };
 
@@ -280,7 +310,7 @@ export default function AdminPage() {
           />
 
         {activeTab === 'registrations' ? (
-          <AdminTable data={registrations} />
+          <AdminTable data={registrations} onPromoteSuccess={() => fetchInitialData(apiKey)} />
         ) : activeTab === 'enrollments' ? (
           <div className="space-y-8">
             <EnrollmentForm registrations={registrations} onEnrollSuccess={() => fetchEnrollments(apiKey)} />
@@ -296,56 +326,11 @@ export default function AdminPage() {
         ) : activeTab === 'blogs' ? (
           <BlogList blogs={blogs} loading={loading} onEdit={(blog) => router.push(`/wombcare-admin-9984/blogs/edit/${blog.id}`)} onDelete={() => {}} />
         ) : activeTab === 'doctor-requests' ? (
-          <div className="space-y-6">
-            {doctorRequests.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
-                <UserPlus className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                <p className="text-slate-400 font-medium">No pending doctor requests</p>
-              </div>
-            ) : (
-              <div className="grid gap-6">
-                {doctorRequests.map((req) => (
-                  <motion.div 
-                    layout
-                    key={req.id} 
-                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-slate-900">{req.fullName}</h3>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'pending' ? 'bg-amber-50 text-amber-600' : req.status === 'approved' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
-                          {req.status}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-500">
-                        <p><span className="font-bold text-slate-700">Email:</span> {req.email}</p>
-                        <p><span className="font-bold text-slate-700">Specialization:</span> {req.specialization}</p>
-                        <p><span className="font-bold text-slate-700">Reg No:</span> {req.medicalRegistrationNumber}</p>
-                        <p><span className="font-bold text-slate-700">Exp:</span> {req.experienceYears} years</p>
-                      </div>
-                    </div>
-
-                    {req.status === 'pending' && (
-                      <div className="flex items-center gap-3">
-                        <button 
-                          onClick={() => handleUpdateStatus(req.id, 'approved')}
-                          className="p-3 bg-green-50 text-green-600 rounded-2xl hover:bg-green-100 transition shadow-sm"
-                        >
-                          <Check className="w-6 h-6" />
-                        </button>
-                        <button 
-                          onClick={() => handleUpdateStatus(req.id, 'rejected')}
-                          className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 transition shadow-sm"
-                        >
-                          <X className="w-6 h-6" />
-                        </button>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
+          <DoctorManagement 
+            apiKey={apiKey} 
+            doctorRequests={doctorRequests} 
+            onUpdateStatus={handleUpdateStatus} 
+          />
         ) : activeTab === 'appointments' ? (
           <div className="space-y-6">
             {appointments.length === 0 ? (
@@ -416,6 +401,11 @@ export default function AdminPage() {
           <DoctorFinance apiKey={apiKey} />
         ) : activeTab === 'diet-plans' ? (
           <DietPlanManagement apiKey={apiKey} registrations={registrations} />
+        ) : activeTab === 'health-assessments' ? (
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <h3 className="font-bold text-slate-800 text-lg mb-4">Patient Health Intake Assessments</h3>
+            <HealthAssessmentTable data={healthAssessments} />
+          </div>
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}

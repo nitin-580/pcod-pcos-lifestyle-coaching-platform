@@ -21,8 +21,8 @@ import {
 } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -50,6 +50,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { id: 'registrations', label: 'Registrations', icon: LayoutDashboard },
     { id: 'appointments', label: 'Appointments', icon: Calendar },
     { id: 'patients', label: 'Patients', icon: UserCircle },
+    { id: 'health-assessments', label: 'Health Intakes', icon: FileText },
     { id: 'diet-plans', label: 'Diet Plans', icon: Sparkles, highlight: true },
     { id: 'classes', label: 'Classes', icon: Video },
     { id: 'enrollments', label: 'Enrollments', icon: Activity },
