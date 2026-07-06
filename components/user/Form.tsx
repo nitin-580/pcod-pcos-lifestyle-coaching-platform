@@ -147,7 +147,7 @@ export default function Form({ userId, onComplete }: Props) {
         weight: Number(formData.weight),
         height: Number(formData.height),
         cycleLength: Number(formData.cycleLength),
-        targetWater: Number(formData.targetWater), // in Liters
+        targetWater: Math.round(Number(formData.targetWater) / 0.25), // convert Liters to glasses (integer)
         activePlan: formData.activePlan,
         symptoms: formData.symptoms,
         personalNotes: formData.personalNotes,

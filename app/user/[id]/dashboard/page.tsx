@@ -1161,7 +1161,7 @@ export default function UserDashboardPage() {
                     </div>
                     <div className="flex items-center gap-2 mt-4 text-[10px] font-semibold text-slate-500">
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
-                      Daily target: {profile?.targetWater || 8} glasses
+                      Daily target: {profile?.targetWater ? (profile.targetWater * 0.25).toFixed(2) : '2.0'} Liters
                     </div>
                   </div>
 
@@ -1447,12 +1447,12 @@ export default function UserDashboardPage() {
                           {/* Animated Wave simulation overlay */}
                           <div 
                             className="absolute bottom-0 left-0 right-0 bg-sky-200/40 transition-all duration-500 wave"
-                            style={{ height: `${Math.min(((profile?.waterIntake || 0) / (profile?.targetWater || 2.5)) * 100, 100)}%` }}
+                            style={{ height: `${Math.min(((profile?.waterIntake || 0) / (profile?.targetWater ? profile.targetWater * 0.25 : 2.5)) * 100, 100)}%` }}
                           />
                           <div className="relative z-10 flex flex-col items-center">
                             <span className="text-3xl">💧</span>
                             <h2 className="text-4xl font-extrabold text-slate-800 mt-1">{(profile?.waterIntake || 0).toFixed(2)}</h2>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">of {profile?.targetWater || 2.5} Liters</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">of {profile?.targetWater ? (profile.targetWater * 0.25).toFixed(2) : 2.5} Liters</p>
                           </div>
                         </div>
                       </div>
