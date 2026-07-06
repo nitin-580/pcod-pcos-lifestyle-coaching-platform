@@ -1394,33 +1394,31 @@ export default function UserDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <button
-                        onClick={() => {
-                          if (isCurrentlyOnPeriod) {
-                            const dailySymptomSec = document.getElementById('daily-reflections');
-                            if (dailySymptomSec) dailySymptomSec.scrollIntoView({ behavior: 'smooth' });
-                          } else {
-                            startPeriod(new Date().toISOString().split('T')[0]);
-                          }
-                        }}
-                        className="py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-150 text-rose-500 font-extrabold text-[10px] md:text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
-                      >
-                        {isCurrentlyOnPeriod ? "Log Symptoms" : "Start Period 🩸"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (isCurrentlyOnPeriod) {
-                            endPeriod(new Date().toISOString().split('T')[0]);
-                          } else {
-                            setActiveTab('history');
-                          }
-                        }}
-                        className="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider transition"
-                      >
-                        {isCurrentlyOnPeriod ? "End Period 🌿" : "Cycle Details"}
-                      </button>
-                    </div>
+                    {isCurrentlyOnPeriod ? (
+                      <div className="mt-6">
+                        <button
+                          onClick={() => endPeriod(new Date().toISOString().split('T')[0])}
+                          className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider transition"
+                        >
+                          End Period 🌿
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-6 grid grid-cols-2 gap-4">
+                        <button
+                          onClick={() => startPeriod(new Date().toISOString().split('T')[0])}
+                          className="py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-150 text-rose-500 font-extrabold text-[10px] md:text-xs uppercase tracking-wider shadow-sm hover:shadow transition"
+                        >
+                          Start Period 🩸
+                        </button>
+                        <button
+                          onClick={() => setActiveTab('history')}
+                          className="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider transition"
+                        >
+                          Cycle Details
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Premium Hydration Tracker widget */}
