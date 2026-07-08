@@ -5,13 +5,13 @@ export async function GET() {
   if (!supabase) return NextResponse.json({ success: false, message: 'Supabase admin client not configured' }, { status: 500 });
 
   try {
-    // 1. Fetch users who are registered as doctors
-    const { data: usersData, error: usersError } = await supabase
-      .from('users')
-      .select('id, name, email, phone, specialization, credentials, referralCode, created_at')
+    // 1. Fetch user roles where role is doctor from user_roles
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('email')
       .eq('role', 'doctor');
 
-    if (usersError) throw usersError;
+    if (roleError) throw roleError;
 
     // 2. Fetch approved doctor requests (who might not have registered a user record yet)
     const { data: approvedReqs, error: approvedError } = await supabase
@@ -21,7 +21,34 @@ export async function GET() {
 
     if (approvedError) throw approvedError;
 
-    const mergedDoctors = [...(usersData || [])];
+    const emails = (roleData || []).map(r => r.email);
+    const approvedEmails = (approvedReqs || []).map(r => r.email);
+    const allEmails = Array.from(new Set([...emails, ...approvedEmails]));
+
+    let usersData: any[] = [];
+    if (allEmails.length > 0) {
+      const { data: fetchUsers, error: fetchUsersError } = await supabase
+        .from('users')
+        .select('id, name, email, phone, specialization, credentials, referral_code, created_at')
+        .in('email', allEmails);
+
+      if (fetchUsersError) throw fetchUsersError;
+      
+      if (fetchUsers) {
+        usersData = fetchUsers.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          specialization: u.specialization,
+          credentials: u.credentials,
+          referralCode: u.referral_code || '',
+          created_at: u.created_at
+        }));
+      }
+    }
+
+    const mergedDoctors = [...usersData];
 
     // Merge in approved requests that may not have user entries yet
     if (approvedReqs) {
@@ -41,18 +68,31 @@ export async function GET() {
       }
     }
 
-    // Fetch registrations (users who are not doctors)
-    const { data: registrations, error: regError } = await supabase
-      .from('users')
-      .select('id, name, email, phone, age, weight, cycleRegularity, symptoms, country, role')
-      .neq('role', 'doctor');
+    // 3. Fetch user roles where role is user
+    const { data: userRoleData, error: userRoleError } = await supabase
+      .from('user_roles')
+      .select('email')
+      .eq('role', 'user');
 
-    if (regError) throw regError;
+    if (userRoleError) throw userRoleError;
+
+    const userEmails = (userRoleData || []).map(r => r.email);
+    let registrations: any[] = [];
+
+    if (userEmails.length > 0) {
+      const { data: regData, error: regError } = await supabase
+        .from('users')
+        .select('id, name, email, phone, age, weight, cycleRegularity, symptoms, country')
+        .in('email', userEmails);
+
+      if (regError) throw regError;
+      registrations = regData || [];
+    }
 
     return NextResponse.json({
       success: true,
       doctors: mergedDoctors,
-      registrations: registrations || []
+      registrations: registrations
     });
   } catch (error: any) {
     console.error('API GET doctors error:', error);
@@ -74,7 +114,7 @@ export async function PATCH(req: Request) {
         phone,
         specialization,
         credentials,
-        referralCode
+        referral_code: referralCode
       })
       .eq('id', id)
       .select()

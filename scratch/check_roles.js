@@ -6,11 +6,10 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function check() {
-  const { data: users, error } = await supabase
-    .from('users')
-    .select('*')
-    .limit(1);
-  console.log('Sample User Keys:', users ? Object.keys(users[0]) : null, error);
+  const { data: roles, error } = await supabase
+    .from('user_roles')
+    .select('*');
+  console.log('User Roles:', roles, error);
 }
 
 check();
