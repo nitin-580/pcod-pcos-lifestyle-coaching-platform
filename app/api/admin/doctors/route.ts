@@ -5,15 +5,15 @@ export async function GET() {
   if (!supabase) return NextResponse.json({ success: false, message: 'Supabase admin client not configured' }, { status: 500 });
 
   try {
-    // 1. Fetch user roles where role is doctor
-    const { data: roleData, error: roleError } = await supabase
-      .from('user_roles')
-      .select('email')
+    // 1. Fetch users who are registered as doctors
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select('id, name, email, phone, specialization, credentials, referralCode, created_at')
       .eq('role', 'doctor');
 
-    if (roleError) throw roleError;
+    if (usersError) throw usersError;
 
-    // 2. Fetch approved doctor requests
+    // 2. Fetch approved doctor requests (who might not have registered a user record yet)
     const { data: approvedReqs, error: approvedError } = await supabase
       .from('doctor_join_requests')
       .select('full_name, email, phone, specialization, medical_registration_number, status')
@@ -21,24 +21,9 @@ export async function GET() {
 
     if (approvedError) throw approvedError;
 
-    const emails = (roleData || []).map(r => r.email);
-    const approvedEmails = (approvedReqs || []).map(r => r.email);
-    const allEmails = Array.from(new Set([...emails, ...approvedEmails]));
+    const mergedDoctors = [...(usersData || [])];
 
-    let usersData: any[] = [];
-    if (allEmails.length > 0) {
-      const { data: fetchUsers, error: fetchUsersError } = await supabase
-        .from('users')
-        .select('id, name, email, phone, specialization, credentials, referralCode, created_at')
-        .in('email', allEmails);
-
-      if (fetchUsersError) throw fetchUsersError;
-      usersData = fetchUsers || [];
-    }
-
-    const mergedDoctors = [...usersData];
-
-    // Merge in approved requests that may not have user profile entries yet
+    // Merge in approved requests that may not have user entries yet
     if (approvedReqs) {
       for (const req of approvedReqs) {
         if (!mergedDoctors.some(d => d.email.toLowerCase() === req.email.toLowerCase())) {
