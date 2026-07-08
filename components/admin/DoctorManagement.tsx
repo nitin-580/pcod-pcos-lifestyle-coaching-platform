@@ -77,58 +77,12 @@ export default function DoctorManagement({
   const fetchActiveDoctors = async () => {
     setLoadingDocs(true);
     try {
-      // 1. Fetch user roles where role is doctor
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('email')
-        .eq('role', 'doctor');
-
-      if (roleError) throw roleError;
-      
-      // Fetch approved doctor requests
-      const { data: approvedReqs } = await supabase
-        .from('doctor_join_requests')
-        .select('full_name, email, phone, specialization, medical_registration_number, status')
-        .eq('status', 'approved');
-
-      const emails = (roleData || []).map(r => r.email);
-      const approvedEmails = (approvedReqs || []).map(r => r.email);
-      const allEmails = Array.from(new Set([...emails, ...approvedEmails]));
-
-      if (allEmails.length === 0) {
-        setDoctors([]);
-        return;
+      const res = await fetch('/api/admin/doctors');
+      const data = await res.json();
+      if (data.success) {
+        setDoctors(data.doctors || []);
+        setRegistrations(data.registrations || []);
       }
-
-      // 2. Fetch user details for those emails
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('id, name, email, phone, specialization, credentials, referralCode, created_at')
-        .in('email', allEmails);
-
-      if (usersError) throw usersError;
-
-      const mergedDoctors: Doctor[] = [...(usersData || [])];
-
-      // Merge in approved requests that may not have user profile entries yet
-      if (approvedReqs) {
-        for (const req of approvedReqs) {
-          if (!mergedDoctors.some(d => d.email.toLowerCase() === req.email.toLowerCase())) {
-            mergedDoctors.push({
-              id: req.email,
-              name: req.full_name,
-              email: req.email,
-              phone: req.phone || '',
-              specialization: req.specialization || '',
-              credentials: req.medical_registration_number || '',
-              referralCode: '',
-              created_at: new Date().toISOString()
-            });
-          }
-        }
-      }
-
-      setDoctors(mergedDoctors);
     } catch (err) {
       console.error('Error fetching doctors:', err);
     } finally {
@@ -137,18 +91,7 @@ export default function DoctorManagement({
   };
 
   const fetchRegistrations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name, email, phone, age, weight, cycleRegularity, symptoms, country')
-        .neq('role', 'doctor')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setRegistrations(data || []);
-    } catch (err) {
-      console.error('Error fetching registrations:', err);
-    }
+    // Loaded in fetchActiveDoctors
   };
 
   const formatTitleCase = (str: string) => {
@@ -173,9 +116,11 @@ export default function DoctorManagement({
     if (!selectedDoc) return;
     setLoadingDocs(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({
+      const res = await fetch('/api/admin/doctors', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedDoc.id,
           name: editForm.name,
           email: editForm.email,
           phone: editForm.phone,
@@ -183,13 +128,15 @@ export default function DoctorManagement({
           credentials: editForm.credentials,
           referralCode: editForm.referralCode
         })
-        .eq('id', selectedDoc.id);
-
-      if (error) throw error;
-      
-      setSelectedDoc(prev => prev ? { ...prev, ...editForm } : null);
-      setIsEditing(false);
-      await fetchActiveDoctors();
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedDoc(prev => prev ? { ...prev, ...editForm } : null);
+        setIsEditing(false);
+        await fetchActiveDoctors();
+      } else {
+        throw new Error(data.message);
+      }
     } catch (err: any) {
       alert('Failed to update doctor: ' + err.message);
     } finally {
@@ -206,40 +153,27 @@ export default function DoctorManagement({
     if (!user) return;
 
     try {
-      if (mappingType === 'patient') {
-        // Map as patient
-        const { error } = await supabase
-          .from('patients')
-          .insert([{
-            name: user.name,
-            email: user.email,
-            phone: user.phone || '',
-            age: Number(user.age) || 0,
-            weight: Number(user.weight) || 0,
-            cycle_regular: user.cycleRegularity || 'Regular',
-            symptoms: user.symptoms || '',
-            country: user.country || 'India',
-            referred_by: selectedDoc.id
-          }]);
-
-        if (error) throw error;
-        setMappingMessage({ type: 'success', text: `Successfully mapped ${user.name} as a Patient to Dr. ${selectedDoc.name}` });
+      const res = await fetch('/api/admin/doctors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: mappingType,
+          user,
+          doctorId: selectedDoc.id,
+          doctorName: selectedDoc.name,
+          doctorReferralCode: selectedDoc.referralCode
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMappingMessage({ 
+          type: 'success', 
+          text: mappingType === 'patient' 
+            ? `Successfully mapped ${user.name} as a Patient to Dr. ${selectedDoc.name}` 
+            : `Successfully mapped ${user.name} in Referral Stage to Dr. ${selectedDoc.name}` 
+        });
       } else {
-        // Map as referral
-        const { error } = await supabase
-          .from('referrals')
-          .insert([{
-            patientName: user.name,
-            mobile: user.phone || '',
-            email: user.email,
-            problem: user.symptoms || '',
-            doctorId: selectedDoc.id,
-            doctorReferralCode: selectedDoc.referralCode,
-            referralStatus: 'pending'
-          }]);
-
-        if (error) throw error;
-        setMappingMessage({ type: 'success', text: `Successfully mapped ${user.name} in Referral Stage to Dr. ${selectedDoc.name}` });
+        throw new Error(data.message);
       }
     } catch (err: any) {
       console.error(err);

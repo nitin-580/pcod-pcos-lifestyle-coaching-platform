@@ -233,8 +233,13 @@ export default function UserDashboardPage() {
 
       const data = await res.json();
       if (data.success) {
-        setProfile(data.data);
-        setJournalInput(data.data.journal || '');
+        const profileData = data.data;
+        if (profileData) {
+          // Convert database glasses to frontend Liters
+          profileData.waterIntake = (profileData.waterIntake || 0) * 0.25;
+        }
+        setProfile(profileData);
+        setJournalInput(profileData?.journal || '');
       } else {
         setError(data.message || 'Failed to load profile');
       }
@@ -282,7 +287,11 @@ export default function UserDashboardPage() {
       });
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        setProfileHistory(data.data);
+        const converted = data.data.map((h: any) => ({
+          ...h,
+          waterIntake: (h.waterIntake || 0) * 0.25
+        }));
+        setProfileHistory(converted);
       }
     } catch (err) {
       console.error('Fetch profile history error:', err);
@@ -399,6 +408,10 @@ export default function UserDashboardPage() {
     if (isUpdating) return;
     setIsUpdating(true);
     try {
+      const payload = { ...updates };
+      if (payload.waterIntake !== undefined) payload.waterIntake = Math.round(payload.waterIntake / 0.25);
+      if (payload.targetWater !== undefined) payload.targetWater = Math.round(payload.targetWater / 0.25);
+
       const token = localStorage.getItem('userToken');
       const res = await fetch(`${getPublicApiBase()}/profiles/${userId}`, {
         method: 'PATCH',
@@ -406,7 +419,7 @@ export default function UserDashboardPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -470,7 +483,7 @@ export default function UserDashboardPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ 
-            waterIntake: finalWater, 
+            waterIntake: Math.round(finalWater / 0.25), 
             waterIntakeDate: new Date().toISOString() 
           }),
         });
