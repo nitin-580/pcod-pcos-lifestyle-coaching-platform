@@ -50,6 +50,13 @@ export default function DoctorManagement({
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Doctor | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [docDetails, setDocDetails] = useState<{
+    referralCount: number;
+    convertedCount: number;
+    patients: any[];
+    referrals: any[];
+  } | null>(null);
   
   // Doctor Edit Form State
   const [editForm, setEditForm] = useState({
@@ -129,6 +136,33 @@ export default function DoctorManagement({
   const fetchRegistrations = async () => {
     // Loaded dynamically via search
   };
+
+  const fetchDoctorDetails = async (doctorId: string) => {
+    setLoadingDetails(true);
+    setDocDetails(null);
+    try {
+      const res = await fetch(`/api/admin/doctors?doctorId=${doctorId}`);
+      const data = await res.json();
+      if (data.success) {
+        setDocDetails({
+          referralCount: data.referralCount,
+          convertedCount: data.convertedCount,
+          patients: data.patients || [],
+          referrals: data.referrals || []
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching doctor details:', err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedDoc && selectedDoc.id) {
+      fetchDoctorDetails(selectedDoc.id);
+    }
+  }, [selectedDoc]);
 
   const formatTitleCase = (str: string) => {
     if (!str) return '—';
@@ -233,6 +267,9 @@ export default function DoctorManagement({
             : `Successfully mapped ${user.name} in Referral Stage to Dr. ${selectedDoc.name}` 
         });
         
+        // Reload details to show updated list and counts
+        await fetchDoctorDetails(selectedDoc.id);
+
         // Reset manual form fields on success
         if (isManualMap) {
           setManualForm({
@@ -486,6 +523,101 @@ export default function DoctorManagement({
                     </div>
                   </div>
                 )}
+
+                {/* Doctor Statistics & Mapped Clients (Lazy loaded) */}
+                <div className="border-t border-slate-100 pt-6 space-y-6">
+                  <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Statistics & Mapped Patients</h4>
+                  {loadingDetails ? (
+                    <div className="flex justify-center items-center py-6">
+                      <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                      <span className="text-xs text-slate-400 ml-2">Loading doctor stats...</span>
+                    </div>
+                  ) : docDetails ? (
+                    <div className="space-y-4">
+                      {/* Metric cards */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl text-center">
+                          <span className="text-xs font-semibold text-purple-600 block uppercase tracking-wider">Referrals Given</span>
+                          <span className="text-2xl font-black text-purple-900 mt-1 block">{docDetails.referralCount}</span>
+                        </div>
+                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl text-center">
+                          <span className="text-xs font-semibold text-emerald-600 block uppercase tracking-wider">Converted Patients</span>
+                          <span className="text-2xl font-black text-emerald-900 mt-1 block">{docDetails.convertedCount}</span>
+                        </div>
+                      </div>
+
+                      {/* Mapped Patients List */}
+                      <div className="space-y-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Registered Patients ({docDetails.patients.length})</span>
+                        {docDetails.patients.length === 0 ? (
+                          <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">No active patients registered under this doctor.</p>
+                        ) : (
+                          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden max-h-[160px] overflow-y-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-100/50">
+                                  <th className="p-3">Name</th>
+                                  <th className="p-3">Email</th>
+                                  <th className="p-3">Phone</th>
+                                  <th className="p-3">Joined</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {docDetails.patients.map((p: any) => (
+                                  <tr key={p.id} className="hover:bg-slate-100/30 text-slate-600">
+                                    <td className="p-3 font-semibold text-slate-800">{formatTitleCase(p.name)}</td>
+                                    <td className="p-3 font-mono">{p.email}</td>
+                                    <td className="p-3">{p.phone || '—'}</td>
+                                    <td className="p-3 text-[10px]">{new Date(p.created_at).toLocaleDateString()}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Mapped Referrals List */}
+                      <div className="space-y-2 pt-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Referral Leads ({docDetails.referrals.length})</span>
+                        {docDetails.referrals.length === 0 ? (
+                          <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">No referral leads added under this doctor.</p>
+                        ) : (
+                          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden max-h-[160px] overflow-y-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-100/50">
+                                  <th className="p-3">Name</th>
+                                  <th className="p-3">Email</th>
+                                  <th className="p-3">Mobile</th>
+                                  <th className="p-3">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {docDetails.referrals.map((r: any) => (
+                                  <tr key={r.id} className="hover:bg-slate-100/30 text-slate-600">
+                                    <td className="p-3 font-semibold text-slate-800">{formatTitleCase(r.patientName)}</td>
+                                    <td className="p-3 font-mono">{r.email}</td>
+                                    <td className="p-3">{r.mobile || '—'}</td>
+                                    <td className="p-3">
+                                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                        r.referralStatus === 'converted' 
+                                          ? 'bg-emerald-50 text-emerald-600' 
+                                          : 'bg-amber-50 text-amber-600'
+                                      }`}>
+                                        {r.referralStatus}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
 
                 {/* Mapping Tool Section */}
                 <div className="border-t border-slate-100 pt-6 space-y-4">

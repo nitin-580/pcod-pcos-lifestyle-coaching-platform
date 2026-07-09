@@ -7,10 +7,13 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
+    const doctorId = searchParams.get('doctorId');
 
     let endpoint = `${getPublicApiBase()}/doctors/admin/active-list`;
     if (query) {
       endpoint = `${getPublicApiBase()}/doctors/admin/search-users?q=${encodeURIComponent(query)}`;
+    } else if (doctorId) {
+      endpoint = `${getPublicApiBase()}/doctors/admin/${doctorId}/details`;
     }
 
     const res = await fetch(endpoint, {
@@ -23,7 +26,7 @@ export async function GET(req: Request) {
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
-    console.error('Frontend API Proxy GET doctors/search error:', error);
+    console.error('Frontend API Proxy GET doctors/details error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
