@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import { 
   UserCircle, Mail, Phone, Calendar, Clipboard, 
-  MapPin, Sparkles, Check, X, Edit2, Loader2, ArrowRight, UserPlus 
+  MapPin, Sparkles, Check, X, Edit2, Loader2, ArrowRight, UserPlus, ArrowLeft 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,6 +50,8 @@ export default function DoctorManagement({
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Doctor | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Lazy Loaded Stats State
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [docDetails, setDocDetails] = useState<{
     referralCount: number;
@@ -57,7 +59,7 @@ export default function DoctorManagement({
     patients: any[];
     referrals: any[];
   } | null>(null);
-  
+
   // Doctor Edit Form State
   const [editForm, setEditForm] = useState({
     name: '',
@@ -118,25 +120,7 @@ export default function DoctorManagement({
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-  const fetchActiveDoctors = async () => {
-    setLoadingDocs(true);
-    try {
-      const res = await fetch('/api/admin/doctors');
-      const data = await res.json();
-      if (data.success) {
-        setDoctors(data.doctors || []);
-      }
-    } catch (err) {
-      console.error('Error fetching doctors:', err);
-    } finally {
-      setLoadingDocs(false);
-    }
-  };
-
-  const fetchRegistrations = async () => {
-    // Loaded dynamically via search
-  };
-
+  // Load details on-demand when selectedDoc changes
   const fetchDoctorDetails = async (doctorId: string) => {
     setLoadingDetails(true);
     setDocDetails(null);
@@ -164,9 +148,23 @@ export default function DoctorManagement({
     }
   }, [selectedDoc]);
 
+  const fetchActiveDoctors = async () => {
+    setLoadingDocs(true);
+    try {
+      const res = await fetch('/api/admin/doctors');
+      const data = await res.json();
+      if (data.success) {
+        setDoctors(data.doctors || []);
+      }
+    } catch (err) {
+      console.error('Error fetching doctors:', err);
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
   const formatTitleCase = (str: string) => {
     if (!str) return '—';
-    // If the string is all uppercase or mixed caps, normalize it to Title Case
     return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -293,6 +291,466 @@ export default function DoctorManagement({
     }
   };
 
+  // Full-width Sub-page details rendering
+  if (selectedDoc) {
+    return (
+      <div className="space-y-6">
+        {/* Sub-page Header */}
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                setSelectedDoc(null);
+                setIsEditing(false);
+                setMappingMessage(null);
+              }}
+              className="p-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl transition border border-slate-100"
+              title="Back to List"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900">Dr. {formatTitleCase(selectedDoc.name)}</h2>
+              <p className="text-xs text-purple-600 font-bold uppercase tracking-wider mt-0.5">{formatTitleCase(selectedDoc.specialization)}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setSelectedDoc(null);
+              setIsEditing(false);
+              setMappingMessage(null);
+            }}
+            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition shadow-md self-start sm:self-auto"
+          >
+            Back to List
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Doctor Profile Details & Stats */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+              {isEditing ? (
+                /* Edit details form */
+                <div className="space-y-4">
+                  <h4 className="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Edit Doctor Details</h4>
+                  <div className="space-y-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Name</label>
+                      <input 
+                        type="text" 
+                        value={editForm.name} 
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-850 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Email</label>
+                      <input 
+                        type="email" 
+                        value={editForm.email} 
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-855 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Phone</label>
+                      <input 
+                        type="text" 
+                        value={editForm.phone} 
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-855 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Referral Code</label>
+                      <input 
+                        type="text" 
+                        value={editForm.referralCode} 
+                        onChange={(e) => setEditForm({ ...editForm, referralCode: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-855 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Specialization</label>
+                      <input 
+                        type="text" 
+                        value={editForm.specialization} 
+                        onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-855 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-500">Credentials</label>
+                      <input 
+                        type="text" 
+                        value={editForm.credentials} 
+                        onChange={(e) => setEditForm({ ...editForm, credentials: e.target.value })}
+                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-855 text-sm focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-3">
+                    <button 
+                      onClick={handleSaveEdit}
+                      className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm transition"
+                    >
+                      Save Changes
+                    </button>
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Profile Summary Card */
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Details</h4>
+                    <button 
+                      onClick={() => handleEditClick(selectedDoc)} 
+                      className="flex items-center gap-1.5 text-xs text-purple-600 font-bold hover:underline"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit Details
+                    </button>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div><span className="text-slate-500 block text-xs">Full Name:</span> <strong className="text-slate-800 text-base">{formatTitleCase(selectedDoc.name)}</strong></div>
+                    <div><span className="text-slate-500 block text-xs">Email Address:</span> <strong className="text-slate-800 font-mono">{selectedDoc.email}</strong></div>
+                    <div><span className="text-slate-500 block text-xs">Phone Number:</span> <strong className="text-slate-800">{selectedDoc.phone || '—'}</strong></div>
+                    <div><span className="text-slate-500 block text-xs">Referral Code:</span> <strong className="text-slate-800">{selectedDoc.referralCode || '—'}</strong></div>
+                    <div><span className="text-slate-500 block text-xs">Specialization:</span> <strong className="text-slate-800">{formatTitleCase(selectedDoc.specialization)}</strong></div>
+                    <div><span className="text-slate-500 block text-xs">Credentials:</span> <strong className="text-slate-800">{selectedDoc.credentials || '—'}</strong></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Doctor Statistics (Lazy loaded) */}
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Performance & Statistics</h4>
+              {loadingDetails ? (
+                <div className="flex justify-center items-center py-6">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                  <span className="text-xs text-slate-400 ml-2">Loading stats...</span>
+                </div>
+              ) : docDetails ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl text-center">
+                    <span className="text-[10px] font-bold text-purple-600 block uppercase tracking-wider">Referrals Given</span>
+                    <span className="text-2xl font-black text-purple-900 mt-1 block">{docDetails.referralCount}</span>
+                  </div>
+                  <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl text-center">
+                    <span className="text-[10px] font-bold text-emerald-600 block uppercase tracking-wider">Patients Converted</span>
+                    <span className="text-2xl font-black text-emerald-900 mt-1 block">{docDetails.convertedCount}</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">Failed to load statistics.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Mapping Tool & Lists */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Mapping tool */}
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Map Patient/Referral</h4>
+                
+                <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={isManualMap}
+                    onChange={(e) => {
+                      setIsManualMap(e.target.checked);
+                      setMappingMessage(null);
+                    }}
+                    className="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500"
+                  />
+                  <span className="text-xs font-semibold text-slate-600">Add client details manually</span>
+                </label>
+              </div>
+
+              {mappingMessage && (
+                <div className={`p-4 rounded-xl text-sm ${mappingMessage.type === 'success' ? 'bg-green-50 border border-green-100 text-green-700' : 'bg-red-50 border border-red-100 text-red-700'}`}>
+                  {mappingMessage.text}
+                </div>
+              )}
+
+              {isManualMap ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-25">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Patient Name *</label>
+                      <input 
+                        type="text" 
+                        value={manualForm.name}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="e.g. Priyal Sharma"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email Address *</label>
+                      <input 
+                        type="email" 
+                        value={manualForm.email}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="e.g. priyal@example.com"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Phone / Mobile</label>
+                      <input 
+                        type="tel" 
+                        value={manualForm.phone}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="e.g. +91 98765 43210"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Symptoms</label>
+                      <input 
+                        type="text" 
+                        value={manualForm.symptoms}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, symptoms: e.target.value }))}
+                        placeholder="e.g. Irregular cycles"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Age</label>
+                      <input 
+                        type="number" 
+                        value={manualForm.age}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, age: e.target.value }))}
+                        placeholder="e.g. 24"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Weight (kg)</label>
+                      <input 
+                        type="number" 
+                        value={manualForm.weight}
+                        onChange={(e) => setManualForm(prev => ({ ...prev, weight: e.target.value }))}
+                        placeholder="e.g. 58"
+                        className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-855 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 max-w-xs">
+                    <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMappingType('patient')}
+                        className={`flex-1 py-2 rounded-xl border text-xs font-semibold transition ${
+                          mappingType === 'patient' 
+                            ? 'bg-purple-600 border-purple-600 text-white' 
+                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        Patient
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMappingType('referral')}
+                        className={`flex-1 py-2 rounded-xl border text-xs font-semibold transition ${
+                          mappingType === 'referral' 
+                            ? 'bg-purple-600 border-purple-600 text-white' 
+                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        Referral Stage
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-500">Search User by Name or Email</label>
+                    <input 
+                      type="text" 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Type at least 2 characters to search..."
+                      className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
+                    />
+                    {isSearchingUsers ? (
+                      <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-1">
+                        <Loader2 className="w-3 h-3 animate-spin text-purple-600" />
+                        Searching database...
+                      </div>
+                    ) : registrations.length > 0 ? (
+                      <div className="flex flex-col gap-1 mt-1">
+                        <select 
+                          value={selectedRegId}
+                          onChange={(e) => setSelectedRegId(e.target.value)}
+                          className="px-4 py-2 bg-slate-50 border border-slate-250 rounded-xl outline-none text-slate-800 text-xs focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="">-- Click to select matching user --</option>
+                          {registrations.map(r => (
+                            <option key={r.id} value={r.id}>
+                              {r.name} ({r.email})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : searchQuery.trim().length >= 2 ? (
+                      <div className="text-[10px] text-rose-500 font-semibold mt-1">
+                        No users match "{searchQuery}"
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMappingType('patient')}
+                        className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                          mappingType === 'patient' 
+                            ? 'bg-purple-600 border-purple-600 text-white' 
+                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        Patient
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMappingType('referral')}
+                        className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                          mappingType === 'referral' 
+                            ? 'bg-purple-600 border-purple-600 text-white' 
+                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        Referral Stage
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleMapUser}
+                disabled={isMapping || (!isManualMap && !selectedRegId)}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
+              >
+                {isMapping ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Mapping user...
+                  </>
+                ) : (
+                  <>
+                    <UserCircle className="w-4 h-4" />
+                    Complete Doctor-User Mapping
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Mapped Patients list */}
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Registered Patients</h4>
+              {loadingDetails ? (
+                <div className="flex justify-center items-center py-6">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                  <span className="text-xs text-slate-400 ml-2">Loading Patients...</span>
+                </div>
+              ) : docDetails && docDetails.patients.length > 0 ? (
+                <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
+                        <th className="p-3.5">Name</th>
+                        <th className="p-3.5">Email</th>
+                        <th className="p-3.5">Phone</th>
+                        <th className="p-3.5">Joined Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-600">
+                      {docDetails.patients.map((p: any) => (
+                        <tr key={p.id} className="hover:bg-slate-50/50">
+                          <td className="p-3.5 font-bold text-slate-800">{formatTitleCase(p.name)}</td>
+                          <td className="p-3.5 font-mono">{p.email}</td>
+                          <td className="p-3.5">{p.phone || '—'}</td>
+                          <td className="p-3.5">{new Date(p.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No active patients registered under this doctor.</p>
+              )}
+            </div>
+
+            {/* Referral Leads list */}
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Referral Leads</h4>
+              {loadingDetails ? (
+                <div className="flex justify-center items-center py-6">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                  <span className="text-xs text-slate-400 ml-2">Loading Referrals...</span>
+                </div>
+              ) : docDetails && docDetails.referrals.length > 0 ? (
+                <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
+                        <th className="p-3.5">Name</th>
+                        <th className="p-3.5">Email</th>
+                        <th className="p-3.5">Mobile</th>
+                        <th className="p-3.5">Status</th>
+                        <th className="p-3.5">Created</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-600">
+                      {docDetails.referrals.map((r: any) => (
+                        <tr key={r.id} className="hover:bg-slate-50/50">
+                          <td className="p-3.5 font-bold text-slate-800">{formatTitleCase(r.patientName)}</td>
+                          <td className="p-3.5 font-mono">{r.email}</td>
+                          <td className="p-3.5">{r.mobile || '—'}</td>
+                          <td className="p-3.5">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                              r.referralStatus === 'converted' 
+                                ? 'bg-emerald-50 text-emerald-600' 
+                                : 'bg-amber-50 text-amber-600'
+                            }`}>
+                              {r.referralStatus}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-[10px]">{new Date(r.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No referral leads added under this doctor.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Requests / Main Doctor List View
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex justify-between items-center">
@@ -396,439 +854,6 @@ export default function DoctorManagement({
           </div>
         )}
       </div>
-
-      {/* Details / Edit / Mapping Modal */}
-      <AnimatePresence>
-        {selectedDoc && (
-          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col"
-            >
-              <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Dr. {formatTitleCase(selectedDoc.name)}</h3>
-                  <p className="text-xs text-purple-600 font-bold uppercase tracking-wider mt-1">{formatTitleCase(selectedDoc.specialization)}</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedDoc(null);
-                    setIsEditing(false);
-                    setMappingMessage(null);
-                  }}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="p-8 space-y-6">
-                {isEditing ? (
-                  /* Edit Details Section */
-                  <div className="space-y-4">
-                    <h4 className="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Edit Doctor Details</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Name</label>
-                        <input 
-                          type="text" 
-                          value={editForm.name} 
-                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Email</label>
-                        <input 
-                          type="email" 
-                          value={editForm.email} 
-                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Phone</label>
-                        <input 
-                          type="text" 
-                          value={editForm.phone} 
-                          onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Referral Code</label>
-                        <input 
-                          type="text" 
-                          value={editForm.referralCode} 
-                          onChange={(e) => setEditForm({ ...editForm, referralCode: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Specialization</label>
-                        <input 
-                          type="text" 
-                          value={editForm.specialization} 
-                          onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Credentials</label>
-                        <input 
-                          type="text" 
-                          value={editForm.credentials} 
-                          onChange={(e) => setEditForm({ ...editForm, credentials: e.target.value })}
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3 mt-4">
-                      <button 
-                        onClick={() => setIsEditing(false)} 
-                        className="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-500 hover:bg-slate-50 transition"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        onClick={handleSaveEdit}
-                        className="px-5 py-2 rounded-xl text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 transition"
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* Display details */
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                      <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Details</h4>
-                      <button 
-                        onClick={() => handleEditClick(selectedDoc)} 
-                        className="flex items-center gap-1.5 text-xs text-purple-600 font-bold hover:underline"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        Edit Details
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl text-sm">
-                      <div><span className="text-slate-500">Full Name:</span> <strong className="text-slate-800">{formatTitleCase(selectedDoc.name)}</strong></div>
-                      <div><span className="text-slate-500">Email:</span> <strong className="text-slate-800">{selectedDoc.email}</strong></div>
-                      <div><span className="text-slate-500">Phone:</span> <strong className="text-slate-800">{selectedDoc.phone || '—'}</strong></div>
-                      <div><span className="text-slate-500">Referral Code:</span> <strong className="text-slate-800">{selectedDoc.referralCode || '—'}</strong></div>
-                      <div><span className="text-slate-500">Specialization:</span> <strong className="text-slate-800">{formatTitleCase(selectedDoc.specialization)}</strong></div>
-                      <div><span className="text-slate-500">Credentials:</span> <strong className="text-slate-800">{selectedDoc.credentials || '—'}</strong></div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Doctor Statistics & Mapped Clients (Lazy loaded) */}
-                <div className="border-t border-slate-100 pt-6 space-y-6">
-                  <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Statistics & Mapped Patients</h4>
-                  {loadingDetails ? (
-                    <div className="flex justify-center items-center py-6">
-                      <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
-                      <span className="text-xs text-slate-400 ml-2">Loading doctor stats...</span>
-                    </div>
-                  ) : docDetails ? (
-                    <div className="space-y-4">
-                      {/* Metric cards */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl text-center">
-                          <span className="text-xs font-semibold text-purple-600 block uppercase tracking-wider">Referrals Given</span>
-                          <span className="text-2xl font-black text-purple-900 mt-1 block">{docDetails.referralCount}</span>
-                        </div>
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl text-center">
-                          <span className="text-xs font-semibold text-emerald-600 block uppercase tracking-wider">Converted Patients</span>
-                          <span className="text-2xl font-black text-emerald-900 mt-1 block">{docDetails.convertedCount}</span>
-                        </div>
-                      </div>
-
-                      {/* Mapped Patients List */}
-                      <div className="space-y-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Registered Patients ({docDetails.patients.length})</span>
-                        {docDetails.patients.length === 0 ? (
-                          <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">No active patients registered under this doctor.</p>
-                        ) : (
-                          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden max-h-[160px] overflow-y-auto">
-                            <table className="w-full text-left text-xs border-collapse">
-                              <thead>
-                                <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-100/50">
-                                  <th className="p-3">Name</th>
-                                  <th className="p-3">Email</th>
-                                  <th className="p-3">Phone</th>
-                                  <th className="p-3">Joined</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {docDetails.patients.map((p: any) => (
-                                  <tr key={p.id} className="hover:bg-slate-100/30 text-slate-600">
-                                    <td className="p-3 font-semibold text-slate-800">{formatTitleCase(p.name)}</td>
-                                    <td className="p-3 font-mono">{p.email}</td>
-                                    <td className="p-3">{p.phone || '—'}</td>
-                                    <td className="p-3 text-[10px]">{new Date(p.created_at).toLocaleDateString()}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Mapped Referrals List */}
-                      <div className="space-y-2 pt-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Referral Leads ({docDetails.referrals.length})</span>
-                        {docDetails.referrals.length === 0 ? (
-                          <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">No referral leads added under this doctor.</p>
-                        ) : (
-                          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden max-h-[160px] overflow-y-auto">
-                            <table className="w-full text-left text-xs border-collapse">
-                              <thead>
-                                <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-100/50">
-                                  <th className="p-3">Name</th>
-                                  <th className="p-3">Email</th>
-                                  <th className="p-3">Mobile</th>
-                                  <th className="p-3">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {docDetails.referrals.map((r: any) => (
-                                  <tr key={r.id} className="hover:bg-slate-100/30 text-slate-600">
-                                    <td className="p-3 font-semibold text-slate-800">{formatTitleCase(r.patientName)}</td>
-                                    <td className="p-3 font-mono">{r.email}</td>
-                                    <td className="p-3">{r.mobile || '—'}</td>
-                                    <td className="p-3">
-                                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                                        r.referralStatus === 'converted' 
-                                          ? 'bg-emerald-50 text-emerald-600' 
-                                          : 'bg-amber-50 text-amber-600'
-                                      }`}>
-                                        {r.referralStatus}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Mapping Tool Section */}
-                <div className="border-t border-slate-100 pt-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Map Patient/Referral to Dr. {formatTitleCase(selectedDoc.name)}</h4>
-                    
-                    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                      <input 
-                        type="checkbox" 
-                        checked={isManualMap}
-                        onChange={(e) => {
-                          setIsManualMap(e.target.checked);
-                          setMappingMessage(null);
-                        }}
-                        className="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500"
-                      />
-                      <span className="text-xs font-semibold text-slate-600">Add client details manually</span>
-                    </label>
-                  </div>
-                  
-                  {mappingMessage && (
-                    <div className={`p-4 rounded-xl text-sm ${mappingMessage.type === 'success' ? 'bg-green-50 border border-green-100 text-green-700' : 'bg-red-50 border border-red-100 text-red-700'}`}>
-                      {mappingMessage.text}
-                    </div>
-                  )}
-
-                  {isManualMap ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-25">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Patient Name *</label>
-                          <input 
-                            type="text" 
-                            value={manualForm.name}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g. Priyal Sharma"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email Address *</label>
-                          <input 
-                            type="email" 
-                            value={manualForm.email}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, email: e.target.value }))}
-                            placeholder="e.g. priyal@example.com"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Phone / Mobile</label>
-                          <input 
-                            type="tel" 
-                            value={manualForm.phone}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, phone: e.target.value }))}
-                            placeholder="e.g. +91 98765 43210"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Symptoms / Health Issue</label>
-                          <input 
-                            type="text" 
-                            value={manualForm.symptoms}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, symptoms: e.target.value }))}
-                            placeholder="e.g. Irregular cycles, acne"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Age</label>
-                          <input 
-                            type="number" 
-                            value={manualForm.age}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, age: e.target.value }))}
-                            placeholder="e.g. 24"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Weight (kg)</label>
-                          <input 
-                            type="number" 
-                            value={manualForm.weight}
-                            onChange={(e) => setManualForm(prev => ({ ...prev, weight: e.target.value }))}
-                            placeholder="e.g. 58"
-                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 max-w-md">
-                        <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setMappingType('patient')}
-                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                              mappingType === 'patient' 
-                                ? 'bg-purple-600 border-purple-600 text-white' 
-                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            Patient
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setMappingType('referral')}
-                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                              mappingType === 'referral' 
-                                ? 'bg-purple-600 border-purple-600 text-white' 
-                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            Referral Stage
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Search User by Name or Email</label>
-                        <input 
-                          type="text" 
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Type at least 2 characters to search..."
-                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        />
-                        {isSearchingUsers ? (
-                          <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-1">
-                            <Loader2 className="w-3 h-3 animate-spin text-purple-600" />
-                            Searching database...
-                          </div>
-                        ) : registrations.length > 0 ? (
-                          <div className="flex flex-col gap-1 mt-1">
-                            <select 
-                              value={selectedRegId}
-                              onChange={(e) => setSelectedRegId(e.target.value)}
-                              className="px-4 py-2 bg-slate-50 border border-slate-250 rounded-xl outline-none text-slate-800 text-xs focus:ring-2 focus:ring-purple-500"
-                            >
-                              <option value="">-- Click to select matching user --</option>
-                              {registrations.map(r => (
-                                <option key={r.id} value={r.id}>
-                                  {r.name} ({r.email})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        ) : searchQuery.trim().length >= 2 ? (
-                          <div className="text-[10px] text-rose-500 font-semibold mt-1">
-                            No users match "{searchQuery}"
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setMappingType('patient')}
-                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                              mappingType === 'patient' 
-                                ? 'bg-purple-600 border-purple-600 text-white' 
-                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            Patient
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setMappingType('referral')}
-                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                              mappingType === 'referral' 
-                                ? 'bg-purple-600 border-purple-600 text-white' 
-                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            Referral Stage
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleMapUser}
-                    disabled={isMapping || (!isManualMap && !selectedRegId)}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
-                  >
-                    {isMapping ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Mapping user...
-                      </>
-                    ) : (
-                      <>
-                        <UserCircle className="w-4 h-4" />
-                        Complete Doctor-User Mapping
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
