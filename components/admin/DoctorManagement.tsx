@@ -46,7 +46,6 @@ export default function DoctorManagement({
   doctorRequests, 
   onUpdateStatus 
 }: DoctorManagementProps) {
-  const [subTab, setSubTab] = useState<'active' | 'requests'>('active');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Doctor | null>(null);
@@ -233,153 +232,105 @@ export default function DoctorManagement({
 
   return (
     <div className="space-y-6">
-      {/* Sub Tabs */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSubTab('active')}
-            className={`px-5 py-2.5 rounded-2xl text-sm font-semibold transition ${
-              subTab === 'active' 
-                ? 'bg-slate-900 text-white' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            Active Doctors ({doctors.length})
-          </button>
-          <button
-            onClick={() => setSubTab('requests')}
-            className={`px-5 py-2.5 rounded-2xl text-sm font-semibold transition ${
-              subTab === 'requests' 
-                ? 'bg-slate-900 text-white' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            Join Requests ({doctorRequests.length})
-          </button>
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Doctor Module</h2>
+          <p className="text-xs text-slate-400 mt-1">Approve doctor join requests, edit details, and map patients directly.</p>
         </div>
       </div>
 
-      {subTab === 'active' ? (
-        loadingDocs ? (
-          <div className="flex items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-          </div>
-        ) : doctors.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-3xl border border-slate-100 shadow-sm text-slate-400">
-            <p className="text-lg">No active doctors found.</p>
+      <div className="space-y-6">
+        {doctorRequests.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+            <UserPlus className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+            <p className="text-slate-400 font-medium">No doctor requests found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {doctors.map((doc) => (
-              <div
-                key={doc.id}
-                onClick={() => {
-                  setSelectedDoc(doc);
-                  setIsManualMap(false);
-                  setSelectedRegId('');
-                  setManualForm({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    age: '',
-                    weight: '',
-                    symptoms: '',
-                    country: 'India'
-                  });
-                  setMappingMessage(null);
-                }}
-                className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
+          <div className="grid gap-6">
+            {doctorRequests.map((req) => (
+              <div 
+                key={req.id} 
+                className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
               >
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 font-bold shrink-0">
-                      {doc.name ? doc.name.charAt(0).toUpperCase() : 'D'}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 line-clamp-1">{formatTitleCase(doc.name)}</h3>
-                      <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 uppercase tracking-wider mt-1">
-                        {formatTitleCase(doc.specialization || 'General Doctor')}
-                      </span>
-                    </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-xl font-bold text-slate-900">{formatTitleCase(req.fullName)}</h3>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      req.status === 'pending' 
+                        ? 'bg-amber-50 text-amber-600' 
+                        : req.status === 'approved' 
+                          ? 'bg-green-50 text-green-600' 
+                          : 'bg-rose-50 text-rose-600'
+                    }`}>
+                      {req.status}
+                    </span>
                   </div>
-
-                  <hr className="border-slate-100 my-4" />
-
-                  <div className="space-y-2 text-sm text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="truncate">{doc.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span>{doc.phone || '—'}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clipboard className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span>Code: <strong>{doc.referralCode || '—'}</strong></span>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-500">
+                    <p><span className="font-bold text-slate-700">Email:</span> {req.email}</p>
+                    <p><span className="font-bold text-slate-700">Specialization:</span> {formatTitleCase(req.specialization)}</p>
+                    <p><span className="font-bold text-slate-700">Reg No:</span> {req.medicalRegistrationNumber}</p>
+                    <p><span className="font-bold text-slate-700">Exp:</span> {req.experienceYears} years</p>
                   </div>
                 </div>
 
-                <div className="text-[10px] text-slate-400 mt-4 text-right font-mono">
-                  ID: #{doc.id.slice(0, 8)}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
-      ) : (
-        /* Requests sub-tab */
-        <div className="space-y-6">
-          {doctorRequests.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
-              <UserPlus className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-              <p className="text-slate-400 font-medium">No pending doctor requests</p>
-            </div>
-          ) : (
-            <div className="grid gap-6">
-              {doctorRequests.map((req) => (
-                <div 
-                  key={req.id} 
-                  className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-slate-900">{formatTitleCase(req.fullName)}</h3>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'pending' ? 'bg-amber-50 text-amber-600' : req.status === 'approved' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
-                        {req.status}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-500">
-                      <p><span className="font-bold text-slate-700">Email:</span> {req.email}</p>
-                      <p><span className="font-bold text-slate-700">Specialization:</span> {formatTitleCase(req.specialization)}</p>
-                      <p><span className="font-bold text-slate-700">Reg No:</span> {req.medicalRegistrationNumber}</p>
-                      <p><span className="font-bold text-slate-700">Exp:</span> {req.experienceYears} years</p>
-                    </div>
-                  </div>
-
+                <div className="flex items-center gap-3">
                   {req.status === 'pending' && (
-                    <div className="flex items-center gap-3">
+                    <>
                       <button 
                         onClick={() => onUpdateStatus(req.id, 'approved')}
                         className="p-3 bg-green-50 text-green-600 rounded-2xl hover:bg-green-100 transition shadow-sm"
+                        title="Approve Request"
                       >
                         <Check className="w-6 h-6" />
                       </button>
                       <button 
                         onClick={() => onUpdateStatus(req.id, 'rejected')}
                         className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 transition shadow-sm"
+                        title="Reject Request"
                       >
                         <X className="w-6 h-6" />
                       </button>
-                    </div>
+                    </>
+                  )}
+
+                  {req.status === 'approved' && (
+                    <button
+                      onClick={() => {
+                        const doc = doctors.find(d => d.email.toLowerCase() === req.email.toLowerCase()) || {
+                          id: req.email,
+                          name: req.fullName,
+                          email: req.email,
+                          phone: req.phone || '',
+                          specialization: req.specialization || '',
+                          credentials: req.medicalRegistrationNumber || '',
+                          referralCode: '',
+                          created_at: new Date().toISOString()
+                        };
+                        setSelectedDoc(doc);
+                        setIsManualMap(false);
+                        setSelectedRegId('');
+                        setManualForm({
+                          name: '',
+                          email: '',
+                          phone: '',
+                          age: '',
+                          weight: '',
+                          symptoms: '',
+                          country: 'India'
+                        });
+                        setMappingMessage(null);
+                      }}
+                      className="px-6 py-3 bg-purple-600 text-white rounded-2xl font-bold hover:bg-purple-700 transition shadow-md text-sm"
+                    >
+                      Manage & Map Patients
+                    </button>
                   )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Details / Edit / Mapping Modal */}
       <AnimatePresence>
