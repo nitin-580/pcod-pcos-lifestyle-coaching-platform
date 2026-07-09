@@ -68,6 +68,18 @@ export default function DoctorManagement({
   const [mappingType, setMappingType] = useState<'patient' | 'referral'>('patient');
   const [isMapping, setIsMapping] = useState(false);
   const [mappingMessage, setMappingMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  // Manual Patient mapping inputs
+  const [isManualMap, setIsManualMap] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    age: '',
+    weight: '',
+    symptoms: '',
+    country: 'India'
+  });
 
   useEffect(() => {
     fetchActiveDoctors();
@@ -145,12 +157,35 @@ export default function DoctorManagement({
   };
 
   const handleMapUser = async () => {
-    if (!selectedDoc || !selectedRegId) return;
+    if (!selectedDoc) return;
+    if (!isManualMap && !selectedRegId) return;
+    
     setIsMapping(true);
     setMappingMessage(null);
 
-    const user = registrations.find(r => r.id === selectedRegId);
-    if (!user) return;
+    const user = isManualMap 
+      ? {
+          name: manualForm.name,
+          email: manualForm.email,
+          phone: manualForm.phone,
+          age: Number(manualForm.age) || 0,
+          weight: Number(manualForm.weight) || 0,
+          cycleRegularity: 'Regular',
+          symptoms: manualForm.symptoms,
+          country: manualForm.country
+        }
+      : registrations.find(r => r.id === selectedRegId);
+
+    if (!user) {
+      setIsMapping(false);
+      return;
+    }
+
+    if (isManualMap && (!user.name || !user.email)) {
+      setMappingMessage({ type: 'error', text: 'Name and Email are required for manual patient mapping.' });
+      setIsMapping(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/admin/doctors', {
@@ -172,6 +207,19 @@ export default function DoctorManagement({
             ? `Successfully mapped ${user.name} as a Patient to Dr. ${selectedDoc.name}` 
             : `Successfully mapped ${user.name} in Referral Stage to Dr. ${selectedDoc.name}` 
         });
+        
+        // Reset manual form fields on success
+        if (isManualMap) {
+          setManualForm({
+            name: '',
+            email: '',
+            phone: '',
+            age: '',
+            weight: '',
+            symptoms: '',
+            country: 'India'
+          });
+        }
       } else {
         throw new Error(data.message);
       }
@@ -225,7 +273,21 @@ export default function DoctorManagement({
             {doctors.map((doc) => (
               <div
                 key={doc.id}
-                onClick={() => setSelectedDoc(doc)}
+                onClick={() => {
+                  setSelectedDoc(doc);
+                  setIsManualMap(false);
+                  setSelectedRegId('');
+                  setManualForm({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    age: '',
+                    weight: '',
+                    symptoms: '',
+                    country: 'India'
+                  });
+                  setMappingMessage(null);
+                }}
                 className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
               >
                 <div>
@@ -448,7 +510,22 @@ export default function DoctorManagement({
 
                 {/* Mapping Tool Section */}
                 <div className="border-t border-slate-100 pt-6 space-y-4">
-                  <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Map Patient/Referral to Dr. {formatTitleCase(selectedDoc.name)}</h4>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Map Patient/Referral to Dr. {formatTitleCase(selectedDoc.name)}</h4>
+                    
+                    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={isManualMap}
+                        onChange={(e) => {
+                          setIsManualMap(e.target.checked);
+                          setMappingMessage(null);
+                        }}
+                        className="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500"
+                      />
+                      <span className="text-xs font-semibold text-slate-600">Add client details manually</span>
+                    </label>
+                  </div>
                   
                   {mappingMessage && (
                     <div className={`p-4 rounded-xl text-sm ${mappingMessage.type === 'success' ? 'bg-green-50 border border-green-100 text-green-700' : 'bg-red-50 border border-red-100 text-red-700'}`}>
@@ -456,56 +533,151 @@ export default function DoctorManagement({
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-slate-500">Select User/Registration</label>
-                      <select 
-                        value={selectedRegId}
-                        onChange={(e) => setSelectedRegId(e.target.value)}
-                        className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                      >
-                        <option value="">Select a user...</option>
-                        {registrations.map(r => (
-                          <option key={r.id} value={r.id}>
-                            {r.name} ({r.email})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {isManualMap ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-25">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Patient Name *</label>
+                          <input 
+                            type="text" 
+                            value={manualForm.name}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g. Priyal Sharma"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email Address *</label>
+                          <input 
+                            type="email" 
+                            value={manualForm.email}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, email: e.target.value }))}
+                            placeholder="e.g. priyal@example.com"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Phone / Mobile</label>
+                          <input 
+                            type="tel" 
+                            value={manualForm.phone}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, phone: e.target.value }))}
+                            placeholder="e.g. +91 98765 43210"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Symptoms / Health Issue</label>
+                          <input 
+                            type="text" 
+                            value={manualForm.symptoms}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, symptoms: e.target.value }))}
+                            placeholder="e.g. Irregular cycles, acne"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Age</label>
+                          <input 
+                            type="number" 
+                            value={manualForm.age}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, age: e.target.value }))}
+                            placeholder="e.g. 24"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Weight (kg)</label>
+                          <input 
+                            type="number" 
+                            value={manualForm.weight}
+                            onChange={(e) => setManualForm(prev => ({ ...prev, weight: e.target.value }))}
+                            placeholder="e.g. 58"
+                            className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-slate-850 text-xs focus:ring-2 focus:ring-purple-500 transition"
+                          />
+                        </div>
+                      </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setMappingType('patient')}
-                          className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                            mappingType === 'patient' 
-                              ? 'bg-purple-600 border-purple-600 text-white' 
-                              : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                        >
-                          Patient
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setMappingType('referral')}
-                          className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
-                            mappingType === 'referral' 
-                              ? 'bg-purple-600 border-purple-600 text-white' 
-                              : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                        >
-                          Referral Stage
-                        </button>
+                      <div className="flex flex-col gap-1.5 max-w-md">
+                        <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setMappingType('patient')}
+                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                              mappingType === 'patient' 
+                                ? 'bg-purple-600 border-purple-600 text-white' 
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            Patient
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMappingType('referral')}
+                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                              mappingType === 'referral' 
+                                ? 'bg-purple-600 border-purple-600 text-white' 
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            Referral Stage
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Select User/Registration</label>
+                        <select 
+                          value={selectedRegId}
+                          onChange={(e) => setSelectedRegId(e.target.value)}
+                          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="">Select a user...</option>
+                          {registrations.map(r => (
+                            <option key={r.id} value={r.id}>
+                              {r.name} ({r.email})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-500">Mapping Stage</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setMappingType('patient')}
+                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                              mappingType === 'patient' 
+                                ? 'bg-purple-600 border-purple-600 text-white' 
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            Patient
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMappingType('referral')}
+                            className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition ${
+                              mappingType === 'referral' 
+                                ? 'bg-purple-600 border-purple-600 text-white' 
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            Referral Stage
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <button
                     type="button"
                     onClick={handleMapUser}
-                    disabled={isMapping || !selectedRegId}
+                    disabled={isMapping || (!isManualMap && !selectedRegId)}
                     className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
                   >
                     {isMapping ? (
