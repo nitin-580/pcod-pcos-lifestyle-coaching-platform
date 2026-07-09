@@ -89,6 +89,12 @@ export default function DoctorManagement({
     country: 'India'
   });
 
+  // Search & Pagination States for Sub-tables
+  const [patientSearch, setPatientSearch] = useState('');
+  const [patientPage, setPatientPage] = useState(1);
+  const [referralSearch, setReferralSearch] = useState('');
+  const [referralPage, setReferralPage] = useState(1);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
@@ -665,84 +671,188 @@ export default function DoctorManagement({
 
             {/* Mapped Patients list */}
             <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Registered Patients</h4>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Registered Patients</h4>
+                <input 
+                  type="text" 
+                  value={patientSearch}
+                  onChange={(e) => {
+                    setPatientSearch(e.target.value);
+                    setPatientPage(1);
+                  }}
+                  placeholder="Filter patients by name or email..."
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-xs focus:ring-1 focus:ring-purple-500 w-full sm:max-w-xs"
+                />
+              </div>
+
               {loadingDetails ? (
                 <div className="flex justify-center items-center py-6">
                   <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
                   <span className="text-xs text-slate-400 ml-2">Loading Patients...</span>
                 </div>
-              ) : docDetails && docDetails.patients.length > 0 ? (
-                <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
-                        <th className="p-3.5">Name</th>
-                        <th className="p-3.5">Email</th>
-                        <th className="p-3.5">Phone</th>
-                        <th className="p-3.5">Joined Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-600">
-                      {docDetails.patients.map((p: any) => (
-                        <tr key={p.id} className="hover:bg-slate-50/50">
-                          <td className="p-3.5 font-bold text-slate-800">{formatTitleCase(p.name)}</td>
-                          <td className="p-3.5 font-mono">{p.email}</td>
-                          <td className="p-3.5">{p.phone || '—'}</td>
-                          <td className="p-3.5">{new Date(p.created_at).toLocaleDateString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No active patients registered under this doctor.</p>
-              )}
+              ) : (() => {
+                const filtered = docDetails?.patients.filter(p => 
+                  p.name?.toLowerCase().includes(patientSearch.toLowerCase()) || 
+                  p.email?.toLowerCase().includes(patientSearch.toLowerCase())
+                ) || [];
+                const PAGE_SIZE = 5;
+                const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+                const startIndex = (patientPage - 1) * PAGE_SIZE;
+                const paginated = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+
+                return (
+                  <div className="space-y-4">
+                    {filtered.length > 0 ? (
+                      <>
+                        <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
+                                <th className="p-3">Name</th>
+                                <th className="p-3">Email</th>
+                                <th className="p-3">Phone</th>
+                                <th className="p-3">Joined Date</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-slate-600">
+                              {paginated.map((p: any) => (
+                                <tr key={p.id} className="hover:bg-slate-50/50">
+                                  <td className="p-3 font-bold text-slate-800">{formatTitleCase(p.name)}</td>
+                                  <td className="p-3 font-mono">{p.email}</td>
+                                  <td className="p-3">{p.phone || '—'}</td>
+                                  <td className="p-3">{new Date(p.created_at).toLocaleDateString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Pagination controls */}
+                        <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
+                          <span>Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filtered.length)} of {filtered.length} patients</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setPatientPage(p => Math.max(p - 1, 1))}
+                              disabled={patientPage === 1}
+                              className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50 transition"
+                            >
+                              Prev
+                            </button>
+                            <span className="self-center">Page {patientPage} of {totalPages}</span>
+                            <button
+                              onClick={() => setPatientPage(p => Math.min(p + 1, totalPages))}
+                              disabled={patientPage === totalPages}
+                              className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50 transition"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No active patients registered matching query.</p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Referral Leads list */}
             <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Referral Leads</h4>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Referral Leads</h4>
+                <input 
+                  type="text" 
+                  value={referralSearch}
+                  onChange={(e) => {
+                    setReferralSearch(e.target.value);
+                    setReferralPage(1);
+                  }}
+                  placeholder="Filter referrals by name or email..."
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-xs focus:ring-1 focus:ring-purple-500 w-full sm:max-w-xs"
+                />
+              </div>
+
               {loadingDetails ? (
                 <div className="flex justify-center items-center py-6">
                   <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
                   <span className="text-xs text-slate-400 ml-2">Loading Referrals...</span>
                 </div>
-              ) : docDetails && docDetails.referrals.length > 0 ? (
-                <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
-                        <th className="p-3.5">Name</th>
-                        <th className="p-3.5">Email</th>
-                        <th className="p-3.5">Mobile</th>
-                        <th className="p-3.5">Status</th>
-                        <th className="p-3.5">Created</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-600">
-                      {docDetails.referrals.map((r: any) => (
-                        <tr key={r.id} className="hover:bg-slate-50/50">
-                          <td className="p-3.5 font-bold text-slate-800">{formatTitleCase(r.patientName)}</td>
-                          <td className="p-3.5 font-mono">{r.email}</td>
-                          <td className="p-3.5">{r.mobile || '—'}</td>
-                          <td className="p-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                              r.referralStatus === 'converted' 
-                                ? 'bg-emerald-50 text-emerald-600' 
-                                : 'bg-amber-50 text-amber-600'
-                            }`}>
-                              {r.referralStatus}
-                            </span>
-                          </td>
-                          <td className="p-3.5 text-[10px]">{new Date(r.created_at).toLocaleDateString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No referral leads added under this doctor.</p>
-              )}
+              ) : (() => {
+                const filtered = docDetails?.referrals.filter(r => 
+                  r.patientName?.toLowerCase().includes(referralSearch.toLowerCase()) || 
+                  r.email?.toLowerCase().includes(referralSearch.toLowerCase())
+                ) || [];
+                const PAGE_SIZE = 5;
+                const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+                const startIndex = (referralPage - 1) * PAGE_SIZE;
+                const paginated = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+
+                return (
+                  <div className="space-y-4">
+                    {filtered.length > 0 ? (
+                      <>
+                        <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-100 text-slate-400 font-bold bg-slate-50">
+                                <th className="p-3">Name</th>
+                                <th className="p-3">Email</th>
+                                <th className="p-3">Mobile</th>
+                                <th className="p-3">Status</th>
+                                <th className="p-3">Created</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-slate-600">
+                              {paginated.map((r: any) => (
+                                <tr key={r.id} className="hover:bg-slate-50/50">
+                                  <td className="p-3 font-bold text-slate-800">{formatTitleCase(r.patientName)}</td>
+                                  <td className="p-3 font-mono">{r.email}</td>
+                                  <td className="p-3">{r.mobile || '—'}</td>
+                                  <td className="p-3">
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                      r.referralStatus === 'converted' 
+                                        ? 'bg-emerald-50 text-emerald-600' 
+                                        : 'bg-amber-50 text-amber-600'
+                                    }`}>
+                                      {r.referralStatus}
+                                    </span>
+                                  </td>
+                                  <td className="p-3 text-[10px]">{new Date(r.created_at).toLocaleDateString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Pagination controls */}
+                        <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
+                          <span>Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filtered.length)} of {filtered.length} referrals</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setReferralPage(p => Math.max(p - 1, 1))}
+                              disabled={referralPage === 1}
+                              className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50 transition"
+                            >
+                              Prev
+                            </button>
+                            <span className="self-center">Page {referralPage} of {totalPages}</span>
+                            <button
+                              onClick={() => setReferralPage(p => Math.min(p + 1, totalPages))}
+                              disabled={referralPage === totalPages}
+                              className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50 transition"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-xl">No referrals leads matching query.</p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -832,6 +942,10 @@ export default function DoctorManagement({
                         setSelectedRegId('');
                         setSearchQuery('');
                         setRegistrations([]);
+                        setPatientSearch('');
+                        setPatientPage(1);
+                        setReferralSearch('');
+                        setReferralPage(1);
                         setManualForm({
                           name: '',
                           email: '',
