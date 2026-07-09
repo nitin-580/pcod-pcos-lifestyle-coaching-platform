@@ -3,9 +3,17 @@ import { getPublicApiBase } from '@/lib/api-config';
 
 const ADMIN_API_KEY = 'nitinisacoderandstudent';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const res = await fetch(`${getPublicApiBase()}/doctors/admin/active-list`, {
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get('q');
+
+    let endpoint = `${getPublicApiBase()}/doctors/admin/active-list`;
+    if (query) {
+      endpoint = `${getPublicApiBase()}/doctors/admin/search-users?q=${encodeURIComponent(query)}`;
+    }
+
+    const res = await fetch(endpoint, {
       headers: {
         'Content-Type': 'application/json',
         'x-admin-api-key': ADMIN_API_KEY
@@ -15,7 +23,7 @@ export async function GET() {
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
-    console.error('Frontend API Proxy GET active list error:', error);
+    console.error('Frontend API Proxy GET doctors/search error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
@@ -58,6 +66,6 @@ export async function POST(req: Request) {
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
     console.error('Frontend API Proxy POST map user error:', error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: error.message }, { status: 550 });
   }
 }

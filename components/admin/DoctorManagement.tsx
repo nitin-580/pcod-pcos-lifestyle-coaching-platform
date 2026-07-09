@@ -80,10 +80,36 @@ export default function DoctorManagement({
     country: 'India'
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
   useEffect(() => {
     fetchActiveDoctors();
-    fetchRegistrations();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setRegistrations([]);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      setIsSearchingUsers(true);
+      try {
+        const res = await fetch(`/api/admin/doctors?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        if (data.success) {
+          setRegistrations(data.data || []);
+        }
+      } catch (err) {
+        console.error('Error searching users:', err);
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
   const fetchActiveDoctors = async () => {
     setLoadingDocs(true);
@@ -92,7 +118,6 @@ export default function DoctorManagement({
       const data = await res.json();
       if (data.success) {
         setDoctors(data.doctors || []);
-        setRegistrations(data.registrations || []);
       }
     } catch (err) {
       console.error('Error fetching doctors:', err);
@@ -102,7 +127,7 @@ export default function DoctorManagement({
   };
 
   const fetchRegistrations = async () => {
-    // Loaded in fetchActiveDoctors
+    // Loaded dynamically via search
   };
 
   const formatTitleCase = (str: string) => {
@@ -195,7 +220,8 @@ export default function DoctorManagement({
           user,
           doctorId: selectedDoc.id,
           doctorName: selectedDoc.name,
-          doctorReferralCode: selectedDoc.referralCode
+          doctorReferralCode: selectedDoc.referralCode,
+          isManual: isManualMap
         })
       });
       const data = await res.json();
@@ -309,6 +335,8 @@ export default function DoctorManagement({
                         setSelectedDoc(doc);
                         setIsManualMap(false);
                         setSelectedRegId('');
+                        setSearchQuery('');
+                        setRegistrations([]);
                         setManualForm({
                           name: '',
                           email: '',
@@ -580,19 +608,39 @@ export default function DoctorManagement({
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500">Select User/Registration</label>
-                        <select 
-                          value={selectedRegId}
-                          onChange={(e) => setSelectedRegId(e.target.value)}
+                        <label className="text-xs font-semibold text-slate-500">Search User by Name or Email</label>
+                        <input 
+                          type="text" 
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Type at least 2 characters to search..."
                           className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 text-sm focus:ring-2 focus:ring-purple-500"
-                        >
-                          <option value="">Select a user...</option>
-                          {registrations.map(r => (
-                            <option key={r.id} value={r.id}>
-                              {r.name} ({r.email})
-                            </option>
-                          ))}
-                        </select>
+                        />
+                        {isSearchingUsers ? (
+                          <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-1">
+                            <Loader2 className="w-3 h-3 animate-spin text-purple-600" />
+                            Searching database...
+                          </div>
+                        ) : registrations.length > 0 ? (
+                          <div className="flex flex-col gap-1 mt-1">
+                            <select 
+                              value={selectedRegId}
+                              onChange={(e) => setSelectedRegId(e.target.value)}
+                              className="px-4 py-2 bg-slate-50 border border-slate-250 rounded-xl outline-none text-slate-800 text-xs focus:ring-2 focus:ring-purple-500"
+                            >
+                              <option value="">-- Click to select matching user --</option>
+                              {registrations.map(r => (
+                                <option key={r.id} value={r.id}>
+                                  {r.name} ({r.email})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ) : searchQuery.trim().length >= 2 ? (
+                          <div className="text-[10px] text-rose-500 font-semibold mt-1">
+                            No users match "{searchQuery}"
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className="flex flex-col gap-1.5">
