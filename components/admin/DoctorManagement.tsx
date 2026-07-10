@@ -140,6 +140,16 @@ export default function DoctorManagement({
           patients: data.patients || [],
           referrals: data.referrals || []
         });
+        if (data.id || data.referralCode) {
+          setSelectedDoc(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              id: data.id || prev.id,
+              referralCode: data.referralCode || prev.referralCode
+            };
+          });
+        }
       }
     } catch (err) {
       console.error('Error fetching doctor details:', err);
