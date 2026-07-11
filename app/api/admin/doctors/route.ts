@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPublicApiBase } from '@/lib/api-config';
+import { getAbsoluteBackendUrl } from '@/lib/api-config';
 
 const ADMIN_API_KEY = 'nitinisacoderandstudent';
 
@@ -9,11 +9,11 @@ export async function GET(req: Request) {
     const query = searchParams.get('q');
     const doctorId = searchParams.get('doctorId');
 
-    let endpoint = `${getPublicApiBase()}/doctors/admin/active-list`;
+    let endpoint = `${getAbsoluteBackendUrl()}/api/doctors/admin/active-list`;
     if (query) {
-      endpoint = `${getPublicApiBase()}/doctors/admin/search-users?q=${encodeURIComponent(query)}`;
+      endpoint = `${getAbsoluteBackendUrl()}/api/doctors/admin/search-users?q=${encodeURIComponent(query)}`;
     } else if (doctorId) {
-      endpoint = `${getPublicApiBase()}/doctors/admin/${doctorId}/details`;
+      endpoint = `${getAbsoluteBackendUrl()}/api/doctors/admin/${doctorId}/details`;
     }
 
     const res = await fetch(endpoint, {
@@ -35,7 +35,7 @@ export async function PATCH(req: Request) {
   try {
     const { id, ...updateData } = await req.json();
 
-    const res = await fetch(`${getPublicApiBase()}/doctors/admin/${id}/profile`, {
+    const res = await fetch(`${getAbsoluteBackendUrl()}/api/doctors/admin/${id}/profile`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const res = await fetch(`${getPublicApiBase()}/doctors/admin/map-user`, {
+    const res = await fetch(`${getAbsoluteBackendUrl()}/api/doctors/admin/map-user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

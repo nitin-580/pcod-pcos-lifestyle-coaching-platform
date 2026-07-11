@@ -143,6 +143,9 @@ export default function DoctorManagement({
         if (data.id || data.referralCode) {
           setSelectedDoc(prev => {
             if (!prev) return null;
+            if (prev.id === data.id && prev.referralCode === data.referralCode) {
+              return prev;
+            }
             return {
               ...prev,
               id: data.id || prev.id,
@@ -158,11 +161,12 @@ export default function DoctorManagement({
     }
   };
 
+  const selectedDocId = selectedDoc?.id;
   useEffect(() => {
-    if (selectedDoc && selectedDoc.id) {
-      fetchDoctorDetails(selectedDoc.id);
+    if (selectedDocId) {
+      fetchDoctorDetails(selectedDocId);
     }
-  }, [selectedDoc]);
+  }, [selectedDocId]);
 
   const fetchActiveDoctors = async () => {
     setLoadingDocs(true);
