@@ -64,6 +64,7 @@ export default function FloatingNavbar() {
   const navLinks = [
     { name: 'About Us', href: '/about' },
     { name: 'What We Do', href: '/what-we-do' },
+    { name: 'AI Chatbot', href: '/chatbot' },
     { name: 'Blogs', href: '/blogs' },
     { name: 'Careers', href: '/careers' },
     { name: 'Join as Doctor', href: '/join-as-doctor' },
