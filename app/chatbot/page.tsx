@@ -10,16 +10,78 @@ interface Message {
   content: string;
 }
 
+const translations = {
+  english: {
+    welcome: "Hello! I am Divya, your evidence-informed WombCare AI health education assistant. I can help answer questions about menstrual health, PCOS, hormones, nutrition, and general reproductive wellness.\n\nHow can I help you today?",
+    title: "Chat with Divya",
+    subtitle: "Educating, guiding, and supporting your reproductive wellness journey.",
+    placeholder: "Ask Divya... (e.g. explain menstrual health)",
+    typing: "Divya is typing...",
+    disclaimer: "This information is for educational purposes only and is not a medical diagnosis or a substitute for professional medical advice. Please consult a qualified healthcare professional for personalized care.",
+    presetTitle: "Common wellness topics to explore",
+    assistantLabel: "Divya (AI Assistant)",
+    presets: [
+      { text: 'Check PCOS symptoms', q: 'What are the common symptoms of PCOS?' },
+      { text: 'Safe self-care for cramps', q: 'I have severe period cramps, what safe self-care measures can I take?' },
+      { text: 'Questions for doctor', q: 'What questions should I ask my doctor about irregular periods?' },
+      { text: 'Lifestyle tips for hormones', q: 'How can lifestyle and nutrition choices help balance hormones naturally?' },
+    ]
+  },
+  hindi: {
+    welcome: "नमस्ते! मैं दिव्या हूँ, आपकी WombCare AI स्वास्थ्य शिक्षा सहायक। मैं मासिक धर्म स्वास्थ्य, PCOS, हार्मोन, पोषण और सामान्य प्रजनन कल्याण से जुड़े सवालों के जवाब देने में आपकी मदद कर सकती हूँ। आज मैं आपकी क्या मदद करूँ?",
+    title: "दिव्या के साथ चैट करें",
+    subtitle: "आपके प्रजनन कल्याण यात्रा की शिक्षा, मार्गदर्शन और समर्थन।",
+    placeholder: "दिव्या से पूछें... (जैसे: मासिक धर्म चक्र के बारे में बताएं)",
+    typing: "दिव्या लिख रही है...",
+    disclaimer: "यह जानकारी केवल शैक्षिक उद्देश्यों के लिए है और यह कोई चिकित्सीय निदान या पेशेवर चिकित्सा सलाह का विकल्प नहीं है। कृपया व्यक्तिगत देखभाल के लिए किसी योग्य स्वास्थ्य पेशेवर से परामर्श लें।",
+    presetTitle: "अन्वेषण करने के लिए सामान्य स्वास्थ्य विषय",
+    assistantLabel: "दिव्या (एआई सहायक)",
+    presets: [
+      { text: 'PCOS के लक्षण जाँचें', q: 'PCOS के सामान्य लक्षण क्या हैं?' },
+      { text: 'ऐंठन के लिए सुरक्षित घरेलू देखभाल', q: 'मुझे मासिक धर्म में तेज ऐंठन होती है, मैं कौन से सुरक्षित घरेलू उपाय अपना सकती हूँ?' },
+      { text: 'डॉक्टर के लिए सवाल', q: 'अनियमित पीरियड्स के बारे में मुझे अपने डॉक्टर से क्या सवाल पूछने चाहिए?' },
+      { text: 'हार्मोन संतुलन के लिए टिप्स', q: 'जीवनशैली और पोषण में बदलाव प्राकृतिक रूप से हार्मोन को संतुलित करने में कैसे मदद कर सकते हैं?' },
+    ]
+  },
+  bhojpuri: {
+    welcome: "प्रणाम! हम दिव्या हईं, राउर WombCare AI स्वास्थ्य शिक्षा सहायक। हम मासिक धर्म के स्वास्थ्य, PCOS, हार्मोन, खान-पान आ सामान्य प्रजनन कल्याण से जुड़ल सवालन के जवाब देवे में राउर मदद कर सकत हईं। आज हम राउर का मदद करीं?",
+    title: "दिव्या से बातचीत करीं",
+    subtitle: "राउर प्रजनन कल्याण यात्रा के शिक्षा, मार्गदर्शन आ सहयोग।",
+    placeholder: "दिव्या से पूछीं... (जैसे: मासिक धर्म के बारे में बताईं)",
+    typing: "दिव्या लिखत हई...",
+    disclaimer: "ई जानकारी खाली शिक्षा देवे खातिर बा, एकरा के कौनों डाक्टरी इलाज भा डाक्टर के सलाह के विकल्प मत मानल जाव। कौनों भी परेशानी में योग्य डाक्टर से जरूर सलाह लीं।",
+    presetTitle: "कल्याण से जुड़ल कुछ आम विषय",
+    assistantLabel: "दिव्या (एआई सहायक)",
+    presets: [
+      { text: 'PCOS के लच्छन देखीं', q: 'PCOS के आम लच्छन का का होला?' },
+      { text: 'दरद खातिर सुरक्षित घरेलू उपाय', q: 'हमरा पीरियड में तेज दरद (ऐंठन) होखता, हम का सुरक्षित घरेलू उपाय कर सकत हईं?' },
+      { text: 'डॉक्टर से पूछे वाला सवाल', q: 'अनियमित पीरियड के बारे में हमरा डॉक्टर से का का पूछे के चाहीं?' },
+      { text: 'हार्मोन ठीक करे के उपाय', q: 'रहन-सहन आ खान-पान में बदलाव से प्राकृतिक रूप से हार्मोन कइसे ठीक कइल जा सकेला?' },
+    ]
+  },
+  maithili: {
+    welcome: "प्रणाम! हम दिव्या छी, अहाँक WombCare AI स्वास्थ्य शिक्षा सहायक। हम मासिक धर्मक स्वास्थ्य, PCOS, हार्मोन, पोषण आ सामान्य प्रजनन कल्याण सं जुड़ल प्रश्नक उत्तर देबय में अहाँक मदद क' सकैत छी। आजु हम अहाँक की मदद करू?",
+    title: "दिव्या सँ बात करू",
+    subtitle: "अहाँक प्रजनन कल्याण यात्राक शिक्षा, मार्गदर्शन आ सहयोग।",
+    placeholder: "दिव्या सं पुछू... (जेना: मासिक धर्म क बारे में बताउ)",
+    typing: "दिव्या लिखि रहल छथि...",
+    disclaimer: "ई जानकारी केवल शैक्षणिक उद्देश्यक लेल अछि आ एकरा कोनो चिकित्सीय निदान या डॉक्टरक सलाहक विकल्प नहि मानल जाए। कोनो भी समस्या लेल योग्य डॉक्टर सं सलाह ली।",
+    presetTitle: "कल्याण सं जुड़ल किछु आम विषय",
+    assistantLabel: "दिव्या (एआई सहायक)",
+    presets: [
+      { text: 'PCOS क लक्षण जाँची', q: 'PCOS क सामान्य लक्षण की की अछि?' },
+      { text: 'ऐंठन लेल सुरक्षित घरेलू उपाय', q: 'हमरा पीरियड में पैघ ऐंठन (दरद) होइत अछि, हम की सुरक्षित घरेलू उपाय क\' सकैत छी?' },
+      { text: 'डॉक्टर सं पूछे वाला सवाल', q: 'अनियमित पीरियड क बारे में हमरा अपन डॉक्टर सं की की पूछेक चाही?' },
+      { text: 'हार्मोन संतुलन लेल टिप्स', q: 'जीवनशैली आ खान-पान में बदलाव प्राकृतिक रूप सं हार्मोन संतुलित करय में कोना मदद क\' सकैत अछि?' },
+    ]
+  }
+};
+
 export default function ChatbotPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: "Hello! I am Divya, your evidence-informed WombCare AI health education assistant. I can help answer questions about menstrual health, PCOS, hormones, nutrition, and general reproductive wellness.\n\nHow can I help you today?",
-    },
-  ]);
+  const [language, setLanguage] = useState<'english' | 'hindi' | 'bhojpuri' | 'maithili'>('english');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'english' | 'hindi' | 'bhojpuri' | 'maithili'>('english');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +89,16 @@ export default function ChatbotPage() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Reload the welcome message whenever the language is switched
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: translations[language].welcome,
+      },
+    ]);
+  }, [language]);
 
   useEffect(() => {
     scrollToBottom();
@@ -166,13 +238,6 @@ export default function ChatbotPage() {
     return elements;
   };
 
-  const presetQuestions = [
-    { text: 'Check PCOS symptoms', q: 'What are the common symptoms of PCOS?' },
-    { text: 'Safe self-care for cramps', q: 'I have severe period cramps, what safe self-care measures can I take?' },
-    { text: 'Questions for doctor', q: 'What questions should I ask my doctor about irregular periods?' },
-    { text: 'Lifestyle tips for hormones', q: 'How can lifestyle and nutrition choices help balance hormones naturally?' },
-  ];
-
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
@@ -226,11 +291,11 @@ export default function ChatbotPage() {
   };
 
   const handleClear = () => {
-    if (confirm('Are you sure you want to clear this conversation?')) {
+    if (confirm(language === 'english' ? 'Are you sure you want to clear this conversation?' : language === 'hindi' ? 'क्या आप वाकई इस बातचीत को मिटाना चाहते हैं?' : language === 'bhojpuri' ? 'का राउर ई बातचीत मिटावे के चाहत हईं?' : 'की अहाँ सच में एहि बातचीत केँ मिटाबय चाहैत छी?')) {
       setMessages([
         {
           role: 'assistant',
-          content: "Hello! I am Divya, your evidence-informed WombCare AI health education assistant. I can help answer questions about menstrual health, PCOS, hormones, nutrition, and general reproductive wellness.\n\nHow can I help you today?",
+          content: translations[language].welcome,
         },
       ]);
     }
@@ -261,6 +326,8 @@ export default function ChatbotPage() {
     );
   };
 
+  const activeTranslation = translations[language];
+
   return (
     <main className="min-h-screen bg-slate-50 font-sans selection:bg-purple-100 selection:text-purple-900 flex flex-col pt-20">
       <FloatingNavbar />
@@ -279,17 +346,17 @@ export default function ChatbotPage() {
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  Divya (AI Assistant)
+                  {activeTranslation.assistantLabel}
                 </span>
                 <span className="flex items-center gap-0.5 text-slate-500 text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" /> Evidence-Informed
                 </span>
               </div>
               <h1 className="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight">
-                Chat with Divya
+                {activeTranslation.title}
               </h1>
               <p className="text-[11px] md:text-xs text-slate-500 max-w-xl">
-                Educating, guiding, and supporting your reproductive wellness journey.
+                {activeTranslation.subtitle}
               </p>
             </div>
           </div>
@@ -418,10 +485,10 @@ export default function ChatbotPage() {
           {messages.length === 1 && (
             <div className="px-6 py-4 border-t border-slate-50 bg-slate-50/50">
               <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">
-                Common wellness topics to explore
+                {activeTranslation.presetTitle}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {presetQuestions.map((pq, idx) => (
+                {activeTranslation.presets.map((pq, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(pq.q)}
@@ -446,7 +513,7 @@ export default function ChatbotPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={isLoading ? 'Divya is typing...' : 'Ask Divya... (e.g. explain menstrual health)'}
+              placeholder={isLoading ? activeTranslation.typing : activeTranslation.placeholder}
               disabled={isLoading}
               className="flex-1 bg-slate-50 border border-slate-200 focus:border-purple-600 focus:bg-white text-slate-800 px-4 py-3 rounded-xl outline-none transition-all text-sm md:text-base disabled:opacity-70"
             />
@@ -464,7 +531,7 @@ export default function ChatbotPage() {
         <div className="bg-amber-50/70 border border-amber-100 rounded-xl p-4 flex gap-3 text-slate-600 text-xs leading-relaxed mb-6">
           <ShieldCheck className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold text-slate-700">Disclaimer:</span> This information is for educational purposes only and is not a medical diagnosis or a substitute for professional medical advice. Please consult a qualified healthcare professional for personalized care.
+            <span className="font-semibold text-slate-700">Disclaimer:</span> {activeTranslation.disclaimer}
           </div>
         </div>
       </div>
