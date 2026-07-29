@@ -42,7 +42,7 @@ export default function ApkDownload() {
           >
 
 
-            {/* Badge */}
+             {/* Badge */}
             <span
               className="
               inline-flex
@@ -60,7 +60,7 @@ export default function ApkDownload() {
               "
             >
               <Smartphone size={15}/>
-              Android Release
+              Google Play Store
             </span>
 
 
@@ -84,7 +84,7 @@ export default function ApkDownload() {
               <br/>
 
               <span className="text-[#FF4D8D]">
-                Now on Android
+                Now on Google Play
               </span>
 
             </h2>
@@ -113,7 +113,7 @@ export default function ApkDownload() {
 
 
               <Feature>
-                WombCare APK v1.0.1
+                WombCare for Android
               </Feature>
 
 
@@ -128,12 +128,12 @@ export default function ApkDownload() {
                   className="
                   w-5
                   h-5
-                  text-purple-500
+                  text-emerald-500
                   "
                 />
 
                 <span className="font-semibold text-slate-700">
-                  Secure official download
+                  Verified by Play Protect
                 </span>
 
               </div>
@@ -150,37 +150,49 @@ export default function ApkDownload() {
 
               <a
 
-                href="https://pub-a67185b5775c4b26ab3cebd36d579b22.r2.dev/wombcare2.apk"
+                href="https://play.google.com/store/apps/details?id=com.wombcare.app"
 
-                download
+                target="_blank"
+
+                rel="noopener noreferrer"
 
                 className="
                 inline-flex
                 items-center
-                gap-3
-                px-8
-                py-4
-                bg-slate-900
+                gap-4
+                px-7
+                py-3
+                bg-slate-950
                 text-white
                 rounded-2xl
                 font-bold
                 shadow-xl
                 hover:scale-105
-                hover:bg-slate-800
+                hover:bg-slate-900
+                border
+                border-slate-800
                 transition-all
                 "
               >
 
-                <Download className="animate-bounce"/>
+                <svg viewBox="0 0 512 512" className="w-8 h-8 select-none pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z" fill="#ffcc00"/>
+                  <path d="M26.4 0C11.9 0 0 11.9 0 26.4v459.2C0 500.1 11.9 512 26.4 512c7.1 0 13.9-2.9 18.9-8.1L271 283.4 45.3 8.1C40.3 2.9 33.5 0 26.4 0z" fill="#00e5ff"/>
+                  <path d="M325.3 277.7l60.1 60.1L104.6 499l220.7-221.3z" fill="#ff3366"/>
+                  <path d="M385.4 174.2L493 236.8c11.6 6.7 19 19 19 32.4s-7.4 25.7-19 32.4L385.4 337.8l-60.1-60.1 60.1-63.5z" fill="#48ff48"/>
+                </svg>
 
-                Download APK
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400">GET IT ON</span>
+                  <span className="text-lg font-bold font-sans mt-0.5">Google Play</span>
+                </div>
 
               </a>
 
 
 
               <p className="text-sm text-slate-500">
-                Size: ~112MB • Android Package (.apk)
+                Official Release • Free Download
               </p>
 
 
