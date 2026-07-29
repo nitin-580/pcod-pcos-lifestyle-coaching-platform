@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             </h2>
             <div className="space-y-4 text-slate-600 leading-relaxed">
               <p>
-                WombCare is owned, developed, and operated by <strong>Nitin Kumar</strong> (&quot;Developer&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). 
+                WombCare is owned, developed, and operated by <strong>Wombcare</strong> (&quot;Developer&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). 
               </p>
               <p>
                 The primary purpose of WombCare is to function as a PCOD/PCOS lifestyle coaching and wellness platform. The application provides educational content, wellness habit tracking, menstrual cycle tracking, symptom logs, and personalized lifestyle coaching recommendations. 
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-slate-600 leading-relaxed">
               <strong>WombCare Support Team</strong>
               <br />
-              Developer/Owner: Nitin Kumar
+              Developer/Owner: Wombcare
               <br />
               Email: support@wombcare.in
               <br />
