@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getAbsoluteBackendUrl } from '@/lib/api-config';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const backendBase = 'https://womb-care-backend-76858014616.europe-west1.run.app/api';
+  const backendBase = `${getAbsoluteBackendUrl()}/api`;
   
   let blogEntries: MetadataRoute.Sitemap = [];
   

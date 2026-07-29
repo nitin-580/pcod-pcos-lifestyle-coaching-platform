@@ -7,6 +7,8 @@ import { Calendar, ArrowLeft, Clock, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
+import { getAbsoluteBackendUrl } from '@/lib/api-config';
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -20,7 +22,7 @@ function generateSlug(title: string): string {
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
-  const backendBase = 'https://womb-care-backend-76858014616.europe-west1.run.app/api';
+  const backendBase = `${getAbsoluteBackendUrl()}/api`;
   
   try {
     // 1. Try fetching by slug directly (in case backend is updated)
