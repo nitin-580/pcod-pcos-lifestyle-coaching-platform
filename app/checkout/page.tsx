@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 const PLANS = {
   basic: {
     name: 'Essential Care',
-    price: 999,
+    price: 1998,
     currency: 'INR',
     duration: '/month',
     description: 'Perfect for getting started with PMOS wellness.',
@@ -22,7 +22,7 @@ const PLANS = {
   },
   premium: {
     name: 'Complete PMOS Care',
-    price: 2999,
+    price: 5998,
     currency: 'INR',
     duration: '/3 months',
     description: 'Our most popular and recommended PMOS reversal program.',
@@ -37,7 +37,7 @@ const PLANS = {
   },
   conceive: {
     name: 'Conceive Care',
-    price: 4999,
+    price: 9998,
     currency: 'INR',
     duration: '/3 months',
     description: 'Designed for fertility support and conception wellness.',
@@ -51,7 +51,7 @@ const PLANS = {
   },
   nri: {
     name: 'NRI Special',
-    price: 32,
+    price: 64,
     currency: 'USD',
     duration: '/3 months',
     description: 'Premium international care program tailored for NRIs.',

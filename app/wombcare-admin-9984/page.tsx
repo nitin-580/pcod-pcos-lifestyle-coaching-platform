@@ -18,6 +18,7 @@ import DoctorFinance from '@/components/admin/DoctorFinance';
 import DietPlanManagement from '@/components/admin/DietPlanManagement';
 import HealthAssessmentTable from '@/components/admin/HealthAssessmentTable';
 import DoctorManagement from '@/components/admin/DoctorManagement';
+import FlashcardManagement from '@/components/admin/FlashcardManagement';
 
 import { useRouter } from 'next/navigation';
 import { API_BASE, getPublicApiBase } from '@/lib/api-config';
@@ -36,12 +37,24 @@ interface Blog {
   excerpt?: string;
 }
 
+const safeFetchJson = async (url: string, options?: RequestInit) => {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error("Invalid response format: expected JSON from server.");
+  }
+  return response.json();
+};
+
 export default function AdminPage() {
   const router = useRouter();
   const [apiKey, setApiKey] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments' | 'flashcards'>('registrations');
   
   // Data States
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -94,10 +107,9 @@ export default function AdminPage() {
 
   const fetchRegistrations = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/users?limit=1000`, {
+      const result = await safeFetchJson(`${API_BASE}/users?limit=1000`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       
       const { data: profiles } = await supabase
         .from('wombcare_user_profiles')
@@ -121,10 +133,9 @@ export default function AdminPage() {
 
   const fetchEnrollments = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/enrollments`, {
+      const result = await safeFetchJson(`${API_BASE}/enrollments`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setEnrollments(result.data || []);
     } catch (err: any) {
       console.error('Fetch enrollments error:', err);
@@ -133,10 +144,9 @@ export default function AdminPage() {
 
   const fetchPatients = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/patients`, {
+      const result = await safeFetchJson(`${API_BASE}/patients`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setPatients(result.data || []);
     } catch (err: any) {
       console.error('Fetch patients error:', err);
@@ -145,10 +155,9 @@ export default function AdminPage() {
 
   const fetchBlogs = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/blogs`, {
+      const result = await safeFetchJson(`${API_BASE}/blogs`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setBlogs(result.data || []);
     } catch (err: any) {
       console.error('Fetch blogs error:', err);
@@ -157,10 +166,9 @@ export default function AdminPage() {
 
   const fetchCareers = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/careers`, {
+      const result = await safeFetchJson(`${API_BASE}/careers`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setCareers(result.data || []);
     } catch (err: any) {
       console.error('Fetch careers error:', err);
@@ -169,10 +177,9 @@ export default function AdminPage() {
 
   const fetchDoctorRequests = async (key: string) => {
     try {
-      const response = await fetch(`${getPublicApiBase()}/doctors/admin/join-requests`, {
+      const result = await safeFetchJson(`${getPublicApiBase()}/doctors/admin/join-requests`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setDoctorRequests(result.data || []);
     } catch (err: any) {
       console.error('Fetch doctor requests error:', err);
@@ -181,10 +188,9 @@ export default function AdminPage() {
 
   const fetchAdminAppointments = async (key: string) => {
     try {
-      const response = await fetch(`${API_BASE}/appointments/admin/all`, {
+      const result = await safeFetchJson(`${getPublicApiBase()}/appointments/admin/all`, {
         headers: { 'x-admin-api-key': key },
       });
-      const result = await response.json();
       setAppointments(result.data || []);
     } catch (err: any) {
       console.error('Fetch admin appointments error:', err);
@@ -193,8 +199,7 @@ export default function AdminPage() {
 
   const fetchHealthAssessments = async (key: string) => {
     try {
-      const response = await fetch(`/api/health-assessments?apiKey=${key}`);
-      const result = await response.json();
+      const result = await safeFetchJson(`/api/health-assessments?apiKey=${key}`);
       setHealthAssessments(result.data || []);
     } catch (err: any) {
       console.error('Fetch health assessments error:', err);
@@ -225,7 +230,7 @@ export default function AdminPage() {
   const handleUpdateAppointmentStatus = async (id: string, status: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/appointments/admin/${id}/status`, {
+      const res = await fetch(`${getPublicApiBase()}/appointments/admin/${id}/status`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -406,6 +411,8 @@ export default function AdminPage() {
             <h3 className="font-bold text-slate-800 text-lg mb-4">Patient Health Intake Assessments</h3>
             <HealthAssessmentTable data={healthAssessments} />
           </div>
+        ) : activeTab === 'flashcards' ? (
+          <FlashcardManagement apiKey={apiKey} />
         ) : (
           <CareerList careers={careers} loading={loading} onEdit={() => {}} onDelete={() => {}} />
         )}

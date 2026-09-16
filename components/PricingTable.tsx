@@ -9,8 +9,8 @@ export default function PricingTable() {
 const plans = [
 {
 name:"Complete PMOS Care",
-price:"₹2999",
-originalPrice:"₹5999",
+price:"₹5998",
+originalPrice:"₹11998",
 duration:"3 Months",
 tag:"Recommended",
 description:
@@ -31,8 +31,8 @@ highlighted:true
 
 {
 name:"Conceive Care",
-price:"₹4999",
-originalPrice:"₹7999",
+price:"₹9998",
+originalPrice:"₹15998",
 duration:"3 Months",
 tag:"Fertility support",
 description:
@@ -53,8 +53,8 @@ highlighted:false
 
 {
 name:"NRI Special",
-price:"$32",
-originalPrice:"$59",
+price:"$64",
+originalPrice:"$118",
 duration:"3 Months",
 tag:"International Plan",
 description:

@@ -21,8 +21,8 @@ import {
 } from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments';
-  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments') => void;
+  activeTab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments' | 'flashcards';
+  setActiveTab: (tab: 'registrations' | 'blogs' | 'careers' | 'enrollments' | 'doctor-requests' | 'appointments' | 'classes' | 'referrals' | 'patients' | 'banners' | 'doctor-earnings' | 'diet-plans' | 'health-assessments' | 'flashcards') => void;
   loading: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -60,6 +60,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { id: 'doctor-earnings', label: 'Doc Finance', icon: Coins, green: true },
     { id: 'referrals', label: 'Referrals', icon: Share2 },
     { id: 'banners', label: 'Banners', icon: Sparkles, pink: true },
+    { id: 'flashcards', label: 'Flash Cards', icon: Sparkles, pink: true },
   ];
 
   const handleTabClick = (tabId: typeof activeTab) => {

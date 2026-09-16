@@ -106,7 +106,7 @@ export default function TermsAndConditionsPage() {
               Certain WombCare services require payment.
             </p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600 mt-4">
-              <li>PMOS Reversal Program – ₹2999 for 3 months</li>
+              <li>PMOS Reversal Program – ₹5998 for 3 months</li>
             </ul>
             <p className="text-slate-600 leading-relaxed mt-4">
               WombCare reserves the right to change pricing at any time.
