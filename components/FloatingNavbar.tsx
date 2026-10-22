@@ -11,60 +11,19 @@ export default function FloatingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [accountUrl, setAccountUrl] = useState('/login');
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 15);
     };
 
     window.addEventListener('scroll', handleScroll);
-    
-    // Check auth status
-    const token = localStorage.getItem('userToken');
-    setIsLoggedIn(!!token);
-
-    if (token) {
-      try {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(atob(parts[1]));
-          const role = (payload.role || 'user').toLowerCase();
-          const userId = payload.id;
-          if (role === 'doctor') {
-            setAccountUrl(`/doctor/${userId}/dashboard`);
-          } else if (role === 'admin') {
-            setAccountUrl(`/wombcare-admin-9984`);
-          } else if (role === 'teacher') {
-            const classesUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')
-              ? 'http://localhost:5173'
-              : 'https://classes.wombcare.in';
-            setAccountUrl(`${classesUrl}/login?token=${token}`);
-          } else {
-            setAccountUrl(`/user/${userId}/dashboard`);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to decode token', err);
-      }
-    }
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('doctorToken');
-    setIsLoggedIn(false);
-    window.location.href = '/';
-  };
 
   const navLinks = [
     { name: 'About Us', href: '/about' },
     { name: 'What We Do', href: '/what-we-do' },
-    { name: 'AI Chatbot', href: 'https://chat.wombcare.in' },
+    { name: 'WombCare AI', href: '/ai' },
     { name: 'Blogs', href: '/blogs' },
     { name: 'Careers', href: '/careers' },
     { name: 'Join as Doctor', href: '/join-as-doctor' },
@@ -120,29 +79,20 @@ export default function FloatingNavbar() {
               );
             })}
 
-            {/* Login / Logout */}
-            {isLoggedIn ? (
-              <Link
-                href={accountUrl}
-                className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-all px-4 py-2 rounded-xl border border-purple-200 bg-purple-50/50 hover:shadow-sm"
-              >
-                My Account
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-xl border border-slate-200 bg-white hover:shadow-sm"
-              >
-                Login
-              </Link>
-            )}
+            {/* Login */}
+            <Link
+              href="/login"
+              className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-all px-4 py-2 rounded-full border border-slate-200 bg-white hover:shadow-sm"
+            >
+              Login
+            </Link>
 
             {/* CTA */}
             <Link
               href="/#register"
-              className="bg-purple-600 hover:opacity-95 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
+              className="bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-95 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
             >
-              Book Session
+              Join Early Access
             </Link>
           </nav>
 
@@ -183,30 +133,20 @@ export default function FloatingNavbar() {
             </Link>
           ))}
 
-          {isLoggedIn ? (
-            <Link
-              href={accountUrl}
-              className="w-full max-w-xs text-center border border-purple-200 bg-purple-50/30 text-purple-600 py-4 rounded-xl font-semibold text-2xl"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              My Account
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-xl font-semibold text-2xl"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Login
-            </Link>
-          )}
+          <Link
+            href="/login"
+            className="w-full max-w-xs text-center border border-slate-200 py-4 rounded-full font-semibold"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Login
+          </Link>
 
           <Link
             href="/#register"
-            className="w-full max-w-xs text-center bg-purple-600 text-white py-4 rounded-xl font-semibold shadow-lg"
+            className="w-full max-w-xs text-center bg-gradient-to-r from-purple-600 to-pink-500 text-white py-4 rounded-full font-semibold shadow-lg"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Book Session
+            Join Early Access
           </Link>
         </div>
       </div>
